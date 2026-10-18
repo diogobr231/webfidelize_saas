@@ -45,7 +45,7 @@ Teste: inspeção visual de viewport mobile 390×844; páginas por nicho e links
 - `pnpm test:db`: 25 testes PostgreSQL aprovados.
 - `pnpm build`: build de produção aprovado, com Supabase configurado.
 - `pnpm exec tsx scripts/smoke.ts`: 18 verificações HTTP aprovadas, incluindo redirecionamento de rotas protegidas e 404 para nicho inválido.
-- Supabase remoto: teste com fixtures descartáveis e ROLLBACK aprovado; advisors sem alertas.
+- Supabase remoto: teste com fixtures descartáveis e ROLLBACK aprovado; advisors sem alertas. Auditoria das dependências de produção: nenhuma vulnerabilidade conhecida.
 
 Esses testes não substituem E2E autenticado, entrega de e-mail, teste de restauração, abuso de reserva pública ou sandbox de pagamento. A plataforma ainda não está liberada para a primeira venda.
 
@@ -53,7 +53,7 @@ Esses testes não substituem E2E autenticado, entrega de e-mail, teste de restau
 
 Arquivos: `README.md`, `.env.example`, `.gitignore`, `.gitattributes`, `.github/workflows/ci.yml`, lockfile e configuração Next.js.
 
-Instruções de Vercel e Supabase, proteção de variáveis, CI e limites conhecidos documentados. Git local publicou os commits com sucesso. A integração GitHub por MCP recusou escrita com 403; Git autenticado foi usado. Nenhum deploy Vercel foi publicado. A execução de CI remoto ainda deve ser confirmada no GitHub.
+Instruções de Vercel e Supabase, proteção de variáveis, CI e limites conhecidos documentados. Git local publicou os commits com sucesso. A integração GitHub por MCP recusou escrita com 403; Git autenticado foi usado. Nenhum deploy Vercel foi publicado. CI remoto confirmado: workflow Validate #1 aprovado no commit 6bcd166, incluindo instalação congelada, TypeScript, 28 testes e build. Execução: https://github.com/diogobr231/webfidelize_saas/actions/runs/39149782988.
 
 O CLI Supabase não concluiu o download neste ambiente; migrações foram aplicadas pelo conector, e os nomes de versão gerados pelo servidor foram espelhados localmente. Não foram inventadas versões. O comando de download pendente foi interrompido.
 
@@ -69,3 +69,4 @@ O CLI Supabase não concluiu o download neste ambiente; migrações foram aplica
 ## Fase 7 — adiada conforme prioridade do MVP
 
 Mesas/comandas, pets, tarefas, rotas, chatbot, site adicional, social media, créditos e Central IA permanecem planejados. As entradas por nicho não habilitam esses módulos.
+
