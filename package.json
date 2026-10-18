@@ -10,7 +10,8 @@
     "test": "tsx --test tests/*.test.ts",
     "test:db": "tsx scripts/test-db.ts",
     "test:experience": "tsx scripts/test-experience-live.ts",
-    "test:landing": "tsx scripts/test-landing.ts"
+    "test:landing": "tsx scripts/test-landing.ts",
+    "test:onboarding": "tsx scripts/test-onboarding-live.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

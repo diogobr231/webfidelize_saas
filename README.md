@@ -40,6 +40,21 @@ Remove-Item Env:SEED_PASSWORD -ErrorAction SilentlyContinue
 
 `test:experience` lê a configuração do `.env.local` e aceita somente servidor local, conta `@example.invalid` e uma empresa marcada `is_demo=true`. Usa cookies SSR em memória, sem acessar os cookies do navegador. Verifica o painel, agenda diária/semanal, autorização no servidor, salvamento do perfil com os valores atuais, catálogo público, reserva via formulário, idempotência, comprovante, calendário, remarcação e cancelamento. Cria um cadastro identificado como **TESTE UX fictício** e mantém seu agendamento cancelado ao terminar, inclusive quando precisa limpar uma execução interrompida. Não apaga os dados de teste nem altera empresas reais. Requer a conta de demonstração ativa e `BOOKING_GATEWAY_SECRET` corretamente configurado; não substitui a revisão visual no navegador.
 
+O roteiro do primeiro acesso exige consentimento explícito para criar cadastros fictícios em uma empresa de demonstração existente:
+
+```powershell
+# Mantenha a aplicação local em execução com pnpm build e pnpm start.
+# Configure SEED_PASSWORD somente no processo, por uma entrada segura.
+# Não coloque seu valor em .env.local, arquivos, histórico ou Git.
+$env:TEST_ONBOARDING_LIVE = '1'
+$env:DEMO_EMAIL = 'pet-shop@example.invalid'
+$env:TEST_BASE_URL = 'http://localhost:3000'
+pnpm test:onboarding
+Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyContinue
+```
+
+`test:onboarding` usa duas contas sintéticas existentes, sessões isoladas em memória e somente servidor local. A empresa precisa estar marcada `is_demo=true` e já permitir gravações. Os oito grupos da suíte foram aprovados neste incremento: autorização, progresso persistido, cadastro de serviço e profissional, reenvio sem duplicação, pausa e retomada, além de erro de validação com resposta HTML completa, campos preservados e formulário aberto sem JavaScript. O roteiro também confirma que trial, plano e publicação permanecem inalterados. Cadastros criados ficam identificados como **Teste guiado fictício** e são mantidos para inspeção; o script não cria usuários, não reinicia trials e não altera assinaturas. A senha vem exclusivamente do processo que o inicia. A cobertura e seus limites estão no [relatório do primeiro acesso](docs/STATUS-PRIMEIRO-ACESSO.md).
+
 ## Já implementado
 
 - Site responsivo, planos R$69,90 / R$119,90 / R$199,90 e WhatsApp comercial.
@@ -49,6 +64,7 @@ Remove-Item Env:SEED_PASSWORD -ErrorAction SilentlyContinue
 - Clientes, serviços, profissionais e criação de agendamentos; duração vem do serviço.
 - Agenda visual diária e semanal, filtros por profissional, horários clicáveis e detalhes com nomes de cliente, serviço e profissional. OWNER e MANAGER podem remarcar, cancelar e concluir atendimentos conforme as permissões e o estado da assinatura.
 - Entrada direta no painel para quem possui uma empresa, mantendo o seletor em `/painel?empresas=1`. Painel com indicadores do dia, próximos atendimentos e configuração guiada a partir dos cadastros salvos.
+- Primeiro acesso em `/comecar` e configuração por empresa, serviços, profissional e resumo. Retomada pelo menu **Primeiros passos**, erros por campo e opção de salvar a etapa antes de continuar depois. O progresso considera cadastros persistidos; não ativa a página pública automaticamente.
 - Restrição transacional de horários sobrepostos; disponibilidade semanal configurável por profissional, no fuso de São Paulo.
 - RLS, autorização no servidor, chaves estrangeiras compostas, limite de profissionais.
 - Página pública `/agendar/[slug]`, ativada pelo OWNER: cartões de serviços, seleção de profissional e horário, resumo antes da reserva, confirmação assinada, idempotência e limites por IP/telefone/empresa.
@@ -102,6 +118,18 @@ Com o servidor local iniciado, execute `pnpm test:landing` para validar conteúd
 Entrega e testes desta etapa: [docs/STATUS-LANDING.md](docs/STATUS-LANDING.md).
 
 Implementação conforme as convenções oficiais de [metadados e imagens sociais do Next.js](https://nextjs.org/docs/app/getting-started/metadata-and-og-images), [robots](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots) e [sitemap](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap). O nome do site usa dados estruturados [WebSite conforme o Google Search Central](https://developers.google.com/search/docs/appearance/site-names); isso não garante posicionamento nem resultados enriquecidos.
+
+## Primeiro acesso e retomada
+
+Quem entra sem empresa é encaminhado a `/comecar`, onde informa nome e segmento, sem nicho pré-selecionado. Criar a empresa inicia o trial já definido no banco. A configuração continua em `/painel/[companyId]/configuracao`, com as etapas `empresa`, `servicos`, `equipe` e `resumo`. Proprietários com empresa existente retomam o cadastro atual; não recebem outro trial ao reabrir o fluxo.
+
+**Salvar e continuar depois** valida e persiste a etapa antes de voltar ao painel. O link **Continuar depois** apenas sai da tela: mantém o que já foi salvo, mas não guarda os campos ainda não enviados. Erros de validação preservam o preenchimento no formulário; o roteiro live verifica também a resposta HTML completa de erro sem JavaScript, com os campos preservados e o formulário aberto. Não há rascunho em localStorage. O menu **Primeiros passos** permite retomar e revisar os cadastros. O resumo distingue os três cadastros iniciais da configuração de horários e da publicação da página.
+
+Um profissional é quem aparece na agenda; cadastrá-lo não cria usuário nem envia convite. O proprietário que atende também ocupa uma vaga de profissional. Acesso ao painel e vínculo do usuário com a agenda são tratados separadamente em **Equipe e acessos**. OWNER e MANAGER podem usar a configuração conforme suas permissões; as ações continuam sujeitas à assinatura, autorização no servidor e RLS.
+
+Esta etapa reutiliza as tabelas e regras existentes, sem nova migração. Serviços e profissionais recebem um UUID de registro por formulário: repetir o mesmo envio com o mesmo conteúdo retoma o cadastro salvo, sem inserir outro. O UUID não substitui a autorização por empresa.
+
+Entrega, testes e limitações: [docs/STATUS-PRIMEIRO-ACESSO.md](docs/STATUS-PRIMEIRO-ACESSO.md). A criação da primeira empresa com conta recém-cadastrada e a entrega/confirmação de um novo e-mail ainda precisam de homologação ponta a ponta neste fluxo.
 
 ## Custos e operação
 

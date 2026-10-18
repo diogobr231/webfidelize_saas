@@ -22,10 +22,12 @@ for (const route of [
   console.log(`PASS ${route}`);
 }
 for (const route of [
+  "/comecar",
   "/painel",
   "/admin",
   "/nova-senha",
   "/painel/00000000-0000-4000-8000-000000000001",
+  "/painel/00000000-0000-4000-8000-000000000001/configuracao",
 ]) {
   const r = await fetch(base + route, { redirect: "manual" });
   assert.ok([303, 307].includes(r.status), `${route}: ${r.status}`);
