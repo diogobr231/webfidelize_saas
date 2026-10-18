@@ -1,160 +1,876 @@
 import Link from "next/link";
 import { money, niches, plans } from "@/lib/catalog";
+import { landingStructuredData } from "@/lib/seo";
+import "./landing.css";
+
+export { landingMetadata as metadata } from "@/lib/seo";
+
 const whatsapp =
   "https://wa.me/5518997695445?text=Ol%C3%A1!%20Quero%20conhecer%20a%20Web%20Fidelize.";
+
+function Icon({
+  name,
+  className = "",
+}: {
+  name:
+    | "calendar"
+    | "people"
+    | "link"
+    | "clock"
+    | "spark"
+    | "check"
+    | "arrow"
+    | "message"
+    | "settings";
+  className?: string;
+}) {
+  const paths = {
+    calendar: (
+      <>
+        <rect x="3" y="5" width="18" height="16" rx="3" />
+        <path d="M7 3v4M17 3v4M3 11h18M7 15h3M14 15h3M7 18h3" />
+      </>
+    ),
+    people: (
+      <>
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2" />
+      </>
+    ),
+    link: (
+      <>
+        <path
+          d="m9 15 6-6M8 16l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M16 8l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0"
+          transform="translate(0 0) scale(.92)"
+        />
+      </>
+    ),
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
+    spark: (
+      <>
+        <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" />
+      </>
+    ),
+    check: <path d="m5 12 4 4L19 6" />,
+    arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
+    message: (
+      <path d="M21 11.5a8.5 8.5 0 0 1-12.8 7.3L3 21l1.6-5.7A8.5 8.5 0 1 1 21 11.5Z" />
+    ),
+    settings: (
+      <>
+        <path d="M4 7h16M4 17h16" />
+        <circle cx="9" cy="7" r="3" />
+        <circle cx="15" cy="17" r="3" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
+function Brand() {
+  return (
+    <span className="wf-brand">
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 28 28"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect x="1" y="1" width="12" height="12" rx="4" fill="currentColor" />
+        <rect
+          x="16"
+          y="1"
+          width="11"
+          height="11"
+          rx="4"
+          fill="currentColor"
+          opacity=".4"
+        />
+        <rect
+          x="1"
+          y="16"
+          width="11"
+          height="11"
+          rx="4"
+          fill="currentColor"
+          opacity=".4"
+        />
+        <path
+          d="m17 21 3 3 7-8"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>
+        web<span>fidelize</span>
+      </span>
+    </span>
+  );
+}
+
+function TrialLink({ secondary = false }: { secondary?: boolean }) {
+  return (
+    <Link
+      className={`wf-button ${secondary ? "wf-button-outline" : ""}`}
+      href="/cadastro"
+    >
+      Testar grátis por 7 dias
+      <Icon name="arrow" />
+    </Link>
+  );
+}
+
+const questions = [
+  {
+    question: "O que posso organizar com a Web Fidelize?",
+    answer:
+      "Agenda diária e semanal, cadastro de clientes, serviços e profissionais, disponibilidade semanal e uma página pública para receber reservas. Você também pode remarcar e cancelar atendimentos pelo painel, conforme sua permissão.",
+  },
+  {
+    question: "Como funcionam os 7 dias gratuitos?",
+    answer:
+      "Crie sua conta, confirme seu e-mail e cadastre a empresa. Os 7 dias começam na criação da empresa, com o plano Essencial e 1 profissional na agenda. O teste não solicita cartão e não gera cobrança automática.",
+  },
+  {
+    question: "Meu cliente precisa instalar um aplicativo?",
+    answer:
+      "Não. Ele abre seu link no navegador, escolhe serviço, profissional e horário e informa nome e telefone para reservar. Não precisa criar uma conta. Ao concluir, recebe um comprovante na tela e pode adicionar o horário ao calendário.",
+  },
+  {
+    question: "O proprietário conta no limite do plano?",
+    answer:
+      "Sim, se estiver cadastrado como profissional que recebe agendamentos. Os limites de 1, 3 e 10 profissionais se referem às pessoas cadastradas na agenda. O preço exibido é mensal; fale conosco para conhecer as condições dos planos.",
+  },
+  {
+    question: "Posso compartilhar minha agenda no WhatsApp?",
+    answer:
+      "Sim. Copie o link da sua página e compartilhe em conversas, no perfil do Instagram ou onde seus clientes encontrarem você. O compartilhamento é feito por você; mensagens, lembretes automáticos e chatbot ainda não estão disponíveis.",
+  },
+  {
+    question: "O cliente consegue alterar a reserva sozinho?",
+    answer:
+      "Para remarcar ou cancelar, o cliente entra em contato com a empresa. Quem tem permissão no painel atualiza o agendamento. O link de confirmação permite consultar a situação e o horário atualizados da reserva.",
+  },
+  {
+    question: "Já posso contratar e pagar pelo site?",
+    answer:
+      "A assinatura e a cobrança online ainda não estão disponíveis. Os valores apresentados são os preços previstos dos planos. Você pode usar o teste gratuito e falar pelo WhatsApp para conhecer a proposta para seu negócio.",
+  },
+  {
+    question: "O sistema tem módulos específicos para cada segmento?",
+    answer:
+      "Hoje, os segmentos compartilham o núcleo de agenda, clientes e serviços. Recursos como prontuário, comandas, caixa, cadastro de pets, rotas, turmas e inteligência artificial não fazem parte da versão disponível.",
+  },
+];
+
 export default function Home() {
   return (
-    <main>
-      <nav>
-        <Link href="/" className="brand">
-          web<span>fidelize</span>
-          <span> •</span>
-        </Link>
-        <div className="links">
-          <a className="optional" href="#segmentos">
-            Segmentos
-          </a>
-          <a className="optional" href="#planos">
-            Planos
-          </a>
-          <Link href="/entrar">Entrar →</Link>
-        </div>
-      </nav>
-      <section className="hero">
-        <div>
-          <span className="tag">GESTÃO SIMPLES. RELAÇÕES DURADOURAS.</span>
-          <h1>
-            Seu negócio
+    <main className="wf-site" id="inicio">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(landingStructuredData).replace(
+            /</g,
+            "\\u003c",
+          ),
+        }}
+      />
+      <a href="#conteudo" className="wf-skip">
+        Pular para o conteúdo
+      </a>
+      <header className="wf-header">
+        <nav
+          className="wf-container wf-navigation"
+          aria-label="Navegação principal"
+        >
+          <Link href="/" aria-label="Web Fidelize, início">
+            <Brand />
+          </Link>
+          <div className="wf-nav-links">
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#recursos">Recursos</a>
+            <a href="#planos">Planos</a>
+            <a href="#duvidas">Dúvidas</a>
+          </div>
+          <Link className="wf-login" href="/entrar">
+            Entrar
+            <Icon name="arrow" />
+          </Link>
+        </nav>
+      </header>
+      <section
+        className="wf-container wf-hero"
+        id="conteudo"
+        aria-labelledby="hero-title"
+      >
+        <div className="wf-hero-copy">
+          <span className="wf-eyebrow wf-hero-pill">
+            <span />
+            SIMPLES PARA VOCÊ. FÁCIL PARA SEU CLIENTE.
+          </span>
+          <h1 id="hero-title">
+            Sua agenda
             <br />
-            organizado.
+            organizada.
             <br />
-            <em>Seu cliente por perto.</em>
+            <em>
+              Seu cliente
+              <br className="wf-mobile-break" /> mais perto.
+            </em>
           </h1>
           <p>
-            Reúna agenda, clientes e equipe em um só lugar. Menos tempo com
-            tarefas, mais espaço para o seu negócio crescer.
+            Agenda online, clientes e profissionais no mesmo lugar. Compartilhe
+            seu link e deixe seu cliente escolher o melhor horário para ser
+            atendido.
           </p>
-          <div className="actions">
-            <Link className="button" href="/cadastro">
-              Começar 7 dias grátis ↗
-            </Link>
+          <div className="wf-hero-actions">
+            <TrialLink />
             <a
-              className="button secondary"
+              className="wf-button wf-button-outline"
               href={whatsapp}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              Falar com a gente
+              <Icon name="message" />
+              Falar no WhatsApp
             </a>
           </div>
-          <small className="muted">
-            Sem cartão para testar · Feito para pequenos negócios
-          </small>
+          <div className="wf-trial-facts">
+            <span>
+              <Icon name="check" />
+              Sem cartão para testar
+            </span>
+            <span>
+              <Icon name="check" />
+              Acesso pelo navegador
+            </span>
+          </div>
         </div>
-        <div className="panel preview" id="demonstracao">
-          <header>
-            <strong>Uma rotina mais leve</strong>
-            <span className="badge">Demonstração visual</span>
-          </header>
-          <div className="row">
-            <div>
-              01 · Conheça seu cliente
-              <small>Histórico e contato em um lugar</small>
+        <figure className="wf-product-figure" aria-labelledby="product-caption">
+          <div className="wf-product-glow" />
+          <div className="wf-product-window">
+            <div className="wf-window-top">
+              <span className="wf-window-dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span>Seu espaço de trabalho</span>
+              <span className="wf-demo-label">Demonstração visual</span>
             </div>
-            <span>↗</span>
-          </div>
-          <div className="row">
-            <div>
-              02 · Organize os horários
-              <small>Agenda compartilhada com sua equipe</small>
+            <div className="wf-product-body">
+              <div className="wf-product-sidebar" aria-hidden="true">
+                <span className="wf-mini-mark">w.</span>
+                <span className="wf-sidebar-active">
+                  <Icon name="calendar" />
+                </span>
+                <span>
+                  <Icon name="people" />
+                </span>
+                <span>
+                  <Icon name="settings" />
+                </span>
+              </div>
+              <div className="wf-calendar-preview">
+                <div className="wf-calendar-title">
+                  <div>
+                    <span>SEU NEGÓCIO, EM ORDEM</span>
+                    <strong>Minha agenda</strong>
+                  </div>
+                  <span className="wf-demo-avatar">EF</span>
+                </div>
+                <div className="wf-calendar-toolbar">
+                  <span>
+                    Dia de exemplo <span aria-hidden="true">⌄</span>
+                  </span>
+                  <span className="wf-view-switch">
+                    <b>Dia</b>
+                    <span>Semana</span>
+                  </span>
+                </div>
+                <div className="wf-calendar-grid">
+                  <div className="wf-grid-heading">
+                    <span />
+                    <span>Profissional A</span>
+                    <span>Profissional B</span>
+                  </div>
+                  <div className="wf-grid-row">
+                    <span className="wf-grid-hour">09:00</span>
+                    <div>
+                      <div className="wf-appointment wf-appointment-cyan">
+                        <strong>Serviço de exemplo</strong>
+                        <span>Cliente fictício A</span>
+                        <small>09:00 – 09:30</small>
+                      </div>
+                    </div>
+                    <div />
+                  </div>
+                  <div className="wf-grid-row">
+                    <span className="wf-grid-hour">10:00</span>
+                    <div />
+                    <div>
+                      <div className="wf-appointment wf-appointment-violet">
+                        <strong>Serviço de exemplo</strong>
+                        <span>Cliente fictício B</span>
+                        <small>10:00 – 10:45</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="wf-grid-row">
+                    <span className="wf-grid-hour">11:00</span>
+                    <div>
+                      <div className="wf-appointment wf-appointment-muted">
+                        <strong>Horário disponível</strong>
+                        <small>Um espaço para o próximo cliente</small>
+                      </div>
+                    </div>
+                    <div />
+                  </div>
+                </div>
+                <div className="wf-calendar-bottom">
+                  <span>
+                    <span />
+                    Tudo em um só lugar
+                  </span>
+                  <Icon name="calendar" />
+                </div>
+              </div>
             </div>
-            <span>◷</span>
           </div>
-          <div className="row">
+          <div className="wf-product-note">
+            <span className="wf-note-icon">
+              <Icon name="link" />
+            </span>
             <div>
-              03 · Acompanhe o negócio
-              <small>Indicadores para decidir com clareza</small>
+              <strong>Seu link. Sua agenda.</strong>
+              <span>Uma conexão com seu cliente.</span>
             </div>
-            <span>▥</span>
+            <Icon name="arrow" />
           </div>
-          <p style={{ fontSize: 12 }}>
-            Visão ilustrativa do produto. Sem dados de empresas reais.
-          </p>
+          <figcaption id="product-caption">
+            Representação ilustrativa com dados fictícios. Não exibe uma agenda
+            real.
+          </figcaption>
+        </figure>
+      </section>
+      <section
+        className="wf-container wf-value-strip"
+        aria-label="O essencial da Web Fidelize"
+      >
+        <div>
+          <Icon name="calendar" />
+          <span>
+            Agenda visual<strong>Veja seu dia e sua semana.</strong>
+          </span>
+        </div>
+        <div>
+          <Icon name="link" />
+          <span>
+            Página de agendamento<strong>Receba reservas pelo seu link.</strong>
+          </span>
+        </div>
+        <div>
+          <Icon name="people" />
+          <span>
+            Clientes e profissionais
+            <strong>Organize quem faz parte da rotina.</strong>
+          </span>
         </div>
       </section>
-      <section className="section" id="segmentos">
-        <span className="tag">UM NEGÓCIO ÚNICO. UMA EXPERIÊNCIA SUA.</span>
-        <h2>Qual é o seu segmento?</h2>
-        <p>Escolha sua entrada. A mesma plataforma, adaptada à sua rotina.</p>
-        <div className="grid niches">
-          {niches.map((n, i) => (
-            <Link className="card" href={`/entrar/${n.slug}`} key={n.slug}>
-              <span className="icon" style={{ color: n.color }}>
-                {n.icon}
-              </span>
-              <h3>{n.name}</h3>
-              <p>{n.description}</p>
-              <span className="badge">
-                {i < 4 ? "Acessar →" : "Conhecer o segmento →"}
-              </span>
+      <section
+        className="wf-container wf-section"
+        id="recursos"
+        aria-labelledby="features-title"
+      >
+        <div className="wf-section-heading">
+          <span className="wf-eyebrow">MENOS IMPROVISO. MAIS ORGANIZAÇÃO.</span>
+          <h2 id="features-title">
+            Tudo o que conecta
+            <br />
+            um bom atendimento.
+          </h2>
+          <p>
+            Do primeiro horário marcado à organização da equipe, o essencial
+            fica ao seu alcance.
+          </p>
+        </div>
+        <div className="wf-features-grid">
+          <article className="wf-feature-card">
+            <span className="wf-feature-icon">
+              <Icon name="calendar" />
+            </span>
+            <span className="wf-feature-number">01</span>
+            <h3>
+              Enxergue sua agenda
+              <br />
+              com clareza.
+            </h3>
+            <p>
+              Visualize o dia ou a semana, filtre por profissional e confira
+              cliente, serviço e horário. Remarque ou cancele pelo painel.
+            </p>
+            <div className="wf-feature-detail">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <span className="wf-feature-footnote">
+              Conflitos de horário são verificados ao reservar.
+            </span>
+          </article>
+          <article className="wf-feature-card">
+            <span className="wf-feature-icon wf-icon-violet">
+              <Icon name="link" />
+            </span>
+            <span className="wf-feature-number">02</span>
+            <h3>
+              Facilite a reserva
+              <br />
+              para seu cliente.
+            </h3>
+            <p>
+              Compartilhe sua página no WhatsApp e Instagram. Seu cliente
+              escolhe entre os horários disponíveis, sem criar conta.
+            </p>
+            <div className="wf-example-link">
+              <Icon name="link" />
+              <span>seu link de agendamento</span>
+              <Icon name="arrow" />
+            </div>
+            <span className="wf-feature-footnote">
+              Sem instalação de aplicativo.
+            </span>
+          </article>
+          <article className="wf-feature-card">
+            <span className="wf-feature-icon wf-icon-amber">
+              <Icon name="people" />
+            </span>
+            <span className="wf-feature-number">03</span>
+            <h3>
+              Encontre as informações
+              <br />
+              que você precisa.
+            </h3>
+            <p>
+              Cadastre contatos, serviços, preços, duração e profissionais.
+              Mantenha as informações da operação em um único lugar.
+            </p>
+            <div className="wf-feature-tags">
+              <span>Clientes</span>
+              <span>Serviços</span>
+              <span>Profissionais</span>
+            </div>
+            <span className="wf-feature-footnote">
+              Cada empresa acessa seus próprios dados.
+            </span>
+          </article>
+        </div>
+        <div className="wf-small-features">
+          <article>
+            <Icon name="clock" />
+            <div>
+              <h3>Disponibilidade do seu jeito</h3>
+              <p>Defina dias, turnos e intervalos semanais por profissional.</p>
+            </div>
+          </article>
+          <article>
+            <Icon name="spark" />
+            <div>
+              <h3>Uma página com a sua identidade</h3>
+              <p>
+                Escolha entre 4 cores e adicione descrição, endereço e WhatsApp.
+              </p>
+            </div>
+          </article>
+          <article>
+            <Icon name="settings" />
+            <div>
+              <h3>Configuração guiada</h3>
+              <p>Acompanhe os passos para preparar e publicar sua agenda.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section
+        className="wf-demo-band"
+        id="demonstracao"
+        aria-labelledby="demo-title"
+      >
+        <div className="wf-container wf-demo-layout">
+          <div className="wf-demo-copy">
+            <span className="wf-eyebrow">
+              EXPERIMENTE O LADO DO SEU CLIENTE
+            </span>
+            <h2 id="demo-title">
+              Do seu link
+              <br />
+              para a sua agenda.
+            </h2>
+            <p>
+              Uma página pensada para quem quer agendar, com serviço,
+              profissional, data e horário. Ao concluir, o cliente recebe a
+              confirmação na tela.
+            </p>
+            <ol className="wf-demo-steps">
+              <li>
+                <span>1</span>
+                <div>
+                  <strong>Você compartilha o link.</strong>
+                  <p>Coloque nas suas conversas e no perfil do negócio.</p>
+                </div>
+              </li>
+              <li>
+                <span>2</span>
+                <div>
+                  <strong>Seu cliente escolhe um horário.</strong>
+                  <p>A página consulta a disponibilidade configurada.</p>
+                </div>
+              </li>
+              <li>
+                <span>3</span>
+                <div>
+                  <strong>A reserva chega à sua agenda.</strong>
+                  <p>Você acompanha e gerencia o atendimento no painel.</p>
+                </div>
+              </li>
+            </ol>
+            <Link className="wf-button" href="/cadastro">
+              Criar minha página de agendamento
+              <Icon name="arrow" />
+            </Link>
+            <p className="wf-demo-disclaimer">
+              Exemplo ilustrativo da página de agendamento, com dados fictícios.
+            </p>
+          </div>
+          <figure className="wf-phone-figure">
+            <div className="wf-phone-orbit" />
+            <div className="wf-phone">
+              <div className="wf-phone-status" aria-hidden="true">
+                <span>09:41</span>
+                <span className="wf-phone-camera" />
+                <span>▰</span>
+              </div>
+              <div className="wf-phone-content">
+                <div className="wf-phone-business">
+                  <span>EF</span>
+                  <div>
+                    <strong>Espaço Fictício</strong>
+                    <small>Exemplo de página pública</small>
+                  </div>
+                </div>
+                <span className="wf-phone-eyebrow">SEU PRÓXIMO HORÁRIO</span>
+                <h3>
+                  Reserve um tempo
+                  <br />
+                  para você.
+                </h3>
+                <p>Escolha seu serviço e encontre um horário.</p>
+                <div className="wf-phone-service">
+                  <span>
+                    <strong>Serviço de exemplo</strong>
+                    <small>30 minutos</small>
+                  </span>
+                  <span className="wf-phone-selected">✓</span>
+                </div>
+                <div className="wf-phone-professional">
+                  <span>Profissional de exemplo</span>
+                  <span>⌄</span>
+                </div>
+                <span className="wf-phone-label">Horários ilustrativos</span>
+                <div className="wf-phone-times">
+                  <span>09:00</span>
+                  <span>09:30</span>
+                  <span>10:00</span>
+                  <span>10:30</span>
+                  <span>11:00</span>
+                  <span>11:30</span>
+                </div>
+                <div className="wf-phone-faux-button">
+                  Confirmar agendamento <Icon name="arrow" />
+                </div>
+                <small className="wf-phone-footnote">
+                  Visual ilustrativo · dados fictícios
+                </small>
+              </div>
+            </div>
+            <figcaption>
+              Uma experiência que funciona no navegador do celular.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+      <section
+        className="wf-container wf-section"
+        id="como-funciona"
+        aria-labelledby="start-title"
+      >
+        <div className="wf-section-heading wf-heading-centered">
+          <span className="wf-eyebrow">UM COMEÇO MAIS SIMPLES</span>
+          <h2 id="start-title">
+            Prepare sua agenda.
+            <br />
+            Compartilhe o próximo passo.
+          </h2>
+          <p>
+            Você não precisa montar um site para começar a receber agendamentos.
+          </p>
+        </div>
+        <div className="wf-setup-grid">
+          <article>
+            <span className="wf-setup-number">01</span>
+            <h3>Crie seu espaço.</h3>
+            <p>
+              Cadastre sua conta, confirme o e-mail e crie sua empresa para
+              iniciar os 7 dias de teste.
+            </p>
+          </article>
+          <article>
+            <span className="wf-setup-number">02</span>
+            <h3>Organize sua rotina.</h3>
+            <p>
+              Adicione serviços e profissionais, configure os turnos e
+              personalize a página de agendamento.
+            </p>
+          </article>
+          <article>
+            <span className="wf-setup-number">03</span>
+            <h3>Coloque seu link no mundo.</h3>
+            <p>
+              Publique a página e compartilhe o endereço. Acompanhe os
+              agendamentos pelo painel.
+            </p>
+          </article>
+        </div>
+        <div className="wf-centered-action">
+          <TrialLink />
+          <span>Teste no plano Essencial, com 1 profissional na agenda.</span>
+        </div>
+      </section>
+      <section
+        className="wf-container wf-segments"
+        id="segmentos"
+        aria-labelledby="segments-title"
+      >
+        <div>
+          <span className="wf-eyebrow">
+            PARA QUEM TRABALHA COM HORA MARCADA
+          </span>
+          <h2 id="segments-title">Seu negócio tem lugar aqui.</h2>
+          <p>
+            Um núcleo de agenda, clientes e serviços para organizar
+            atendimentos.
+          </p>
+        </div>
+        <div className="wf-segment-links">
+          {niches.slice(0, 4).map((niche) => (
+            <Link href={`/entrar/${niche.slug}`} key={niche.slug}>
+              <span aria-hidden="true">{niche.icon}</span>
+              {niche.name}
+              <Icon name="arrow" />
             </Link>
           ))}
         </div>
-      </section>
-      <section className="section" id="planos">
-        <span className="tag">CRESÇA NO SEU RITMO</span>
-        <h2>O próximo capítulo começa aqui.</h2>
-        <p>Teste por 7 dias. Escolha o plano que acompanha sua equipe.</p>
-        <div className="grid">
-          {plans.map((p, i) => (
-            <article className={`card ${i === 1 ? "featured" : ""}`} key={p.id}>
-              <span className="tag">
-                {i === 1 ? "RECOMENDADO PARA EQUIPES" : "SEU PRÓXIMO PASSO"}
-              </span>
-              <h3>{p.name}</h3>
-              <div className="price">
-                {money(p.cents)}
-                <small>/mês</small>
-              </div>
-              <ul className="list">
-                <li>
-                  Até {p.staff}{" "}
-                  {p.staff === 1 ? "profissional" : "profissionais"}
-                </li>
-                <li>Cadastro de clientes e serviços</li>
-                <li>Agenda da equipe</li>
-                <li>Página pública de agendamento</li>
-                <li>Trial de 7 dias</li>
-              </ul>
-              <Link
-                className={`button ${i !== 1 ? "secondary" : ""}`}
-                href="/cadastro"
-              >
-                Experimentar grátis →
+        <div className="wf-other-segments">
+          <span>Outros segmentos com módulos específicos em planejamento:</span>
+          <div>
+            {niches.slice(4).map((niche) => (
+              <Link key={niche.slug} href={`/entrar/${niche.slug}`}>
+                {niche.name}
+                <span aria-hidden="true">↗</span>
               </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section
+        className="wf-container wf-section wf-pricing"
+        id="planos"
+        aria-labelledby="pricing-title"
+      >
+        <div className="wf-section-heading wf-heading-centered">
+          <span className="wf-eyebrow">CRESÇA NO SEU RITMO</span>
+          <h2 id="pricing-title">
+            Um plano para cada
+            <br />
+            tamanho de agenda.
+          </h2>
+          <p>Os mesmos recursos essenciais. Espaço para diferentes equipes.</p>
+        </div>
+        <div className="wf-plans-grid">
+          {plans.map((plan, index) => (
+            <article
+              className={`wf-plan ${index === 1 ? "wf-plan-featured" : ""}`}
+              key={plan.id}
+            >
+              {index === 1 ? (
+                <span className="wf-recommended">RECOMENDADO PARA EQUIPES</span>
+              ) : null}
+              <span className="wf-plan-kicker">
+                {index === 0
+                  ? "PARA QUEM ATENDE SOZINHO"
+                  : index === 1
+                    ? "PARA UMA EQUIPE PEQUENA"
+                    : "PARA MAIS PROFISSIONAIS"}
+              </span>
+              <h3>{plan.name}</h3>
+              <div className="wf-price">
+                {money(plan.cents)}
+                <span>/mês</span>
+              </div>
+              <p className="wf-plan-capacity">
+                Até{" "}
+                <strong>
+                  {plan.staff}{" "}
+                  {plan.staff === 1 ? "profissional" : "profissionais"}
+                </strong>{" "}
+                na agenda
+              </p>
+              <ul>
+                {[
+                  "Agenda visual por dia e semana",
+                  "Cadastro de clientes e serviços",
+                  "Disponibilidade por profissional",
+                  "Página pública de agendamento",
+                  "Personalização com 4 opções de cor",
+                ].map((feature) => (
+                  <li key={feature}>
+                    <Icon name="check" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <TrialLink secondary={index !== 1} />
+              <span className="wf-plan-trial-note">
+                Teste de 7 dias no plano Essencial.
+              </span>
             </article>
           ))}
         </div>
-        <p style={{ fontSize: 13 }}>
-          MVP em implantação. Cobrança ainda em implantação; agenda pública
-          disponível para homologação. Módulos por nicho e IA serão
-          disponibilizados em etapas.
-        </p>
+        <div className="wf-pricing-note">
+          <Icon name="message" />
+          <div>
+            <p>
+              <strong>
+                O teste é gratuito. A cobrança online ainda não está disponível.
+              </strong>{" "}
+              Os valores acima apresentam os planos previstos. Para conhecer a
+              proposta para sua empresa,{" "}
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer">
+                fale no WhatsApp
+              </a>
+              .
+            </p>
+            <p>
+              O proprietário ocupa uma vaga quando cadastrado como profissional
+              na agenda. Nenhum cartão é solicitado no teste.
+            </p>
+          </div>
+        </div>
       </section>
-      <section className="panel section">
-        <span className="tag">GENTE DE VERDADE, DO OUTRO LADO</span>
-        <h2>Vamos organizar o seu negócio?</h2>
-        <p>
-          Converse com a Web Fidelize e conheça a proposta para sua empresa.
-        </p>
-        <a className="button" href={whatsapp} target="_blank" rel="noreferrer">
-          Conversar pelo WhatsApp ↗
-        </a>
+      <section
+        className="wf-container wf-section wf-faq"
+        id="duvidas"
+        aria-labelledby="faq-title"
+      >
+        <div className="wf-section-heading">
+          <span className="wf-eyebrow">ANTES DE COMEÇAR</span>
+          <h2 id="faq-title">
+            Dúvidas comuns.
+            <br />
+            Respostas diretas.
+          </h2>
+          <p>Entenda o que você pode fazer hoje com a Web Fidelize.</p>
+        </div>
+        <div className="wf-faq-grid">
+          {questions.map(({ question, answer }) => (
+            <article key={question}>
+              <h3>{question}</h3>
+              <p>{answer}</p>
+            </article>
+          ))}
+        </div>
       </section>
-      <footer>
-        <span>© {new Date().getFullYear()} Web Fidelize</span>
-        <span>Agenda · Clientes · Equipe · Conexões</span>
-        <Link href="/entrar">Acessar minha conta →</Link>
+      <section
+        className="wf-container wf-final-section"
+        aria-labelledby="final-title"
+      >
+        <div className="wf-final-cta">
+          <div>
+            <span className="wf-eyebrow">
+              MAIS ORGANIZAÇÃO PARA O SEU PRÓXIMO DIA
+            </span>
+            <h2 id="final-title">
+              Seu próximo cliente
+              <br />
+              pode começar por um link.
+            </h2>
+            <p>
+              Conheça a plataforma e veja como ela se encaixa na sua rotina.
+            </p>
+          </div>
+          <div className="wf-final-actions">
+            <TrialLink />
+            <a
+              className="wf-button wf-button-outline"
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="message" />
+              Falar no WhatsApp
+            </a>
+            <span>7 dias no Essencial · Sem cartão</span>
+          </div>
+        </div>
+      </section>
+      <footer className="wf-container wf-footer">
+        <div>
+          <Link href="/" aria-label="Web Fidelize, início">
+            <Brand />
+          </Link>
+          <p>
+            Agenda, clientes e profissionais.
+            <br />
+            Conectados à sua rotina.
+          </p>
+        </div>
+        <div className="wf-footer-links">
+          <a href="#recursos">Recursos</a>
+          <a href="#planos">Planos</a>
+          <a href="#duvidas">Dúvidas</a>
+          <Link href="/entrar">Entrar na minha conta</Link>
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer">
+            WhatsApp
+          </a>
+        </div>
+        <div className="wf-footer-bottom">
+          <span>© {new Date().getFullYear()} Web Fidelize</span>
+          <span>Feito para pequenos negócios.</span>
+        </div>
       </footer>
     </main>
   );
