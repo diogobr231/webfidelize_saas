@@ -97,6 +97,7 @@ export function siteRobots(config = site): MetadataRoute.Robots {
         "/auth/",
         "/entrar",
         "/cadastro",
+        "/comecar",
         "/recuperar",
         "/nova-senha",
         "/convite/",

@@ -29,7 +29,8 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (
     !user &&
-    (path === "/painel" ||
+    (path === "/comecar" ||
+      path === "/painel" ||
       path.startsWith("/painel/") ||
       path === "/admin" ||
       path.startsWith("/admin/") ||
@@ -46,6 +47,7 @@ export async function proxy(request: NextRequest) {
 }
 export const config = {
   matcher: [
+    "/comecar",
     "/painel/:path*",
     "/admin/:path*",
     "/entrar/:path*",
