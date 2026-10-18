@@ -109,7 +109,7 @@ export default function Home() {
           {plans.map((p, i) => (
             <article className={`card ${i === 1 ? "featured" : ""}`} key={p.id}>
               <span className="tag">
-                {i === 1 ? "MAIS ESCOLHIDO" : "SEU PRÓXIMO PASSO"}
+                {i === 1 ? "RECOMENDADO PARA EQUIPES" : "SEU PRÓXIMO PASSO"}
               </span>
               <h3>{p.name}</h3>
               <div className="price">

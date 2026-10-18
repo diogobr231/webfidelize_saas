@@ -1,7 +1,10 @@
-import Link from "next/link";
+import type { CSSProperties } from "react";
 import { requireCompany } from "@/lib/auth";
-import { canManage } from "@/lib/permissions";
-import { addShift, removeShift, configure } from "./actions";
+import { canManage, hasAccess } from "@/lib/permissions";
+import { PendingButton } from "@/components/pending-button";
+import { ShareBooking } from "@/components/share-booking";
+import { addShift, removeShift, configure, configureProfile } from "./actions";
+
 const days = [
   "",
   "Segunda",
@@ -12,14 +15,21 @@ const days = [
   "Sábado",
   "Domingo",
 ];
+const themes = [
+  { value: "teal", label: "Turquesa", color: "#2dd4bf" },
+  { value: "blue", label: "Azul", color: "#38bdf8" },
+  { value: "violet", label: "Violeta", color: "#a78bfa" },
+  { value: "rose", label: "Rosa", color: "#fb7185" },
+];
 const time = (m: number) =>
   `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
 export default async function Availability({
   params,
   searchParams,
 }: {
   params: Promise<{ companyId: string }>;
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{ erro?: string; salvo?: string }>;
 }) {
   const { companyId } = await params;
   const { db, role, company } = await requireCompany(companyId);
@@ -27,143 +37,378 @@ export default async function Availability({
   const [shifts, professionals] = await Promise.all([
     db
       .from("availability")
-      .select("*")
+      .select("id,professional_id,weekday,start_minute,end_minute")
       .eq("company_id", companyId)
       .order("weekday")
       .order("start_minute"),
-    db.from("professionals").select("id,name").eq("company_id", companyId),
+    db
+      .from("professionals")
+      .select("id,name")
+      .eq("company_id", companyId)
+      .order("name"),
   ]);
+  const writable = hasAccess(company.status, company.trial_ends_at);
+  const managed = canManage(role);
+  const enabled = company.booking_enabled && company.booking_slug;
+  const publicUrl = company.booking_slug
+    ? new URL(
+        `/agendar/${company.booking_slug}`,
+        process.env.APP_URL || "http://localhost:3000",
+      ).toString()
+    : "";
+  const messages: Record<string, string> = {
+    turno:
+      "Não foi possível adicionar o turno. Confira se o fim é depois do início e se já existe outro turno nesse horário.",
+    remover:
+      "Não foi possível remover o turno. Atualize a página e tente novamente.",
+    slug: "Use um endereço com 3 a 60 caracteres: letras minúsculas, números e hífen.",
+    pagina:
+      "Não foi possível salvar a página. Confira se o endereço escolhido já está em uso.",
+    perfil:
+      "Não foi possível salvar a apresentação. Confira os limites dos campos e seu acesso.",
+  };
   return (
     <>
-      <h2>Disponibilidade e reservas</h2>
-      <p>
-        Fuso: São Paulo. Cadastre turnos separados para intervalos de almoço.
-        Remova o turno anterior antes de substituir um horário.
+      <div className="workspace-page-heading">
+        <div>
+          <span className="tag">Cada negócio tem seu ritmo</span>
+          <h1>{managed ? "Horários e sua página" : "Meus horários"}</h1>
+          <p>
+            {managed
+              ? "Organize os turnos da equipe e prepare a página que seus clientes vão conhecer."
+              : "Confira os turnos disponíveis para receber seus atendimentos."}
+          </p>
+        </div>
+      </div>
+      <p className="notice">
+        Horários no fuso de São Paulo. Turnos separados permitem reservar um
+        intervalo para almoço. Alterar os turnos preserva os agendamentos já
+        feitos.
       </p>
-      {company.is_demo && (
-        <p className="notice">Empresa de demonstração — dados fictícios.</p>
+      {!writable && (
+        <p className="notice error">
+          Sua assinatura permite consultar os horários, mas as alterações estão
+          bloqueadas. Fale com o suporte para regularizar.
+        </p>
       )}
       {q.erro && (
         <p role="alert" className="notice error">
-          Não foi possível salvar. Verifique turnos sobrepostos, assinatura e se
-          o endereço público está disponível.
+          {messages[q.erro] ||
+            "Não foi possível salvar. Verifique seus dados e permissões."}
+        </p>
+      )}
+      {q.salvo && !q.erro && (
+        <p role="status" className="notice">
+          {{
+            turno: "Turno adicionado.",
+            remover:
+              "Turno removido. Os agendamentos existentes foram preservados.",
+            pagina: "Configuração da página salva.",
+            perfil: "Apresentação da sua empresa salva.",
+          }[q.salvo] || "Configuração salva."}
         </p>
       )}
       {(shifts.error || professionals.error) && (
-        <p className="notice error">Erro ao carregar a disponibilidade.</p>
+        <p className="notice error" role="alert">
+          Não foi possível carregar os horários. Atualize a página para tentar
+          novamente.
+        </p>
       )}
-      <div className="panel table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Profissional</th>
-              <th>Dia</th>
-              <th>Turno</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shifts.data?.map((s) => (
-              <tr key={s.id}>
-                <td>
-                  {
-                    professionals.data?.find((p) => p.id === s.professional_id)
-                      ?.name
-                  }
-                </td>
-                <td>{days[s.weekday]}</td>
-                <td>
-                  {time(s.start_minute)}–{time(s.end_minute)}
-                </td>
-                <td>
-                  {canManage(role) && (
-                    <form action={removeShift}>
-                      <input
-                        type="hidden"
-                        name="company_id"
-                        value={companyId}
-                      />
-                      <input type="hidden" name="id" value={s.id} />
-                      <button className="secondary">Remover</button>
-                    </form>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {!shifts.data?.length && (
-          <p className="empty">Sem turnos cadastrados.</p>
+      <div className="availability-columns" id="turnos">
+        <section className="panel">
+          <h2>Sua semana de atendimento</h2>
+          <p>
+            {managed
+              ? "Confira a disponibilidade de cada profissional."
+              : "Estes são os turnos vinculados ao seu perfil."}
+          </p>
+          {shifts.error || professionals.error ? (
+            <p className="empty">
+              A semana ficará disponível quando os dados forem carregados.
+            </p>
+          ) : !professionals.data?.length ? (
+            <p className="empty">
+              {managed
+                ? "Cadastre um profissional para configurar os horários."
+                : "Ainda não há um profissional vinculado ao seu perfil. Peça ao proprietário para configurar seu acesso."}
+            </p>
+          ) : (
+            professionals.data.map((professional) => (
+              <section
+                key={professional.id}
+                className="availability-pro"
+                aria-labelledby={`professional-${professional.id}`}
+              >
+                <h3 id={`professional-${professional.id}`}>
+                  {professional.name}
+                </h3>
+                <ul className="availability-week">
+                  {days.slice(1).map((day, index) => {
+                    const dayShifts =
+                      shifts.data?.filter(
+                        (shift) =>
+                          shift.professional_id === professional.id &&
+                          shift.weekday === index + 1,
+                      ) || [];
+                    return (
+                      <li key={day}>
+                        <strong>{day}</strong>
+                        <div className="availability-shifts">
+                          {dayShifts.length ? (
+                            dayShifts.map((shift) => (
+                              <div
+                                key={shift.id}
+                                className="availability-shift"
+                              >
+                                <span>
+                                  {time(shift.start_minute)}–
+                                  {time(shift.end_minute)}
+                                </span>
+                                {managed && writable && (
+                                  <form action={removeShift}>
+                                    <input
+                                      type="hidden"
+                                      name="company_id"
+                                      value={companyId}
+                                    />
+                                    <input
+                                      type="hidden"
+                                      name="id"
+                                      value={shift.id}
+                                    />
+                                    <button
+                                      aria-label={`Remover turno de ${professional.name}, ${day}, ${time(shift.start_minute)} a ${time(shift.end_minute)}`}
+                                    >
+                                      ×
+                                    </button>
+                                  </form>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <span className="availability-off">
+                              Sem atendimento
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))
+          )}
+        </section>
+        {managed && writable && (
+          <form action={addShift} className="panel">
+            <h2>Adicionar um turno</h2>
+            <p>
+              Para ajustar um horário, remova o turno anterior e adicione o
+              novo.
+            </p>
+            <input type="hidden" name="company_id" value={companyId} />
+            <label htmlFor="professional_id">Profissional</label>
+            <select
+              id="professional_id"
+              name="professional_id"
+              required
+              defaultValue=""
+            >
+              <option value="">Selecione um profissional</option>
+              {professionals.data?.map((professional) => (
+                <option key={professional.id} value={professional.id}>
+                  {professional.name}
+                </option>
+              ))}
+            </select>
+            <label htmlFor="weekday">Dia da semana</label>
+            <select id="weekday" name="weekday">
+              {days.slice(1).map((day, index) => (
+                <option key={day} value={index + 1}>
+                  {day}
+                </option>
+              ))}
+            </select>
+            <div className="form-grid">
+              <div>
+                <label htmlFor="start">Começa às</label>
+                <input
+                  id="start"
+                  name="start"
+                  type="time"
+                  required
+                  defaultValue="08:00"
+                />
+              </div>
+              <div>
+                <label htmlFor="end">Termina às</label>
+                <input
+                  id="end"
+                  name="end"
+                  type="time"
+                  required
+                  defaultValue="18:00"
+                />
+              </div>
+            </div>
+            <p className="availability-help">
+              Exemplo com almoço: um turno das 8h às 12h e outro das 13h às 18h.
+            </p>
+            <PendingButton>Adicionar turno</PendingButton>
+          </form>
         )}
       </div>
-      {canManage(role) && (
-        <form action={addShift} className="panel" style={{ marginTop: 24 }}>
-          <h3>Adicionar turno</h3>
-          <input type="hidden" name="company_id" value={companyId} />
-          <label htmlFor="professional_id">Profissional</label>
-          <select id="professional_id" name="professional_id" required>
-            {professionals.data?.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-          <div className="form-grid">
-            <div>
-              <label htmlFor="weekday">Dia</label>
-              <select id="weekday" name="weekday">
-                {days.slice(1).map((d, i) => (
-                  <option key={d} value={i + 1}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="start">Início</label>
-              <input id="start" name="start" type="time" required />
-            </div>
-            <div>
-              <label htmlFor="end">Fim</label>
-              <input id="end" name="end" type="time" required />
-            </div>
-          </div>
-          <button>Adicionar turno</button>
-        </form>
-      )}
       {role === "OWNER" && (
-        <form action={configure} className="panel" style={{ marginTop: 24 }}>
-          <h3>Página pública</h3>
-          <input type="hidden" name="company_id" value={companyId} />
-          <label htmlFor="slug">
-            Endereço (letras minúsculas, números e hífen)
-          </label>
-          <input
-            id="slug"
-            name="slug"
-            minLength={3}
-            maxLength={60}
-            pattern="[a-z0-9][a-z0-9-]{2,59}"
-            defaultValue={company.booking_slug || ""}
-            required
-          />
-          <label className="slot">
-            <input
-              type="checkbox"
-              name="enabled"
-              defaultChecked={company.booking_enabled}
-            />
-            Ativar reservas públicas
-          </label>
-          <button>Salvar página</button>
-          {company.booking_slug && (
+        <>
+          <section className="panel booking-settings" id="pagina-publica">
+            <div className="workspace-section-heading">
+              <div>
+                <span className="tag">Seu negócio, com sua identidade</span>
+                <h2>Apresente sua empresa</h2>
+              </div>
+              <span className="badge">
+                {enabled ? "Página ativada" : "Página desativada"}
+              </span>
+            </div>
             <p>
-              <Link href={`/agendar/${company.booking_slug}`} target="_blank">
-                Abrir página de agendamento ↗
-              </Link>
+              Essas informações aparecem para quem abre seu link de agendamento.
             </p>
-          )}
-        </form>
+            {writable ? (
+              <form action={configureProfile}>
+                <input type="hidden" name="company_id" value={companyId} />
+                <div className="booking-profile-grid">
+                  <div>
+                    <label htmlFor="description">Uma breve apresentação</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      maxLength={240}
+                      rows={3}
+                      placeholder="Conte o que torna seu atendimento especial."
+                      defaultValue={company.booking_description || ""}
+                      aria-describedby="description-help"
+                    />
+                    <p id="description-help" className="field-help">
+                      Até 240 caracteres. Evite incluir informações pessoais de
+                      clientes.
+                    </p>
+                    <label htmlFor="address">
+                      Endereço ou local de atendimento
+                    </label>
+                    <input
+                      id="address"
+                      name="address"
+                      maxLength={200}
+                      placeholder="Rua, número, bairro — cidade"
+                      defaultValue={company.booking_address || ""}
+                    />
+                    <label htmlFor="phone">WhatsApp da empresa</label>
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      maxLength={24}
+                      placeholder="DDD e número"
+                      defaultValue={company.booking_phone || ""}
+                      aria-describedby="phone-help"
+                    />
+                    <p id="phone-help" className="field-help">
+                      Opcional. Esse número ficará público para seus clientes.
+                    </p>
+                    <fieldset className="booking-theme-options">
+                      <legend>Cor da sua página</legend>
+                      {themes.map((theme) => (
+                        <label key={theme.value}>
+                          <input
+                            type="radio"
+                            name="theme"
+                            value={theme.value}
+                            defaultChecked={
+                              (company.booking_theme || "teal") === theme.value
+                            }
+                          />
+                          <span
+                            className="booking-theme-dot"
+                            aria-hidden="true"
+                            style={
+                              { "--theme-color": theme.color } as CSSProperties
+                            }
+                          />
+                          {theme.label}
+                        </label>
+                      ))}
+                    </fieldset>
+                  </div>
+                  <aside
+                    className="booking-profile-preview"
+                    aria-label="Apresentação salva da empresa"
+                  >
+                    <span className="company-avatar" aria-hidden="true">
+                      {company.name.slice(0, 2).toLocaleUpperCase("pt-BR")}
+                    </span>
+                    <h3>{company.name}</h3>
+                    <p>
+                      {company.booking_description ||
+                        "Sua apresentação vai aparecer aqui após salvar."}
+                    </p>
+                    <p>
+                      {company.booking_address || "Seu endereço de atendimento"}
+                    </p>
+                    <span>Uma página fácil de usar no celular</span>
+                  </aside>
+                </div>
+                <PendingButton>Salvar apresentação</PendingButton>
+              </form>
+            ) : (
+              <p>
+                Apresentação disponível para edição quando a assinatura estiver
+                regularizada.
+              </p>
+            )}
+          </section>
+          <section className="panel booking-settings">
+            <h2>Publique e compartilhe</h2>
+            <p>
+              Escolha o endereço da página. Ative quando seus serviços,
+              profissionais e turnos estiverem preparados.
+            </p>
+            {writable && (
+              <form action={configure}>
+                <input type="hidden" name="company_id" value={companyId} />
+                <label htmlFor="slug">Endereço da sua página</label>
+                <input
+                  id="slug"
+                  name="slug"
+                  minLength={3}
+                  maxLength={60}
+                  pattern="[a-z0-9][a-z0-9-]{2,59}"
+                  defaultValue={company.booking_slug || ""}
+                  placeholder="nome-da-sua-empresa"
+                  required
+                  aria-describedby="slug-help"
+                />
+                <p id="slug-help" className="field-help">
+                  Use letras minúsculas, números e hífen. Alterar o endereço
+                  torna o link anterior indisponível.
+                </p>
+                <label className="slot">
+                  <input
+                    type="checkbox"
+                    name="enabled"
+                    defaultChecked={company.booking_enabled}
+                  />
+                  Receber agendamentos pela página pública
+                </label>
+                <div>
+                  <PendingButton>Salvar publicação</PendingButton>
+                </div>
+              </form>
+            )}
+            {enabled && writable && (
+              <ShareBooking url={publicUrl} companyName={company.name} />
+            )}
+          </section>
+        </>
       )}
     </>
   );
