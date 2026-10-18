@@ -78,7 +78,7 @@ export default async function Records({
                         ? row.phone
                         : section === "agenda"
                           ? `${row.status} · até ${new Date(row.ends_at).toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" })}`
-                          : "Expediente padrão: seg–sex, 08h–18h (São Paulo)"}
+                          : "Horários configuráveis na seção Disponibilidade (São Paulo)"}
                   </td>
                 </tr>
               ))}

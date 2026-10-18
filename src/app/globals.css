@@ -1,4 +1,16 @@
 @import "tailwindcss";
+.slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #36516a;
+  border-radius: 8px;
+}
+.slot input {
+  width: auto;
+  display: inline-block;
+}
 :root {
   --bg: #061222;
   --panel: #0c1d31;

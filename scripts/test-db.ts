@@ -10,6 +10,7 @@ await db.exec(
 const migrations = await readdir("supabase/migrations").catch(() => []);
 for (const name of migrations.filter((n) => n.endsWith(".sql")).sort())
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
+
 if (!migrations.length) throw new Error("Versioned migrations missing");
 
 const a = "00000000-0000-4000-8000-000000000001",
@@ -347,6 +348,179 @@ await check("bootstrap address consumed and cannot be reused", async () => {
     "0",
   );
 });
+await db.exec("reset role");
+await db.query(
+  "insert into private.booking_gateway values(true,encode(sha256(convert_to('test-only-gateway','UTF8')),'hex'))",
+);
+await as(a);
+await db.query("select public.configure_booking($1,'demo-salao',true)", [ca]);
+await check("foreign tenant cannot edit public booking settings", async () => {
+  await as(b);
+  await assert.rejects(
+    () => db.query("select public.configure_booking($1,'hijacked',true)", [ca]),
+    /not authorized/,
+  );
+});
+await as(a);
+await db.query(
+  "delete from public.availability where company_id=$1 and weekday=1",
+  [ca],
+);
+await db.query(
+  "insert into public.availability(company_id,professional_id,weekday,start_minute,end_minute) values($1,$2,480,480,600)".replace(
+    "480,480",
+    "1,480",
+  ),
+  [ca, professional],
+);
+await db.query(
+  "insert into public.availability(company_id,professional_id,weekday,start_minute,end_minute) values($1,$2,1,660,720)",
+  [ca, professional],
+);
+await check("overlapping shifts rejected", async () => {
+  await assert.rejects(
+    () =>
+      db.query(
+        "insert into public.availability(company_id,professional_id,weekday,start_minute,end_minute) values($1,$2,1,500,620)",
+        [ca, professional],
+      ),
+    /exclusion constraint/,
+  );
+});
+await as(employee);
+await check("employee cannot change availability", async () => {
+  await assert.rejects(
+    () =>
+      db.query(
+        "insert into public.availability(company_id,professional_id,weekday,start_minute,end_minute) values($1,$2,7,480,600)",
+        [ca, professional],
+      ),
+    /row-level security|row level security/,
+  );
+});
+await db.exec("reset role; set role anon");
+await check(
+  "public catalogue exposes no CRM or customer information",
+  async () => {
+    const cat = await scalar(
+      "select public.public_catalog('demo-salao')::text",
+    );
+    assert.ok(cat.includes("services"));
+    assert.ok(!cat.includes("phone"));
+    await assert.rejects(
+      () => db.query("select * from public.customers"),
+      /permission denied/,
+    );
+  },
+);
+const nextMonday = new Date();
+nextMonday.setUTCDate(
+  nextMonday.getUTCDate() + ((8 - nextMonday.getUTCDay()) % 7 || 7),
+);
+const day = nextMonday.toISOString().slice(0, 10);
+const slots = await db.query<{ starts_at: Date }>(
+  "select * from public.public_slots($1,$2,$3,$4)",
+  ["demo-salao", service, professional, day],
+);
+await check(
+  "public slots reflect configured shifts and lunch break",
+  async () => {
+    assert.ok(slots.rows.length > 0);
+    assert.ok(
+      !slots.rows.some((s) => new Date(s.starts_at).getUTCHours() === 13),
+    );
+  },
+);
+const publicStart = day + "T08:30:00-03:00";
+const request = "00000000-0000-4000-8000-000000000077";
+const args = [
+  "demo-salao",
+  service,
+  professional,
+  publicStart,
+  "Visitante TESTE",
+  "11999990001",
+  request,
+  "test-only-gateway",
+  "a".repeat(64),
+];
+const submit =
+  "select public.submit_public_booking($1,$2,$3,$4,$5,$6,$7,$8,$9)";
+await check(
+  "direct anonymous booking without gateway credential denied",
+  async () => {
+    const invalid = [...args];
+    invalid[7] = "invalid";
+    await assert.rejects(
+      () => db.query(submit, invalid),
+      /gateway unauthorized/,
+    );
+  },
+);
+const reservation = await scalar(submit, args);
+await check("retry is idempotent and produces one appointment", async () => {
+  assert.equal(await scalar(submit, args), reservation);
+});
+await check("competing reservation cannot take occupied slot", async () => {
+  const duplicate = [...args];
+  duplicate[6] = "00000000-0000-4000-8000-000000000078";
+  await assert.rejects(() => db.query(submit, duplicate), /slot unavailable/);
+});
+await check("forged service from another company denied", async () => {
+  const invalid = [...args];
+  invalid[1] = foreignCustomer;
+  invalid[6] = "00000000-0000-4000-8000-000000000079";
+  await assert.rejects(() => db.query(submit, invalid), /slot unavailable/);
+});
+await check(
+  "public callers cannot read shifts or private booking requests",
+  async () => {
+    await assert.rejects(
+      () => db.query("select * from public.availability"),
+      /permission denied/,
+    );
+    await assert.rejects(
+      () => db.query("select * from private.booking_requests"),
+      /permission denied/,
+    );
+  },
+);
+await db.exec("reset role");
+await db.query(
+  "insert into private.booking_limits values($1,date_trunc('hour',now()),10) on conflict(key,bucket) do update set hits=10",
+  ["ip:" + "a".repeat(64)],
+);
+await db.exec("set role anon");
+await check("server-enforced IP quota blocks excess bookings", async () => {
+  const limited = [...args];
+  limited[3] = day + "T08:00:00-03:00";
+  limited[6] = "00000000-0000-4000-8000-000000000080";
+  await assert.rejects(() => db.query(submit, limited), /booking rate limit/);
+});
+await db.exec("reset role");
+await db.query("update public.companies set status='past_due' where id=$1", [
+  ca,
+]);
+await db.exec("set role anon");
+await check(
+  "unpaid company has no public catalogue or bookable slots",
+  async () => {
+    assert.equal(
+      await scalar("select public.public_catalog('demo-salao')"),
+      "null",
+    );
+    assert.equal(
+      (
+        await db.query("select * from public.public_slots($1,$2,$3,$4)", [
+          "demo-salao",
+          service,
+          professional,
+          day,
+        ])
+      ).rows.length,
+      0,
+    );
+  },
+);
 await db.close();
 console.log(`${passed} PostgreSQL security tests passed (disposable PGlite).`);
-

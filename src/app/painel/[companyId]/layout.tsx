@@ -27,6 +27,7 @@ export default async function CompanyLayout({
             ["services", "Serviços"],
             ["professionals", "Profissionais"],
             ["agenda", "Agenda"],
+            ["disponibilidade", "Disponibilidade"],
             ["equipe", "Equipe"],
           ].map(([path, name]) => (
             <Link key={path} href={`/painel/${companyId}/${path}`}>
@@ -42,7 +43,15 @@ export default async function CompanyLayout({
             Suporte ↗
           </a>
         </aside>
-        <div>{children}</div>
+        <div>
+          {company.is_demo && (
+            <p className="notice">
+              DEMONSTRAÇÃO — empresa e cadastros fictícios para testar o
+              sistema.
+            </p>
+          )}
+          {children}
+        </div>
       </div>
     </main>
   );
