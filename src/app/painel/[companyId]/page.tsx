@@ -1,7 +1,69 @@
-import { requireCompany } from '@/lib/auth';
-import { hasAccess } from '@/lib/permissions';
-export default async function Dashboard({params,searchParams}:{params:Promise<{companyId:string}>;searchParams:Promise<{erro?:string}>}){
-  const {companyId}=await params;const {db,company}=await requireCompany(companyId);const p=await searchParams;
-  const results=await Promise.all(['customers','services','appointments'].map(table=>db.from(table).select('id',{count:'exact',head:true}).eq('company_id',companyId)));
-  return <><span className="tag">SEU NEGÓCIO EM MOVIMENTO</span><h2>Visão geral</h2><div className="notice">{company.status==='trialing'?`Trial até ${new Date(company.trial_ends_at).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'})}`:`Assinatura: ${company.status}`}. {!hasAccess(company.status,company.trial_ends_at)&&'Alterações bloqueadas. Contate o suporte para regularizar.'}</div>{p.erro&&<p className="notice error" role="alert">Operação não autorizada para seu perfil ou assinatura.</p>}{results.some(r=>r.error)?<p className="notice error">Não foi possível carregar os indicadores.</p>:<div className="grid">{results.map((r,i)=><div className="card" key={i}><p>{['Clientes acessíveis','Serviços','Agendamentos acessíveis'][i]}</p><span className="stat">{r.count??0}</span></div>)}</div>}<section className="panel" style={{marginTop:24}}><h3>Comece pelo essencial</h3><p>Cadastre um cliente, um serviço e um profissional. Depois, crie seu primeiro agendamento.</p></section></>;
+import { requireCompany } from "@/lib/auth";
+import { hasAccess } from "@/lib/permissions";
+export default async function Dashboard({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ companyId: string }>;
+  searchParams: Promise<{ erro?: string }>;
+}) {
+  const { companyId } = await params;
+  const { db, company } = await requireCompany(companyId);
+  const p = await searchParams;
+  const results = await Promise.all(
+    ["customers", "services", "appointments"].map((table) =>
+      db
+        .from(table)
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", companyId),
+    ),
+  );
+  return (
+    <>
+      <span className="tag">SEU NEGÓCIO EM MOVIMENTO</span>
+      <h2>Visão geral</h2>
+      <div className="notice">
+        {company.status === "trialing"
+          ? `Trial até ${new Date(company.trial_ends_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
+          : `Assinatura: ${company.status}`}
+        .{" "}
+        {!hasAccess(company.status, company.trial_ends_at) &&
+          "Alterações bloqueadas. Contate o suporte para regularizar."}
+      </div>
+      {p.erro && (
+        <p className="notice error" role="alert">
+          Operação não autorizada para seu perfil ou assinatura.
+        </p>
+      )}
+      {results.some((r) => r.error) ? (
+        <p className="notice error">
+          Não foi possível carregar os indicadores.
+        </p>
+      ) : (
+        <div className="grid">
+          {results.map((r, i) => (
+            <div className="card" key={i}>
+              <p>
+                {
+                  [
+                    "Clientes acessíveis",
+                    "Serviços",
+                    "Agendamentos acessíveis",
+                  ][i]
+                }
+              </p>
+              <span className="stat">{r.count ?? 0}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <section className="panel" style={{ marginTop: 24 }}>
+        <h3>Comece pelo essencial</h3>
+        <p>
+          Cadastre um cliente, um serviço e um profissional. Depois, crie seu
+          primeiro agendamento.
+        </p>
+      </section>
+    </>
+  );
 }

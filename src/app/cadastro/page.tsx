@@ -1,3 +1,48 @@
-import Link from 'next/link';
-import { signup } from '@/app/auth/actions';
-export default async function Signup({searchParams}:{searchParams:Promise<{erro?:string}>}){const p=await searchParams;return <main className="auth"><Link className="brand" href="/">web<span>fidelize</span></Link><h1>Um novo começo para seu negócio.</h1><p>Crie sua conta. O trial começa ao criar sua empresa.</p>{p.erro&&<p className="notice error" role="alert">Não foi possível cadastrar. Confira os campos e a configuração do ambiente.</p>}<form action={signup}><label htmlFor="email">E-mail</label><input id="email" name="email" type="email" required autoComplete="email"/><label htmlFor="password">Senha com pelo menos 8 caracteres</label><input id="password" name="password" type="password" minLength={8} maxLength={128} required autoComplete="new-password"/><button>Criar minha conta →</button></form><p><Link href="/entrar">Já tenho uma conta</Link></p></main>;}
+import Link from "next/link";
+import { signup } from "@/app/auth/actions";
+export default async function Signup({
+  searchParams,
+}: {
+  searchParams: Promise<{ erro?: string }>;
+}) {
+  const p = await searchParams;
+  return (
+    <main className="auth">
+      <Link className="brand" href="/">
+        web<span>fidelize</span>
+      </Link>
+      <h1>Um novo começo para seu negócio.</h1>
+      <p>Crie sua conta. O trial começa ao criar sua empresa.</p>
+      {p.erro && (
+        <p className="notice error" role="alert">
+          Não foi possível cadastrar. Confira os campos e a configuração do
+          ambiente.
+        </p>
+      )}
+      <form action={signup}>
+        <label htmlFor="email">E-mail</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+        />
+        <label htmlFor="password">Senha com pelo menos 8 caracteres</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          minLength={8}
+          maxLength={128}
+          required
+          autoComplete="new-password"
+        />
+        <button>Criar minha conta →</button>
+      </form>
+      <p>
+        <Link href="/entrar">Já tenho uma conta</Link>
+      </p>
+    </main>
+  );
+}
