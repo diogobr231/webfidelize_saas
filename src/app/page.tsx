@@ -123,7 +123,7 @@ export default function Home() {
                 </li>
                 <li>Cadastro de clientes e serviços</li>
                 <li>Agenda da equipe</li>
-                <li>Página de agendamento prevista no MVP</li>
+                <li>Página pública de agendamento</li>
                 <li>Trial de 7 dias</li>
               </ul>
               <Link
@@ -136,8 +136,9 @@ export default function Home() {
           ))}
         </div>
         <p style={{ fontSize: 13 }}>
-          MVP em implantação. Cobrança e agendamento público ainda em validação.
-          Módulos por nicho e IA serão disponibilizados em etapas.
+          MVP em implantação. Cobrança ainda em implantação; agenda pública
+          disponível para homologação. Módulos por nicho e IA serão
+          disponibilizados em etapas.
         </p>
       </section>
       <section className="panel section">

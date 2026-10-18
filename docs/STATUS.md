@@ -1,4 +1,6 @@
-# Relatório de implementação — 18/10/2026
+# Relatório de implementação inicial — 18/10/2026
+
+> Este documento preserva a primeira entrega. Para o estado mais recente, consulte [STATUS-AGENDAMENTO.md](STATUS-AGENDAMENTO.md).
 
 ## Fase 0 — auditoria concluída
 
@@ -69,4 +71,3 @@ O CLI Supabase não concluiu o download neste ambiente; migrações foram aplica
 ## Fase 7 — adiada conforme prioridade do MVP
 
 Mesas/comandas, pets, tarefas, rotas, chatbot, site adicional, social media, créditos e Central IA permanecem planejados. As entradas por nicho não habilitam esses módulos.
-

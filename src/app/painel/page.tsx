@@ -9,11 +9,21 @@ export default async function Companies({
 }: {
   searchParams: Promise<{ erro?: string }>;
 }) {
-  const { db } = await requireUser();
+  const { db, user } = await requireUser();
   const p = await searchParams;
-  const { data: companies, error } = await db
-    .from("companies")
-    .select("id,name,niche");
+  const memberships = await db
+    .from("memberships")
+    .select("company_id")
+    .eq("user_id", user.id);
+  const { data: companies, error } = memberships.data?.length
+    ? await db
+        .from("companies")
+        .select("id,name,niche")
+        .in(
+          "id",
+          memberships.data.map((m) => m.company_id),
+        )
+    : { data: [], error: memberships.error };
   const { data: admin } = await db.rpc("is_super_admin");
   return (
     <main>

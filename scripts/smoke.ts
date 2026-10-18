@@ -39,6 +39,28 @@ const home = await (await fetch(base)).text();
 assert.ok(home.includes("5518997695445"));
 assert.ok(home.includes("Demonstração visual"));
 checks++;
+if (process.env.TEST_DEMOS === "1") {
+  await Promise.all(
+    [
+      "salao",
+      "pet-shop",
+      "clinica",
+      "escritorio",
+      "restaurante",
+      "fornecedores",
+      "logistica",
+      "academia",
+    ].map(async (niche) => {
+      const result = await fetch(base + "/agendar/demo-" + niche);
+      assert.equal(result.status, 200);
+      const html = await result.text();
+      assert.ok(html.includes("DEMONSTRAÇÃO"), niche);
+      assert.ok(html.includes("Ver horários disponíveis"), niche);
+      checks++;
+      console.log(`PASS public booking ${niche}`);
+    }),
+  );
+}
 console.log(
   `${checks} HTTP smoke checks passed. Does not validate authenticated E2E or email delivery.`,
 );

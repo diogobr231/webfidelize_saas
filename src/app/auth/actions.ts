@@ -13,6 +13,8 @@ export async function login(form: FormData) {
   const db = await createClient();
   const { error } = await db.auth.signInWithPassword(input.data);
   if (error) redirect("/entrar?erro=credenciais");
+  const { data: admin } = await db.rpc("is_super_admin");
+  if (admin) redirect("/admin");
   redirect("/painel");
 }
 export async function signup(form: FormData) {

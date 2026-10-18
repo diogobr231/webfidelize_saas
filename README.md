@@ -33,8 +33,9 @@ pnpm build
 - Cadastro, login, confirmação, recuperação e troca de senha com Supabase SSR.
 - Criação transacional de empresa e OWNER, trial de sete dias calculado no banco.
 - Clientes, serviços, profissionais e criação de agendamentos; duração vem do serviço.
-- Restrição transacional de horários sobrepostos; expediente inicial fixo seg–sex 08h–18h, São Paulo.
+- Restrição transacional de horários sobrepostos; disponibilidade semanal configurável por profissional, no fuso de São Paulo.
 - RLS, autorização no servidor, chaves estrangeiras compostas, limite de profissionais.
+- Página pública `/agendar/[slug]`, ativada pelo OWNER: horários livres, turnos por profissional, intervalo de almoço, confirmação assinada, idempotência e limites por IP/telefone/empresa.
 - EMPLOYEE acessa apenas agenda atribuída e clientes relacionados; MANAGER gerencia o operacional; OWNER emite convites.
 - Convites por link: hash SHA-256 no banco, validade 48h, uso único e e-mail confirmado obrigatório.
 - SUPER_ADMIN: consulta empresas, ajusta plano, suspende/cancela e estende trial até 30 dias. Ativação paga não está disponível manualmente.
@@ -42,7 +43,7 @@ pnpm build
 ## Ainda pendente antes da primeira venda
 
 - Mercado Pago: checkout de assinatura, HMAC do webhook, idempotência persistida, conciliação e testes sandbox. **Nenhuma cobrança foi habilitada.**
-- Página pública de reservas e controle de abuso; disponibilidade configurável e reagendamento/cancelamento.
+- Reagendamento/cancelamento e proteção adicional anti-bot conforme volume. Reserva pública e turnos configuráveis já implementados.
 - Edição/exclusão dos cadastros, vinculação visual entre profissional e usuário, remoção de colaboradores e paginação (listas atuais: 100 registros).
 - SUPER_ADMIN: preços configuráveis, módulos, métricas de receita, auditoria administrativa e chamados de suporte.
 - Homologação completa de confirmação de e-mail, recuperação, login, convite e criação da primeira empresa.
@@ -75,3 +76,9 @@ Para Storage: ainda não há bucket nem upload. Só habilitar com bucket privado
 Um deploy e um banco para todas as empresas, com company_id e RLS. Sem serviços de IA, filas ou automações pagas no primeiro incremento. O plano de infraestrutura deve permitir uso comercial e ter orçamento definido antes do lançamento. Receita de assinatura só será reconhecida após conciliação do provedor. O trial não depende de cron: cada escrita valida o prazo no banco.
 
 Arquitetura e árvore: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Relatório: [docs/STATUS.md](docs/STATUS.md).
+
+## Demonstração e próxima integração
+
+Contas e roteiro: [docs/DEMONSTRACAO.md](docs/DEMONSTRACAO.md). Mercado Pago: [docs/MERCADO_PAGO.md](docs/MERCADO_PAGO.md).
+
+Reserva pública exige BOOKING_GATEWAY_SECRET privado no servidor e seu hash em private.booking_gateway. O segredo não vai ao navegador. Para deploy, copie a variável privada do ambiente local para o ambiente servidor da Vercel com cuidado; não gere um segredo diferente sem atualizar o hash no banco. Localmente, as reservas compartilham o limite de IP; na Vercel é usado o header de IP definido pela plataforma. Somente o provedor pode preencher esse header em produção.
