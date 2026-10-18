@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { money } from "@/lib/catalog";
 import { reserve } from "@/app/agendar/[slug]/actions";
+import { Icon } from "@/components/ui/icon";
 
 function ConfirmButton() {
   const { pending } = useFormStatus();
@@ -14,7 +15,11 @@ function ConfirmButton() {
       aria-disabled={pending}
     >
       {pending ? "Confirmando seu agendamento…" : "Confirmar agendamento"}
-      {!pending && <span aria-hidden="true">→</span>}
+      {!pending ? (
+        <Icon name="arrow-right" size={17} />
+      ) : (
+        <span className="booking-spinner" aria-hidden="true" />
+      )}
     </button>
   );
 }
@@ -131,7 +136,10 @@ export function ReserveForm({
         </div>
         <div className="booking-summary" aria-live="polite" aria-atomic="true">
           <div className="booking-summary-heading">
-            <span>Seu agendamento</span>
+            <span>
+              <Icon name="calendar" size={15} />
+              Seu agendamento
+            </span>
             <strong>{money(service.price_cents)}</strong>
           </div>
           <strong>{service.name}</strong>

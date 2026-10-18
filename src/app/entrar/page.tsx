@@ -2,6 +2,10 @@ import Link from "next/link";
 import { login } from "@/app/auth/actions";
 import { configured } from "@/lib/supabase/server";
 import { niches } from "@/lib/catalog";
+import { AuthShell } from "@/components/auth-shell";
+import { PendingButton } from "@/components/pending-button";
+import { Icon } from "@/components/ui/icon";
+
 export default async function Login({
   searchParams,
 }: {
@@ -9,70 +13,75 @@ export default async function Login({
 }) {
   const params = await searchParams;
   return (
-    <main>
-      <nav>
-        <Link className="brand" href="/">
-          web<span>fidelize</span>
-        </Link>
-        <Link href="/cadastro">Criar conta →</Link>
-      </nav>
-      <section className="auth panel">
-        <span className="tag">BEM-VINDO DE VOLTA</span>
-        <h1>Seu negócio começa por aqui.</h1>
-        <p>Acesse sua conta para continuar.</p>
-        {!configured() && (
-          <div className="notice">
-            Ambiente em implantação. A conexão segura com o Supabase ainda
-            precisa ser configurada.
-          </div>
-        )}
-        {params.erro && (
-          <div role="alert" className="notice error">
-            {params.erro === "configuracao"
-              ? "A autenticação ainda não foi configurada."
-              : "Não foi possível entrar. Confira suas credenciais ou solicite um novo link."}
-          </div>
-        )}
-        {params.aviso && (
-          <div role="status" className="notice">
-            Verifique seu e-mail para confirmar o cadastro antes de entrar.
-          </div>
-        )}
-        <form action={login}>
-          <label htmlFor="email">E-mail</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-          />
+    <AuthShell
+      eyebrow="BEM-VINDO DE VOLTA"
+      title="Seu negócio começa por aqui."
+      description="Acesse sua conta e continue de onde parou."
+      footer={
+        <>
+          Ainda não tem uma conta?{" "}
+          <Link href="/cadastro">Comece seu teste grátis</Link>
+        </>
+      }
+    >
+      {!configured() && (
+        <div className="notice" role="status">
+          Ambiente em implantação. A conexão segura com o Supabase ainda precisa
+          ser configurada.
+        </div>
+      )}
+      {params.erro && (
+        <div role="alert" className="notice error">
+          {params.erro === "configuracao"
+            ? "A autenticação ainda não foi configurada."
+            : "Não foi possível entrar. Confira suas credenciais ou solicite um novo link."}
+        </div>
+      )}
+      {params.aviso && (
+        <div role="status" className="notice">
+          Verifique seu e-mail para confirmar o cadastro antes de entrar.
+        </div>
+      )}
+      <form action={login}>
+        <label htmlFor="email">E-mail</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="voce@empresa.com.br"
+        />
+        <div className="auth-password-label">
           <label htmlFor="password">Senha</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            minLength={8}
-            maxLength={128}
-            required
-            autoComplete="current-password"
-          />
-          <button style={{ width: "100%" }}>Entrar na minha conta →</button>
-        </form>
-        <p>
-          <Link href="/recuperar">Esqueci minha senha</Link>
-        </p>
-      </section>
-      <div className="auth">
-        <p>Uma entrada para cada rotina</p>
-        <div className="actions">
+          <Link href="/recuperar">Esqueceu sua senha?</Link>
+        </div>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          minLength={8}
+          maxLength={128}
+          required
+          autoComplete="current-password"
+          placeholder="Sua senha de acesso"
+        />
+        <PendingButton pendingLabel="Entrando…">
+          Entrar na minha conta <Icon name="arrow-right" />
+        </PendingButton>
+      </form>
+      <details className="auth-segments">
+        <summary>
+          Uma entrada para cada rotina <Icon name="chevron-right" size={15} />
+        </summary>
+        <div className="auth-segment-links">
           {niches.map((n) => (
-            <Link className="badge" key={n.slug} href={`/entrar/${n.slug}`}>
+            <Link key={n.slug} href={`/entrar/${n.slug}`}>
               {n.name}
             </Link>
           ))}
         </div>
-      </div>
-    </main>
+      </details>
+    </AuthShell>
   );
 }

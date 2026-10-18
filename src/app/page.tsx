@@ -1,135 +1,14 @@
 import Link from "next/link";
 import { money, niches, plans } from "@/lib/catalog";
 import { landingStructuredData } from "@/lib/seo";
+import { Icon } from "@/components/ui/icon";
+import { Brand } from "@/components/ui/brand";
 import "./landing.css";
 
 export { landingMetadata as metadata } from "@/lib/seo";
 
 const whatsapp =
   "https://wa.me/5518997695445?text=Ol%C3%A1!%20Quero%20conhecer%20a%20Web%20Fidelize.";
-
-function Icon({
-  name,
-  className = "",
-}: {
-  name:
-    | "calendar"
-    | "people"
-    | "link"
-    | "clock"
-    | "spark"
-    | "check"
-    | "arrow"
-    | "message"
-    | "settings";
-  className?: string;
-}) {
-  const paths = {
-    calendar: (
-      <>
-        <rect x="3" y="5" width="18" height="16" rx="3" />
-        <path d="M7 3v4M17 3v4M3 11h18M7 15h3M14 15h3M7 18h3" />
-      </>
-    ),
-    people: (
-      <>
-        <circle cx="9" cy="8" r="3" />
-        <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2" />
-      </>
-    ),
-    link: (
-      <>
-        <path
-          d="m9 15 6-6M8 16l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M16 8l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0"
-          transform="translate(0 0) scale(.92)"
-        />
-      </>
-    ),
-    clock: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3 2" />
-      </>
-    ),
-    spark: (
-      <>
-        <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" />
-      </>
-    ),
-    check: <path d="m5 12 4 4L19 6" />,
-    arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
-    message: (
-      <path d="M21 11.5a8.5 8.5 0 0 1-12.8 7.3L3 21l1.6-5.7A8.5 8.5 0 1 1 21 11.5Z" />
-    ),
-    settings: (
-      <>
-        <path d="M4 7h16M4 17h16" />
-        <circle cx="9" cy="7" r="3" />
-        <circle cx="15" cy="17" r="3" />
-      </>
-    ),
-  };
-  return (
-    <svg
-      className={className}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {paths[name]}
-    </svg>
-  );
-}
-
-function Brand() {
-  return (
-    <span className="wf-brand">
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 28 28"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect x="1" y="1" width="12" height="12" rx="4" fill="currentColor" />
-        <rect
-          x="16"
-          y="1"
-          width="11"
-          height="11"
-          rx="4"
-          fill="currentColor"
-          opacity=".4"
-        />
-        <rect
-          x="1"
-          y="16"
-          width="11"
-          height="11"
-          rx="4"
-          fill="currentColor"
-          opacity=".4"
-        />
-        <path
-          d="m17 21 3 3 7-8"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span>
-        web<span>fidelize</span>
-      </span>
-    </span>
-  );
-}
 
 function TrialLink({ secondary = false }: { secondary?: boolean }) {
   return (
@@ -138,7 +17,7 @@ function TrialLink({ secondary = false }: { secondary?: boolean }) {
       href="/cadastro"
     >
       Testar grátis por 7 dias
-      <Icon name="arrow" />
+      <Icon name="arrow-right" />
     </Link>
   );
 }
@@ -206,9 +85,7 @@ export default function Home() {
           className="wf-container wf-navigation"
           aria-label="Navegação principal"
         >
-          <Link href="/" aria-label="Web Fidelize, início">
-            <Brand />
-          </Link>
+          <Brand href="/" className="wf-brand" />
           <div className="wf-nav-links">
             <a href="#como-funciona">Como funciona</a>
             <a href="#recursos">Recursos</a>
@@ -217,7 +94,7 @@ export default function Home() {
           </div>
           <Link className="wf-login" href="/entrar">
             Entrar
-            <Icon name="arrow" />
+            <Icon name="arrow-right" />
           </Link>
         </nav>
       </header>
@@ -254,7 +131,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Icon name="message" />
+              <Icon name="phone" />
               Falar no WhatsApp
             </a>
           </div>
@@ -288,7 +165,7 @@ export default function Home() {
                   <Icon name="calendar" />
                 </span>
                 <span>
-                  <Icon name="people" />
+                  <Icon name="users" />
                 </span>
                 <span>
                   <Icon name="settings" />
@@ -368,7 +245,7 @@ export default function Home() {
               <strong>Seu link. Sua agenda.</strong>
               <span>Uma conexão com seu cliente.</span>
             </div>
-            <Icon name="arrow" />
+            <Icon name="arrow-right" />
           </div>
           <figcaption id="product-caption">
             Representação ilustrativa com dados fictícios. Não exibe uma agenda
@@ -393,7 +270,7 @@ export default function Home() {
           </span>
         </div>
         <div>
-          <Icon name="people" />
+          <Icon name="users" />
           <span>
             Clientes e profissionais
             <strong>Organize quem faz parte da rotina.</strong>
@@ -459,7 +336,7 @@ export default function Home() {
             <div className="wf-example-link">
               <Icon name="link" />
               <span>seu link de agendamento</span>
-              <Icon name="arrow" />
+              <Icon name="arrow-right" />
             </div>
             <span className="wf-feature-footnote">
               Sem instalação de aplicativo.
@@ -467,7 +344,7 @@ export default function Home() {
           </article>
           <article className="wf-feature-card">
             <span className="wf-feature-icon wf-icon-amber">
-              <Icon name="people" />
+              <Icon name="users" />
             </span>
             <span className="wf-feature-number">03</span>
             <h3>
@@ -498,7 +375,7 @@ export default function Home() {
             </div>
           </article>
           <article>
-            <Icon name="spark" />
+            <Icon name="sparkles" />
             <div>
               <h3>Uma página com a sua identidade</h3>
               <p>
@@ -560,7 +437,7 @@ export default function Home() {
             </ol>
             <Link className="wf-button" href="/cadastro">
               Criar minha página de agendamento
-              <Icon name="arrow" />
+              <Icon name="arrow-right" />
             </Link>
             <p className="wf-demo-disclaimer">
               Exemplo ilustrativo da página de agendamento, com dados fictícios.
@@ -610,7 +487,7 @@ export default function Home() {
                   <span>11:30</span>
                 </div>
                 <div className="wf-phone-faux-button">
-                  Confirmar agendamento <Icon name="arrow" />
+                  Confirmar agendamento <Icon name="arrow-right" />
                 </div>
                 <small className="wf-phone-footnote">
                   Visual ilustrativo · dados fictícios
@@ -688,9 +565,19 @@ export default function Home() {
         <div className="wf-segment-links">
           {niches.slice(0, 4).map((niche) => (
             <Link href={`/entrar/${niche.slug}`} key={niche.slug}>
-              <span aria-hidden="true">{niche.icon}</span>
+              <Icon
+                name={
+                  niche.slug === "salao"
+                    ? "scissors"
+                    : niche.slug === "pet-shop"
+                      ? "paw"
+                      : niche.slug === "clinica"
+                        ? "heart"
+                        : "briefcase"
+                }
+              />
               {niche.name}
-              <Icon name="arrow" />
+              <Icon name="arrow-right" />
             </Link>
           ))}
         </div>
@@ -700,7 +587,7 @@ export default function Home() {
             {niches.slice(4).map((niche) => (
               <Link key={niche.slug} href={`/entrar/${niche.slug}`}>
                 {niche.name}
-                <span aria-hidden="true">↗</span>
+                <Icon name="arrow-up-right" size={14} />
               </Link>
             ))}
           </div>
@@ -771,7 +658,7 @@ export default function Home() {
           ))}
         </div>
         <div className="wf-pricing-note">
-          <Icon name="message" />
+          <Icon name="phone" />
           <div>
             <p>
               <strong>
@@ -807,10 +694,13 @@ export default function Home() {
         </div>
         <div className="wf-faq-grid">
           {questions.map(({ question, answer }) => (
-            <article key={question}>
-              <h3>{question}</h3>
+            <details key={question}>
+              <summary>
+                {question}
+                <Icon name="plus" size={17} />
+              </summary>
               <p>{answer}</p>
-            </article>
+            </details>
           ))}
         </div>
       </section>
@@ -840,7 +730,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Icon name="message" />
+              <Icon name="phone" />
               Falar no WhatsApp
             </a>
             <span>7 dias no Essencial · Sem cartão</span>
@@ -849,9 +739,7 @@ export default function Home() {
       </section>
       <footer className="wf-container wf-footer">
         <div>
-          <Link href="/" aria-label="Web Fidelize, início">
-            <Brand />
-          </Link>
+          <Brand href="/" className="wf-brand" />
           <p>
             Agenda, clientes e profissionais.
             <br />

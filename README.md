@@ -2,6 +2,8 @@
 
 SaaS B2B multiempresa em reconstrução. Next.js App Router, TypeScript, Tailwind e Supabase. **Ainda não liberado para clientes pagantes.**
 
+O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a identidade grafite e menta, a área de trabalho clara, os tokens, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
+
 ## Executar
 
 Requisitos: Node.js 24 e pnpm 11.25.0 (instalação oficial do pnpm ou Corepack).
@@ -135,7 +137,7 @@ Entrega, testes e limitações: [docs/STATUS-PRIMEIRO-ACESSO.md](docs/STATUS-PRI
 
 Um deploy e um banco para todas as empresas, com company_id e RLS. Sem serviços de IA, filas ou automações pagas no primeiro incremento. O plano de infraestrutura deve permitir uso comercial e ter orçamento definido antes do lançamento. Receita de assinatura só será reconhecida após conciliação do provedor. O trial não depende de cron: cada escrita valida o prazo no banco.
 
-Arquitetura e árvore: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Relatório inicial: [docs/STATUS.md](docs/STATUS.md). Primeira etapa de reservas públicas: [docs/STATUS-AGENDAMENTO.md](docs/STATUS-AGENDAMENTO.md). Melhorias de agenda e experiência: [docs/STATUS-EXPERIENCIA.md](docs/STATUS-EXPERIENCIA.md). Os relatórios registram a validação do respectivo incremento; execute os comandos acima para conferir a versão atual.
+Arquitetura e árvore: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Relatório inicial: [docs/STATUS.md](docs/STATUS.md). Primeira etapa de reservas públicas: [docs/STATUS-AGENDAMENTO.md](docs/STATUS-AGENDAMENTO.md). Melhorias de agenda e experiência: [docs/STATUS-EXPERIENCIA.md](docs/STATUS-EXPERIENCIA.md). Modernização da interface: [docs/STATUS-INTERFACE.md](docs/STATUS-INTERFACE.md). Os relatórios registram a validação do respectivo incremento; execute os comandos acima para conferir a versão atual.
 
 Orientações de recuperação local: [docs/RECUPERACAO-LEGADO.md](docs/RECUPERACAO-LEGADO.md). Backups e relatórios privados ficam fora do versionamento público, na pasta ignorada `.recovery/`.
 

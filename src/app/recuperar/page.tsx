@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { recover } from "@/app/auth/actions";
+import { AuthShell } from "@/components/auth-shell";
+import { PendingButton } from "@/components/pending-button";
+import { Icon } from "@/components/ui/icon";
+
 export default async function Recover({
   searchParams,
 }: {
@@ -7,16 +11,19 @@ export default async function Recover({
 }) {
   const p = await searchParams;
   return (
-    <main className="auth panel">
-      <h1>Recuperar acesso</h1>
-      <p>Enviaremos um link se houver uma conta para este e-mail.</p>
+    <AuthShell
+      eyebrow="VAMOS RECONECTAR VOCÊ"
+      title="Recuperar acesso"
+      description="Enviaremos um link se houver uma conta para este e-mail."
+      footer={<Link href="/entrar">Voltar ao login</Link>}
+    >
       {p.aviso && (
         <p className="notice" role="status">
           Se a conta existir, você receberá as instruções por e-mail.
         </p>
       )}
       {p.erro && (
-        <p className="notice error">
+        <p className="notice error" role="alert">
           Ambiente de autenticação não configurado.
         </p>
       )}
@@ -28,12 +35,12 @@ export default async function Recover({
           type="email"
           required
           autoComplete="email"
+          placeholder="O e-mail da sua conta"
         />
-        <button>Enviar instruções</button>
+        <PendingButton pendingLabel="Enviando instruções…">
+          Enviar instruções <Icon name="arrow-right" />
+        </PendingButton>
       </form>
-      <p>
-        <Link href="/entrar">Voltar ao login</Link>
-      </p>
-    </main>
+    </AuthShell>
   );
 }

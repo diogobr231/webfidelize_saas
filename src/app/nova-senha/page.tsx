@@ -1,10 +1,17 @@
 import { updatePassword } from "@/app/auth/actions";
 import { requireUser } from "@/lib/auth";
+import { AuthShell } from "@/components/auth-shell";
+import { PendingButton } from "@/components/pending-button";
+import { Icon } from "@/components/ui/icon";
+
 export default async function NewPassword() {
   await requireUser();
   return (
-    <main className="auth panel">
-      <h1>Definir nova senha</h1>
+    <AuthShell
+      eyebrow="SEU ACESSO, RENOVADO"
+      title="Definir nova senha"
+      description="Escolha uma senha com pelo menos 8 caracteres para continuar usando sua conta."
+    >
       <form action={updatePassword}>
         <label htmlFor="password">Nova senha</label>
         <input
@@ -15,9 +22,12 @@ export default async function NewPassword() {
           maxLength={128}
           autoComplete="new-password"
           required
+          placeholder="Crie sua nova senha"
         />
-        <button>Salvar senha</button>
+        <PendingButton pendingLabel="Salvando senha…">
+          Salvar senha <Icon name="arrow-right" />
+        </PendingButton>
       </form>
-    </main>
+    </AuthShell>
   );
 }

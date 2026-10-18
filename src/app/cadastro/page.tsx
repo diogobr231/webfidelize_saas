@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { signup } from "@/app/auth/actions";
 import { PendingButton } from "@/components/pending-button";
+import { AuthShell } from "@/components/auth-shell";
+import { Icon } from "@/components/ui/icon";
+
 export default async function Signup({
   searchParams,
 }: {
@@ -8,19 +11,23 @@ export default async function Signup({
 }) {
   const p = await searchParams;
   return (
-    <main className="auth">
-      <Link className="brand" href="/">
-        web<span>fidelize</span>
-      </Link>
-      <h1>Um novo começo para seu negócio.</h1>
-      <p>
-        Crie sua conta e confirme seu e-mail. Depois, vamos guiar você pelo
-        cadastro da empresa, dos serviços e dos profissionais.
-      </p>
-      <p>
-        Seu teste gratuito de sete dias começa quando você cria a empresa. Não
-        precisa de cartão.
-      </p>
+    <AuthShell
+      eyebrow="SEU PRÓXIMO PASSO COMEÇA AQUI"
+      title="Um novo começo para seu negócio."
+      description="Crie sua conta e confirme seu e-mail. Depois, vamos guiar você pelo cadastro da empresa, dos serviços e dos profissionais."
+      footer={
+        <>
+          Já tem uma conta? <Link href="/entrar">Entrar na Web Fidelize</Link>
+        </>
+      }
+    >
+      <div className="auth-trial-note">
+        <Icon name="check" size={17} />
+        <span>
+          7 dias grátis, sem cartão. Seu teste começa quando você cria a
+          empresa.
+        </span>
+      </div>
       {p.erro && (
         <p className="notice error" role="alert">
           Não foi possível cadastrar. Confira os campos e a configuração do
@@ -35,6 +42,7 @@ export default async function Signup({
           type="email"
           required
           autoComplete="email"
+          placeholder="voce@empresa.com.br"
         />
         <label htmlFor="password">Senha com pelo menos 8 caracteres</label>
         <input
@@ -45,14 +53,12 @@ export default async function Signup({
           maxLength={128}
           required
           autoComplete="new-password"
+          placeholder="Crie sua senha"
         />
         <PendingButton pendingLabel="Criando sua conta…">
-          Criar minha conta →
+          Criar minha conta <Icon name="arrow-right" />
         </PendingButton>
       </form>
-      <p>
-        <Link href="/entrar">Já tenho uma conta</Link>
-      </p>
-    </main>
+    </AuthShell>
   );
 }

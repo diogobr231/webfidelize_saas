@@ -10,6 +10,8 @@ import {
   type BookingReceipt,
 } from "@/lib/booking-receipt";
 import { ReserveForm } from "@/components/booking/reserve-form";
+import { BookingAnchor } from "@/components/booking/booking-anchor";
+import { Icon } from "@/components/ui/icon";
 import "./booking.css";
 
 export const dynamic = "force-dynamic";
@@ -30,24 +32,6 @@ type Catalog = {
   }[];
   professionals: { id: string; name: string }[];
 };
-
-function CalendarIcon({ check = false }: { check?: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="24"
-      height="24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      aria-hidden="true"
-    >
-      <rect x="3" y="5" width="18" height="16" rx="3" />
-      <path d="M7 3v4M17 3v4M3 11h18" />
-      {check ? <path d="m8 15 3 3 5-5" /> : <path d="M7 15h3M14 15h3M7 18h3" />}
-    </svg>
-  );
-}
 
 export default async function Booking({
   params,
@@ -178,10 +162,16 @@ export default async function Booking({
                 `Escolha seu serviço e encontre o melhor horário com ${catalog.name}. É simples, rápido e sem precisar instalar um aplicativo.`}
             </p>
             <div className="booking-details">
-              {catalog.address ? <span>⌖ {catalog.address}</span> : null}
+              {catalog.address ? (
+                <span>
+                  <Icon name="building" size={15} />
+                  {catalog.address}
+                </span>
+              ) : null}
               {contact ? (
                 <a href={contact} target="_blank" rel="noopener noreferrer">
-                  Fale com a empresa <span aria-hidden="true">↗</span>
+                  <Icon name="phone" size={15} />
+                  Fale com a empresa <Icon name="arrow-up-right" size={14} />
                 </a>
               ) : null}
             </div>
@@ -189,7 +179,7 @@ export default async function Booking({
           <div className="booking-hero-art" aria-hidden="true">
             <div className="booking-art-orbit" />
             <div className="booking-art-card">
-              <CalendarIcon check />
+              <Icon name="calendar" size={30} />
               <span>
                 Mais facilidade
                 <br />
@@ -201,7 +191,10 @@ export default async function Booking({
                 <i />
               </div>
             </div>
-            <span className="booking-art-badge">No seu tempo.</span>
+            <span className="booking-art-badge">
+              <Icon name="clock" size={14} />
+              No seu tempo.
+            </span>
           </div>
         </header>
         {catalog.is_demo ? (
@@ -222,7 +215,13 @@ export default async function Booking({
                 data-complete={currentStep > i + 1}
                 aria-current={currentStep === i + 1 ? "step" : undefined}
               >
-                <span>{currentStep > i + 1 ? "✓" : i + 1}</span>
+                <span>
+                  {currentStep > i + 1 ? (
+                    <Icon name="check" size={14} />
+                  ) : (
+                    i + 1
+                  )}
+                </span>
                 <span>{label}</span>
               </li>
             ),
@@ -263,7 +262,7 @@ export default async function Booking({
             aria-labelledby="booking-confirmation-title"
           >
             <span className="booking-confirmation-icon">
-              <CalendarIcon check />
+              <Icon name="calendar" size={28} />
             </span>
             <span className="booking-eyebrow">
               {receipt?.status === "canceled"
@@ -343,7 +342,9 @@ export default async function Booking({
                   className="booking-button"
                   href={`/agendar/${slug}/calendario?recibo=${encodeURIComponent(q.recibo)}`}
                 >
-                  Adicionar ao calendário <span aria-hidden="true">↗</span>
+                  <Icon name="calendar" size={17} />
+                  Adicionar ao calendário{" "}
+                  <Icon name="arrow-up-right" size={15} />
                 </a>
               ) : null}
               {contact ? (
@@ -353,6 +354,7 @@ export default async function Booking({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
+                  <Icon name="phone" size={16} />
                   Falar com a empresa
                 </a>
               ) : null}
@@ -362,17 +364,17 @@ export default async function Booking({
               empresa.
             </p>
             <Link className="booking-text-link" href={`/agendar/${slug}`}>
-              Fazer outro agendamento →
+              Fazer outro agendamento <Icon name="arrow-right" size={16} />
             </Link>
           </section>
         ) : !catalog.services.length || !catalog.professionals.length ? (
           <section className="booking-card booking-empty">
-            <CalendarIcon />
+            <Icon name="calendar" size={30} />
             <h2>A agenda está sendo preparada.</h2>
             <p>Volte em breve para encontrar seu próximo horário.</p>
             {contact ? (
               <a className="booking-text-link" href={contact}>
-                Fale com a empresa →
+                Fale com a empresa <Icon name="arrow-right" size={16} />
               </a>
             ) : null}
           </section>
@@ -406,7 +408,10 @@ export default async function Booking({
                           />
                           <span className="booking-service-body">
                             <strong>{service.name}</strong>
-                            <span>{service.duration} minutos</span>
+                            <span>
+                              <Icon name="clock" size={13} />
+                              {service.duration} minutos
+                            </span>
                           </span>
                           <span className="booking-service-price">
                             {money(service.price_cents)}
@@ -455,7 +460,8 @@ export default async function Booking({
                     </div>
                   </div>
                   <button className="booking-button">
-                    Ver horários disponíveis <span aria-hidden="true">→</span>
+                    Ver horários disponíveis{" "}
+                    <Icon name="arrow-right" size={17} />
                   </button>
                 </form>
               </section>
@@ -471,7 +477,7 @@ export default async function Booking({
                   </section>
                 ) : !slots.length ? (
                   <section className="booking-card booking-empty" id="horarios">
-                    <CalendarIcon />
+                    <Icon name="calendar" size={30} />
                     <h2>Vamos tentar outro dia?</h2>
                     <p>
                       Não há horários disponíveis para esta combinação.
@@ -496,21 +502,22 @@ export default async function Booking({
             </div>
             <aside className="booking-aside">
               <div className="booking-aside-icon">
-                <CalendarIcon check />
+                <Icon name="calendar" size={22} />
               </div>
               <h2>Seu próximo horário começa aqui.</h2>
               <p>Você escolhe. A empresa recebe sua reserva na agenda.</p>
               <ul>
                 <li>
-                  <span aria-hidden="true">✓</span>Horários disponíveis em tempo
-                  real
+                  <Icon name="check" size={16} />
+                  Horários disponíveis em tempo real
                 </li>
                 <li>
-                  <span aria-hidden="true">✓</span>Sem criar conta ou instalar
-                  aplicativo
+                  <Icon name="check" size={16} />
+                  Sem criar conta ou instalar aplicativo
                 </li>
                 <li>
-                  <span aria-hidden="true">✓</span>Sem pagamento nesta reserva
+                  <Icon name="check" size={16} />
+                  Sem pagamento nesta reserva
                 </li>
               </ul>
               <div className="booking-aside-divider" />
@@ -525,7 +532,7 @@ export default async function Booking({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Tirar uma dúvida ↗
+                  Tirar uma dúvida <Icon name="arrow-up-right" size={16} />
                 </a>
               ) : null}
             </aside>
@@ -541,6 +548,7 @@ export default async function Booking({
           </Link>
         </footer>
       </div>
+      <BookingAnchor key={`${selected?.id}:${professional?.id}:${validDay}`} />
     </main>
   );
 }
