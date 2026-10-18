@@ -12,7 +12,13 @@ export function PendingButton({
 }) {
   const { pending } = useFormStatus();
   return (
-    <button disabled={pending} aria-disabled={pending} className={className}>
+    <button
+      disabled={pending}
+      aria-disabled={pending}
+      aria-busy={pending}
+      className={className}
+    >
+      {pending && <span className="ui-spinner" aria-hidden="true" />}
       {pending ? pendingLabel : children}
     </button>
   );

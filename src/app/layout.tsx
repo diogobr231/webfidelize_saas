@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { site } from "@/lib/seo";
 import "./globals.css";
+const geist = localFont({
+  src: "./fonts/Geist.woff2",
+  variable: "--font-geist",
+  display: "swap",
+  weight: "100 900",
+});
 export const metadata: Metadata = {
   metadataBase: site.url,
   applicationName: "Web Fidelize",
@@ -13,7 +20,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={geist.variable}>
       <body>{children}</body>
     </html>
   );
