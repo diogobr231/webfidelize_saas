@@ -4,7 +4,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { publicDatabase } from "@/lib/supabase/public";
-import { signReceipt } from "@/lib/booking-receipt";
+import {
+  bookingReceiptSchema,
+  signDetailedReceipt,
+  signReceipt,
+} from "@/lib/booking-receipt";
 export async function reserve(form: FormData) {
   const slug = z
     .string()
@@ -39,13 +43,31 @@ export async function reserve(form: FormData) {
   const { consent, website, ...values } = input.data;
   void consent;
   void website;
-  const { data, error } = await publicDatabase().rpc("submit_public_booking", {
+  const db = publicDatabase();
+  const { data, error } = await db.rpc("submit_public_booking", {
     slug: slug.data,
     ...values,
     gateway_secret: secret,
     ip_hash: createHmac("sha256", secret).update(ip).digest("hex"),
   });
   if (error) redirect(`/agendar/${slug.data}?erro=horario`);
+  // Read the stored reservation for this idempotency key: a retried request
+  // may carry changed form fields but must still describe the original booking.
+  const result = await db.rpc("public_booking_receipt", {
+    slug: slug.data,
+    request_id: values.request_id,
+    gateway_secret: secret,
+  });
+  const receipt = bookingReceiptSchema.safeParse(result.data);
+  if (!result.error && receipt.success && receipt.data.id === data) {
+    const token = signDetailedReceipt(
+      slug.data,
+      values.request_id,
+      receipt.data,
+      secret,
+    );
+    redirect(`/agendar/${slug.data}?recibo=${token}`);
+  }
   redirect(
     `/agendar/${slug.data}?confirmado=${data}&proof=${signReceipt(slug.data, data, secret)}`,
   );

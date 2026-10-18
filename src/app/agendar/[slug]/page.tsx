@@ -3,13 +3,25 @@ import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import { publicDatabase } from "@/lib/supabase/public";
 import { money } from "@/lib/catalog";
-import { reserve } from "./actions";
-import { validReceipt } from "@/lib/booking-receipt";
+import {
+  bookingReceiptSchema,
+  readDetailedReceipt,
+  validReceipt,
+  type BookingReceipt,
+} from "@/lib/booking-receipt";
+import { ReserveForm } from "@/components/booking/reserve-form";
+import "./booking.css";
+
 export const dynamic = "force-dynamic";
+
 type Catalog = {
   name: string;
   slug: string;
   is_demo: boolean;
+  description?: string;
+  address?: string;
+  phone?: string;
+  theme?: string;
   services: {
     id: string;
     name: string;
@@ -18,6 +30,25 @@ type Catalog = {
   }[];
   professionals: { id: string; name: string }[];
 };
+
+function CalendarIcon({ check = false }: { check?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="18" height="16" rx="3" />
+      <path d="M7 3v4M17 3v4M3 11h18" />
+      {check ? <path d="m8 15 3 3 5-5" /> : <path d="M7 15h3M14 15h3M7 18h3" />}
+    </svg>
+  );
+}
+
 export default async function Booking({
   params,
   searchParams,
@@ -30,6 +61,7 @@ export default async function Booking({
     erro?: string;
     confirmado?: string;
     proof?: string;
+    recibo?: string;
   }>;
 }) {
   const { slug } = await params;
@@ -46,209 +78,469 @@ export default async function Booking({
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
+  const lastDay = new Date(`${today}T12:00:00Z`);
+  lastDay.setUTCDate(lastDay.getUTCDate() + 60);
+  const maxDay = lastDay.toISOString().slice(0, 10);
+  const validDay =
+    q.day &&
+    /^\d{4}-\d{2}-\d{2}$/.test(q.day) &&
+    q.day >= today &&
+    q.day <= maxDay
+      ? q.day
+      : today;
   const selected = catalog.services.find((s) => s.id === q.service);
   const professional = catalog.professionals.find(
     (p) => p.id === q.professional,
   );
+  const theme = ["teal", "blue", "violet", "rose"].includes(catalog.theme || "")
+    ? catalog.theme
+    : "teal";
+  const initials = catalog.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  const phone = (catalog.phone || "").replace(/\D/g, "");
+  const contactPhone = /^\d{10,11}$/.test(phone)
+    ? `55${phone}`
+    : /^55\d{10,11}$/.test(phone)
+      ? phone
+      : "";
+  const contact = contactPhone ? `https://wa.me/${contactPhone}` : null;
+  const secret = process.env.BOOKING_GATEWAY_SECRET;
+  const claims =
+    q.recibo && secret ? readDetailedReceipt(q.recibo, slug, secret) : null;
+  let receipt: BookingReceipt | null = null;
+  let receiptUnavailable = false;
+  if (claims && secret) {
+    const result = await db.rpc("public_booking_receipt", {
+      slug,
+      request_id: claims.request_id,
+      gateway_secret: secret,
+    });
+    const parsed = bookingReceiptSchema.safeParse(result.data);
+    if (!result.error && parsed.success && parsed.data.id === claims.receipt.id)
+      receipt = parsed.data;
+    else receiptUnavailable = true;
+  }
+  const legacyReceipt =
+    q.confirmado &&
+    q.proof &&
+    secret &&
+    validReceipt(slug, q.confirmado, q.proof, secret)
+      ? q.confirmado
+      : null;
+  const confirmed = Boolean(receipt || legacyReceipt);
   let slots: { starts_at: string }[] = [];
   let failed = false;
-  if (selected && professional && q.day && /^\d{4}-\d{2}-\d{2}$/.test(q.day)) {
+  if (selected && professional && !confirmed) {
     const result = await db.rpc("public_slots", {
       slug,
       service: selected.id,
       professional: professional.id,
-      day: q.day,
+      day: validDay,
     });
     slots = result.data || [];
     failed = Boolean(result.error);
   }
+  const currentStep = confirmed ? 3 : selected && professional ? 2 : 1;
   return (
-    <main>
-      <nav>
-        <Link className="brand" href="/">
-          web<span>fidelize</span>
-        </Link>
-        <span className="badge">Agendamento online</span>
-      </nav>
-      <section style={{ maxWidth: 720, margin: "24px auto" }}>
-        <span className="tag">SEU PRÓXIMO HORÁRIO</span>
-        <h1 style={{ fontSize: 40 }}>{catalog.name}</h1>
-        {catalog.is_demo && (
-          <div className="notice">
-            DEMONSTRAÇÃO — empresa e serviços fictícios para testes. Nenhum
-            atendimento real será realizado.
-          </div>
-        )}
-        <p>
-          Escolha seu serviço e profissional. Horários no fuso de São Paulo.
-          Nenhum pagamento é solicitado nesta reserva.
-        </p>
-        {q.erro && (
-          <p className="notice error" role="alert">
-            {q.erro === "configuracao"
-              ? "Reservas temporariamente indisponíveis."
-              : "Não foi possível reservar. Confira seus dados ou escolha um novo horário. O limite de tentativas também pode ter sido atingido."}
-          </p>
-        )}
-        {q.confirmado &&
-          q.proof &&
-          process.env.BOOKING_GATEWAY_SECRET &&
-          validReceipt(
-            slug,
-            q.confirmado,
-            q.proof,
-            process.env.BOOKING_GATEWAY_SECRET,
-          ) && (
-            <div className="notice" role="status">
-              <strong>Agendamento confirmado.</strong>
-              <p>Guarde a referência: {q.confirmado}.</p>
-              <p>Para alterar ou cancelar, fale diretamente com a empresa.</p>
+    <main className="booking-page" data-theme={theme}>
+      <div className="booking-topbar">
+        <div className="booking-shell booking-topbar-inner">
+          <Link href={`/agendar/${slug}`} className="booking-business">
+            <span className="booking-avatar" aria-hidden="true">
+              {initials}
+            </span>
+            <span>{catalog.name}</span>
+          </Link>
+          <span className="booking-online">
+            <span aria-hidden="true" />
+            Agendamento online
+          </span>
+        </div>
+      </div>
+      <div className="booking-shell">
+        <header className="booking-hero">
+          <div className="booking-hero-copy">
+            <span className="booking-eyebrow">
+              SEU PRÓXIMO HORÁRIO, SEM COMPLICAÇÃO
+            </span>
+            <h1>
+              Reserve um tempo
+              <br />
+              para você.
+            </h1>
+            <p>
+              {catalog.description ||
+                `Escolha seu serviço e encontre o melhor horário com ${catalog.name}. É simples, rápido e sem precisar instalar um aplicativo.`}
+            </p>
+            <div className="booking-details">
+              {catalog.address ? <span>⌖ {catalog.address}</span> : null}
+              {contact ? (
+                <a href={contact} target="_blank" rel="noopener noreferrer">
+                  Fale com a empresa <span aria-hidden="true">↗</span>
+                </a>
+              ) : null}
             </div>
-          )}
-        {!catalog.services.length || !catalog.professionals.length ? (
-          <p className="empty">A empresa ainda está preparando sua agenda.</p>
-        ) : (
-          <>
-            <form className="panel">
-              <div className="form-grid">
-                <div>
-                  <label htmlFor="service">Serviço</label>
-                  <select
-                    id="service"
-                    name="service"
-                    defaultValue={selected?.id || ""}
-                    required
-                  >
-                    <option value="">Selecione</option>
-                    {catalog.services.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} · {s.duration} min · {money(s.price_cents)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="professional">Profissional</label>
-                  <select
-                    id="professional"
-                    name="professional"
-                    defaultValue={professional?.id || ""}
-                    required
-                  >
-                    <option value="">Selecione</option>
-                    {catalog.professionals.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="day">Data</label>
-                  <input
-                    type="date"
-                    id="day"
-                    name="day"
-                    min={today}
-                    defaultValue={q.day || today}
-                    required
-                  />
-                </div>
+          </div>
+          <div className="booking-hero-art" aria-hidden="true">
+            <div className="booking-art-orbit" />
+            <div className="booking-art-card">
+              <CalendarIcon check />
+              <span>
+                Mais facilidade
+                <br />
+                <strong>para o seu dia.</strong>
+              </span>
+              <div className="booking-art-lines">
+                <i />
+                <i />
+                <i />
               </div>
-              <button>Ver horários disponíveis →</button>
-            </form>
-            {selected && professional && (
-              <section className="panel" style={{ marginTop: 24 }}>
-                <h2>Escolha seu horário</h2>
-                {failed ? (
-                  <p className="notice error">
-                    Não foi possível carregar os horários.
-                  </p>
-                ) : !slots.length ? (
-                  <p className="empty">
-                    Nenhum horário disponível nesta data. Experimente outro dia.
-                  </p>
-                ) : (
-                  <form action={reserve}>
-                    <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="service" value={selected.id} />
-                    <input
-                      type="hidden"
-                      name="professional"
-                      value={professional.id}
-                    />
-                    <input
-                      type="hidden"
-                      name="request_id"
-                      value={randomUUID()}
-                    />
-                    <div className="actions">
-                      {slots.map((s) => (
-                        <label key={s.starts_at} className="slot">
+            </div>
+            <span className="booking-art-badge">No seu tempo.</span>
+          </div>
+        </header>
+        {catalog.is_demo ? (
+          <div className="booking-notice booking-demo">
+            <strong>DEMONSTRAÇÃO</strong>
+            <span>
+              Empresa e serviços fictícios para testes. Nenhum atendimento real
+              será realizado.
+            </span>
+          </div>
+        ) : null}
+        <ol className="booking-progress" aria-label="Etapas do agendamento">
+          {["Serviço e profissional", "Dia e horário", "Confirmação"].map(
+            (label, i) => (
+              <li
+                key={label}
+                data-current={currentStep === i + 1}
+                data-complete={currentStep > i + 1}
+                aria-current={currentStep === i + 1 ? "step" : undefined}
+              >
+                <span>{currentStep > i + 1 ? "✓" : i + 1}</span>
+                <span>{label}</span>
+              </li>
+            ),
+          )}
+        </ol>
+        {q.erro ? (
+          <div className="booking-notice booking-error" role="alert">
+            <strong>
+              {q.erro === "configuracao"
+                ? "Reservas temporariamente indisponíveis."
+                : "Não conseguimos concluir sua reserva."}
+            </strong>
+            <span>
+              {q.erro === "configuracao"
+                ? "Tente novamente mais tarde ou fale com a empresa."
+                : "Confira seus dados e consulte os horários novamente. O horário pode ter sido ocupado ou o limite de tentativas pode ter sido atingido."}
+            </span>
+          </div>
+        ) : null}
+        {receiptUnavailable ? (
+          <div className="booking-notice" role="alert">
+            <strong>Não conseguimos consultar os detalhes agora.</strong>
+            <span>
+              Sua solicitação já foi registrada. Atualize esta página para
+              consultar o estado atual ou fale com a empresa.
+            </span>
+          </div>
+        ) : null}
+        {(q.recibo && !claims) || (q.confirmado && !legacyReceipt) ? (
+          <div className="booking-notice booking-error" role="alert">
+            Este link de confirmação é inválido. Confira o endereço completo
+            recebido após reservar.
+          </div>
+        ) : null}
+        {confirmed ? (
+          <section
+            className="booking-confirmation booking-card"
+            aria-labelledby="booking-confirmation-title"
+          >
+            <span className="booking-confirmation-icon">
+              <CalendarIcon check />
+            </span>
+            <span className="booking-eyebrow">
+              {receipt?.status === "canceled"
+                ? "RESERVA CANCELADA"
+                : receipt?.status === "completed"
+                  ? "ATENDIMENTO CONCLUÍDO"
+                  : receipt
+                    ? "TUDO CERTO"
+                    : "COMPROVANTE DE RESERVA"}
+            </span>
+            <h2 id="booking-confirmation-title">
+              {receipt?.status === "canceled"
+                ? "Este agendamento foi cancelado."
+                : receipt?.status === "completed"
+                  ? "Seu atendimento foi concluído."
+                  : receipt
+                    ? "Seu agendamento está confirmado."
+                    : "Reserva registrada."}
+            </h2>
+            <p>
+              {receipt ? (
+                <>
+                  {catalog.name}{" "}
+                  {receipt.status === "canceled"
+                    ? "atualizou sua reserva. Você pode escolher um novo horário abaixo."
+                    : "registrou sua reserva. Guarde este link para consultar os detalhes."}
+                </>
+              ) : (
+                "Este comprovante antigo não informa alterações posteriores. Confirme a situação com a empresa."
+              )}
+            </p>
+            {receipt ? (
+              <dl className="booking-confirmation-details">
+                <div>
+                  <dt>Serviço</dt>
+                  <dd>{receipt.service_name}</dd>
+                </div>
+                <div>
+                  <dt>Profissional</dt>
+                  <dd>{receipt.professional_name}</dd>
+                </div>
+                <div>
+                  <dt>Quando</dt>
+                  <dd>
+                    {new Date(receipt.starts_at).toLocaleDateString("pt-BR", {
+                      timeZone: "America/Sao_Paulo",
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Horário de São Paulo</dt>
+                  <dd>
+                    {new Date(receipt.starts_at).toLocaleTimeString("pt-BR", {
+                      timeZone: "America/Sao_Paulo",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    às{" "}
+                    {new Date(receipt.ends_at).toLocaleTimeString("pt-BR", {
+                      timeZone: "America/Sao_Paulo",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="booking-reference">Referência: {legacyReceipt}</p>
+            )}
+            <div className="booking-confirmation-actions">
+              {receipt && q.recibo && receipt.status !== "canceled" ? (
+                <a
+                  className="booking-button"
+                  href={`/agendar/${slug}/calendario?recibo=${encodeURIComponent(q.recibo)}`}
+                >
+                  Adicionar ao calendário <span aria-hidden="true">↗</span>
+                </a>
+              ) : null}
+              {contact ? (
+                <a
+                  className="booking-button booking-button-secondary"
+                  href={contact}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Falar com a empresa
+                </a>
+              ) : null}
+            </div>
+            <p className="booking-small">
+              Para alterar ou cancelar, entre em contato diretamente com a
+              empresa.
+            </p>
+            <Link className="booking-text-link" href={`/agendar/${slug}`}>
+              Fazer outro agendamento →
+            </Link>
+          </section>
+        ) : !catalog.services.length || !catalog.professionals.length ? (
+          <section className="booking-card booking-empty">
+            <CalendarIcon />
+            <h2>A agenda está sendo preparada.</h2>
+            <p>Volte em breve para encontrar seu próximo horário.</p>
+            {contact ? (
+              <a className="booking-text-link" href={contact}>
+                Fale com a empresa →
+              </a>
+            ) : null}
+          </section>
+        ) : (
+          <div className="booking-content">
+            <div className="booking-main-column">
+              <section className="booking-card" id="escolher">
+                <div className="booking-section-heading">
+                  <span className="booking-step-number">1</span>
+                  <div>
+                    <h2>Como podemos cuidar do seu dia?</h2>
+                    <p>Escolha o serviço, o profissional e a data desejada.</p>
+                  </div>
+                </div>
+                <form
+                  action={`/agendar/${slug}#horarios`}
+                  method="get"
+                  className="booking-selection"
+                >
+                  <fieldset className="booking-fieldset">
+                    <legend>Escolha seu serviço</legend>
+                    <div className="booking-services">
+                      {catalog.services.map((service) => (
+                        <label className="booking-service" key={service.id}>
                           <input
                             type="radio"
-                            name="start_time"
-                            value={s.starts_at}
+                            name="service"
+                            value={service.id}
                             required
+                            defaultChecked={selected?.id === service.id}
                           />
-                          {new Date(s.starts_at).toLocaleTimeString("pt-BR", {
-                            timeZone: "America/Sao_Paulo",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          <span className="booking-service-body">
+                            <strong>{service.name}</strong>
+                            <span>{service.duration} minutos</span>
+                          </span>
+                          <span className="booking-service-price">
+                            {money(service.price_cents)}
+                          </span>
+                          <span
+                            className="booking-radio-mark"
+                            aria-hidden="true"
+                          />
                         </label>
                       ))}
                     </div>
-                    <label htmlFor="customer_name">Seu nome</label>
-                    <input
-                      id="customer_name"
-                      name="customer_name"
-                      minLength={2}
-                      maxLength={120}
-                      autoComplete="name"
-                      required
-                    />
-                    <label htmlFor="phone">WhatsApp com DDD</label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      minLength={10}
-                      maxLength={30}
-                      autoComplete="tel"
-                      required
-                    />
-                    <div
-                      style={{ position: "absolute", left: -10000 }}
-                      aria-hidden="true"
-                    >
-                      <label htmlFor="website">Deixe em branco</label>
+                  </fieldset>
+                  <div className="booking-fields">
+                    <div>
+                      <label htmlFor="professional">Com quem?</label>
+                      <select
+                        id="professional"
+                        name="professional"
+                        required
+                        defaultValue={
+                          professional?.id ||
+                          (catalog.professionals.length === 1
+                            ? catalog.professionals[0].id
+                            : "")
+                        }
+                      >
+                        <option value="">Selecione um profissional</option>
+                        {catalog.professionals.map((person) => (
+                          <option key={person.id} value={person.id}>
+                            {person.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="day">Qual dia?</label>
                       <input
-                        id="website"
-                        name="website"
-                        tabIndex={-1}
-                        autoComplete="off"
-                        defaultValue=""
+                        type="date"
+                        id="day"
+                        name="day"
+                        required
+                        min={today}
+                        max={maxDay}
+                        defaultValue={validDay}
                       />
                     </div>
-                    <label className="slot">
-                      <input name="consent" type="checkbox" required />
-                      Autorizo o uso do meu nome e telefone pela empresa para
-                      organizar este agendamento.
-                    </label>
-                    <p style={{ fontSize: 13 }}>
-                      Seus dados ficam disponíveis somente à empresa responsável
-                      pelo atendimento. Não inclua informações de saúde neste
-                      formulário.
-                    </p>
-                    <button>Confirmar agendamento →</button>
-                  </form>
-                )}
+                  </div>
+                  <button className="booking-button">
+                    Ver horários disponíveis <span aria-hidden="true">→</span>
+                  </button>
+                </form>
               </section>
-            )}
-          </>
+              {selected && professional ? (
+                failed ? (
+                  <section
+                    className="booking-card booking-empty"
+                    role="alert"
+                    id="horarios"
+                  >
+                    <h2>Não foi possível carregar os horários.</h2>
+                    <p>Tente consultar novamente em alguns instantes.</p>
+                  </section>
+                ) : !slots.length ? (
+                  <section className="booking-card booking-empty" id="horarios">
+                    <CalendarIcon />
+                    <h2>Vamos tentar outro dia?</h2>
+                    <p>
+                      Não há horários disponíveis para esta combinação.
+                      Selecione outra data ou profissional acima.
+                    </p>
+                    <a className="booking-text-link" href="#day">
+                      Escolher outra data ↑
+                    </a>
+                  </section>
+                ) : (
+                  <ReserveForm
+                    key={`${selected.id}:${professional.id}:${validDay}`}
+                    slug={slug}
+                    service={selected}
+                    professional={professional}
+                    day={validDay}
+                    slots={slots}
+                    requestId={randomUUID()}
+                  />
+                )
+              ) : null}
+            </div>
+            <aside className="booking-aside">
+              <div className="booking-aside-icon">
+                <CalendarIcon check />
+              </div>
+              <h2>Seu próximo horário começa aqui.</h2>
+              <p>Você escolhe. A empresa recebe sua reserva na agenda.</p>
+              <ul>
+                <li>
+                  <span aria-hidden="true">✓</span>Horários disponíveis em tempo
+                  real
+                </li>
+                <li>
+                  <span aria-hidden="true">✓</span>Sem criar conta ou instalar
+                  aplicativo
+                </li>
+                <li>
+                  <span aria-hidden="true">✓</span>Sem pagamento nesta reserva
+                </li>
+              </ul>
+              <div className="booking-aside-divider" />
+              <span className="booking-small">
+                Todos os horários seguem o fuso de São Paulo. Para dúvidas sobre
+                o atendimento, fale com a empresa.
+              </span>
+              {contact ? (
+                <a
+                  className="booking-text-link"
+                  href={contact}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Tirar uma dúvida ↗
+                </a>
+              ) : null}
+            </aside>
+          </div>
         )}
-      </section>
+        <footer className="booking-footer">
+          <span>Agendamento de {catalog.name}</span>
+          <Link href="/" aria-label="Conheça a plataforma Web Fidelize">
+            Feito com{" "}
+            <strong>
+              web<span>fidelize</span>
+            </strong>
+          </Link>
+        </footer>
+      </div>
     </main>
   );
 }
