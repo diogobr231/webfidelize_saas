@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser, requireCompany } from "@/lib/auth";
 import { niches } from "@/lib/catalog";
+import {
+  localAppointmentInstant,
+  saoPauloDay,
+  validDay,
+} from "@/lib/scheduling";
 export async function createCompany(form: FormData) {
   const { db } = await requireUser();
   const name = z.string().trim().min(2).max(100).safeParse(form.get("name"));
@@ -82,9 +87,16 @@ export async function createAppointment(form: FormData) {
       customer_id: form.get("customer_id"),
       service_id: form.get("service_id"),
       professional_id: form.get("professional_id"),
-      starts_at: form.get("starts_at"),
+      starts_at: form.has("day")
+        ? localAppointmentInstant(
+            String(form.get("day")),
+            String(form.get("time")),
+          )
+        : form.get("starts_at"),
     });
   if (!data.success) redirect(`/painel/${company.data}/agenda?erro=validacao`);
+  if (!validDay(saoPauloDay(new Date(data.data.starts_at))))
+    redirect(`/painel/${company.data}/agenda?erro=validacao`);
   const { error } = await db.rpc("book_appointment", {
     p_company: company.data,
     p_customer: data.data.customer_id,
@@ -94,5 +106,7 @@ export async function createAppointment(form: FormData) {
   });
   if (error) redirect(`/painel/${company.data}/agenda?erro=horario`);
   revalidatePath(`/painel/${company.data}`, "layout");
-  redirect(`/painel/${company.data}/agenda`);
+  redirect(
+    `/painel/${company.data}/agenda?day=${saoPauloDay(new Date(data.data.starts_at))}&notice=criado`,
+  );
 }
