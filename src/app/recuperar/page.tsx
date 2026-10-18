@@ -1,0 +1,3 @@
+import Link from 'next/link';
+import { recover } from '@/app/auth/actions';
+export default async function Recover({searchParams}:{searchParams:Promise<{aviso?:string;erro?:string}>}){const p=await searchParams;return <main className="auth panel"><h1>Recuperar acesso</h1><p>Enviaremos um link se houver uma conta para este e-mail.</p>{p.aviso&&<p className="notice" role="status">Se a conta existir, você receberá as instruções por e-mail.</p>}{p.erro&&<p className="notice error">Ambiente de autenticação não configurado.</p>}<form action={recover}><label htmlFor="email">E-mail</label><input id="email" name="email" type="email" required autoComplete="email"/><button>Enviar instruções</button></form><p><Link href="/entrar">Voltar ao login</Link></p></main>;}
