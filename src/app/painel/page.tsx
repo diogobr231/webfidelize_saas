@@ -2,9 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { niches } from "@/lib/catalog";
-import { createCompany } from "./actions";
 import { logout } from "@/app/auth/actions";
-import { PendingButton } from "@/components/pending-button";
 import "./painel.css";
 export const dynamic = "force-dynamic";
 export default async function Companies({
@@ -14,10 +12,10 @@ export default async function Companies({
 }) {
   const { db, user } = await requireUser();
   const p = await searchParams;
-  const memberships = await db
-    .from("memberships")
-    .select("company_id,role")
-    .eq("user_id", user.id);
+  const [memberships, adminResult] = await Promise.all([
+    db.from("memberships").select("company_id,role").eq("user_id", user.id),
+    db.rpc("is_super_admin"),
+  ]);
   const { data: companies, error } = memberships.data?.length
     ? await db
         .from("companies")
@@ -27,10 +25,12 @@ export default async function Companies({
           memberships.data.map((m) => m.company_id),
         )
     : { data: [], error: memberships.error };
-  if (!error && !p.erro && p.empresas !== "1" && companies?.length === 1) {
-    redirect(`/painel/${companies[0].id}`);
+  const admin = adminResult.data;
+  const loadError = error || memberships.error || adminResult.error;
+  if (!loadError && !p.erro && p.empresas !== "1") {
+    if (companies?.length === 1) redirect(`/painel/${companies[0].id}`);
+    if (!companies?.length && !admin) redirect("/comecar");
   }
-  const { data: admin } = await db.rpc("is_super_admin");
   const alreadyOwner = memberships.data?.some(
     (member) => member.role === "OWNER",
   );
@@ -50,7 +50,7 @@ export default async function Companies({
       <span className="tag">Seu espaço na Web Fidelize</span>
       <h1>Suas empresas</h1>
       <p>Escolha onde quer trabalhar hoje.</p>
-      {(p.erro || error) && (
+      {(p.erro || loadError) && (
         <div role="alert" className="notice error">
           Não foi possível concluir. Verifique suas permissões e a instalação do
           banco.
@@ -68,11 +68,6 @@ export default async function Companies({
           </Link>
         ))}
       </div>
-      {!companies?.length && !error && (
-        <p className="empty">
-          Sua jornada começa aqui. Cadastre sua primeira empresa.
-        </p>
-      )}
       {alreadyOwner ? (
         <section className="panel company-create">
           <h2>Precisa gerenciar outra unidade?</h2>
@@ -89,40 +84,27 @@ export default async function Companies({
             Conversar com a equipe ↗
           </a>
         </section>
-      ) : (
+      ) : !loadError ? (
         <section className="panel company-create">
           <h2>
             {companies?.length
-              ? "Criar outra empresa"
-              : "Vamos conhecer seu negócio"}
+              ? "Prepare sua própria empresa"
+              : "Bem-vindo à Web Fidelize"}
           </h2>
           <p>
-            Seu teste gratuito de sete dias começa ao criar a empresa. O plano
-            inicial permite um profissional.
+            Configure sua empresa e segmento, cadastre seus serviços e adicione
+            os profissionais. Você pode continuar depois; os cadastros salvos
+            serão mantidos.
           </p>
-          <form action={createCompany}>
-            <label htmlFor="name">Nome da empresa</label>
-            <input
-              id="name"
-              name="name"
-              minLength={2}
-              maxLength={100}
-              required
-            />
-            <label htmlFor="niche">Segmento</label>
-            <select id="niche" name="niche">
-              {niches.map((n) => (
-                <option key={n.slug} value={n.slug}>
-                  {n.name}
-                </option>
-              ))}
-            </select>
-            <PendingButton pendingLabel="Criando sua empresa…">
-              Criar e começar teste gratuito →
-            </PendingButton>
-          </form>
+          <p>
+            Os sete dias de teste gratuito começam ao criar a empresa, com um
+            profissional no plano Essencial.
+          </p>
+          <Link className="button" href="/comecar">
+            Continuar configuração →
+          </Link>
         </section>
-      )}
+      ) : null}
     </main>
   );
 }

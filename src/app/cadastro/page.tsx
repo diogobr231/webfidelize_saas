@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signup } from "@/app/auth/actions";
+import { PendingButton } from "@/components/pending-button";
 export default async function Signup({
   searchParams,
 }: {
@@ -12,7 +13,14 @@ export default async function Signup({
         web<span>fidelize</span>
       </Link>
       <h1>Um novo começo para seu negócio.</h1>
-      <p>Crie sua conta. O trial começa ao criar sua empresa.</p>
+      <p>
+        Crie sua conta e confirme seu e-mail. Depois, vamos guiar você pelo
+        cadastro da empresa, dos serviços e dos profissionais.
+      </p>
+      <p>
+        Seu teste gratuito de sete dias começa quando você cria a empresa. Não
+        precisa de cartão.
+      </p>
       {p.erro && (
         <p className="notice error" role="alert">
           Não foi possível cadastrar. Confira os campos e a configuração do
@@ -38,7 +46,9 @@ export default async function Signup({
           required
           autoComplete="new-password"
         />
-        <button>Criar minha conta →</button>
+        <PendingButton pendingLabel="Criando sua conta…">
+          Criar minha conta →
+        </PendingButton>
       </form>
       <p>
         <Link href="/entrar">Já tenho uma conta</Link>

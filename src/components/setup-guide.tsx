@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { setupProgress } from "@/lib/onboarding";
 
 type SetupStep = {
   label: string;
@@ -59,11 +60,12 @@ export function SetupGuide({
     },
   ];
   const done = steps.filter((step) => step.done).length;
+  const initialSetup = setupProgress(true, services, professionals);
   return (
     <section className="panel setup-guide" aria-labelledby="setup-title">
       <div className="workspace-section-heading">
         <div>
-          <span className="tag">Configuração da sua empresa</span>
+          <span className="tag">Preparar agendamento online</span>
           <h3 id="setup-title">
             {!writable
               ? "Sua configuração está salva"
@@ -110,6 +112,22 @@ export function SetupGuide({
         O progresso acompanha os cadastros salvos. Profissionais começam com
         horários de segunda a sexta, das 8h às 18h; revise para refletir seu
         atendimento.
+      </p>
+      <div className="workspace-actions">
+        <Link
+          className="button secondary"
+          href={`${base}/configuracao?etapa=${initialSetup.next}`}
+        >
+          {services > 0 && professionals > 0
+            ? "Revisar configuração guiada"
+            : "Continuar configuração guiada"}
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+      <p className="setup-footnote">
+        O guia inicial organiza empresa, serviços e profissionais para uso
+        interno. Somente os cadastros salvos contam para o progresso. A página
+        pública é ativada separadamente pelo proprietário.
       </p>
     </section>
   );

@@ -31,7 +31,7 @@ export default async function Dashboard({
   searchParams,
 }: {
   params: Promise<{ companyId: string }>;
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{ erro?: string; configuracao?: string }>;
 }) {
   const { companyId } = await params;
   const { db, company, role } = await requireCompany(companyId);
@@ -130,6 +130,17 @@ export default async function Dashboard({
       {p.erro && (
         <p className="notice error" role="alert">
           Operação não autorizada para seu perfil ou assinatura.
+        </p>
+      )}
+      {managed && p.configuracao === "pausada" && (
+        <p className="notice" role="status">
+          Os cadastros salvos foram mantidos. Continue quando quiser.{" "}
+          <Link
+            className="workspace-text-link"
+            href={`/painel/${companyId}/configuracao`}
+          >
+            Continuar configuração guiada →
+          </Link>
         </p>
       )}
       {today.error || completed.error ? (

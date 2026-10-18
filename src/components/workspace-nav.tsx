@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { Role } from "@/lib/permissions";
+import { canManage, type Role } from "@/lib/permissions";
 
 const entries = [
   { path: "", label: "Meu dia", icon: "◈" },
@@ -26,6 +26,19 @@ export function WorkspaceNav({
     <aside className="workspace-sidebar">
       <p className="workspace-nav-caption">Seu espaço de trabalho</p>
       <nav aria-label="Menu da empresa" className="workspace-nav">
+        {canManage(role) && (
+          <Link
+            href={`${base}/configuracao`}
+            aria-current={
+              pathname === `${base}/configuracao` ? "page" : undefined
+            }
+          >
+            <span className="workspace-nav-icon" aria-hidden="true">
+              ✓
+            </span>
+            Primeiros passos
+          </Link>
+        )}
         {entries.map((entry) => {
           const href = `${base}${entry.path}`;
           const active = pathname === href || pathname === `${href}/`;

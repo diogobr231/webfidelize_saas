@@ -19,7 +19,7 @@ export async function createCompany(form: FormData) {
     company_niche: niche.slug,
   });
   if (error) redirect("/painel?erro=criacao");
-  redirect(`/painel/${data}`);
+  redirect(`/painel/${data}/configuracao?etapa=servicos`);
 }
 const id = z.uuid();
 export async function saveRecord(form: FormData) {
