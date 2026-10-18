@@ -89,6 +89,20 @@ O primeiro SUPER_ADMIN usa um bootstrap de instalação de uso único: o e-mail 
 
 Para Storage: ainda não há bucket nem upload. Só habilitar com bucket privado, limites de tipo/tamanho e políticas por prefixo company_id. Não criar bucket público para dados de clientes.
 
+## Landing comercial e SEO
+
+A página inicial apresenta agenda, clientes, profissionais e reservas públicas. As ilustrações do sistema usam dados identificados como fictícios. Os planos refletem o catálogo atual; a cobrança online permanece em implantação e novos testes começam no Essencial.
+
+Título, descrição, canonical, Open Graph, imagem de compartilhamento e dados estruturados de WebSite/Organization ficam em `src/lib/seo.ts` e nas convenções de metadados do App Router. Não há avaliações, depoimentos ou números de clientes inventados. O sitemap inclui apenas a página comercial. Rotas de conta, painel e demonstração permanecem fora da indexação.
+
+Defina `APP_URL` com a origem HTTPS definitiva antes do build de produção. Localhost, URL ausente/inválida e ambientes Vercel Preview/Development ficam com `noindex` e robots bloqueando indexação. Não é preciso inventar um domínio para rodar localmente. Alterar a origem exige novo build. Robots não substitui autenticação e RLS.
+
+Com o servidor local iniciado, execute `pnpm test:landing` para validar conteúdo, destinos dos CTAs e metadados. O teste não envia mensagens nem cria contas.
+
+Entrega e testes desta etapa: [docs/STATUS-LANDING.md](docs/STATUS-LANDING.md).
+
+Implementação conforme as convenções oficiais de [metadados e imagens sociais do Next.js](https://nextjs.org/docs/app/getting-started/metadata-and-og-images), [robots](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots) e [sitemap](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap). O nome do site usa dados estruturados [WebSite conforme o Google Search Central](https://developers.google.com/search/docs/appearance/site-names); isso não garante posicionamento nem resultados enriquecidos.
+
 ## Custos e operação
 
 Um deploy e um banco para todas as empresas, com company_id e RLS. Sem serviços de IA, filas ou automações pagas no primeiro incremento. O plano de infraestrutura deve permitir uso comercial e ter orçamento definido antes do lançamento. Receita de assinatura só será reconhecida após conciliação do provedor. O trial não depende de cron: cada escrita valida o prazo no banco.

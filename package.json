@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "test:db": "tsx scripts/test-db.ts",
-    "test:experience": "tsx scripts/test-experience-live.ts"
+    "test:experience": "tsx scripts/test-experience-live.ts",
+    "test:landing": "tsx scripts/test-landing.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
