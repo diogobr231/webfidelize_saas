@@ -77,6 +77,8 @@ Um deploy e um banco para todas as empresas, com company_id e RLS. Sem serviços
 
 Arquitetura e árvore: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Relatório: [docs/STATUS.md](docs/STATUS.md).
 
+Orientações de recuperação local: [docs/RECUPERACAO-LEGADO.md](docs/RECUPERACAO-LEGADO.md). Backups e relatórios privados ficam fora do versionamento público, na pasta ignorada `.recovery/`.
+
 ## Demonstração e próxima integração
 
 Contas e roteiro: [docs/DEMONSTRACAO.md](docs/DEMONSTRACAO.md). Mercado Pago: [docs/MERCADO_PAGO.md](docs/MERCADO_PAGO.md).
