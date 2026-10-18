@@ -25,13 +25,16 @@ CLI Supabase voltou a não concluir o download. A migração foi validada em Pos
 - TypeScript e build de produção aprovados com o ambiente real configurado.
 - Logins das oito contas DEMO e do administrador testados pela API real. Cada conta DEMO viu somente sua própria empresa, clientes e catálogo. Houve uma falha transitória de rede na primeira rodada; o teste usa no máximo três tentativas de fetch e a rodada seguinte passou integralmente.
 - Reserva real pelo formulário do navegador, com cliente explicitamente fictício na empresa DEMO Salão, confirmada por consulta ao banco. Não houve pagamento ou atendimento real.
-- 18 verificações HTTP existentes aprovadas; extensão opcional para as oito páginas DEMO disponível com TEST_DEMOS=1.
+- 26 verificações HTTP aprovadas com TEST_DEMOS=1, incluindo as oito páginas públicas de demonstração.
 - Advisors do Supabase: sem alerta de RLS/extensão/função para a nova migração; há alerta de proteção contra senhas vazadas desativada no Auth. Avaliar habilitação conforme plano antes do lançamento: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
 
 Os testes não equivalem a validação de carga distribuída, proteção completa contra bots, recuperação de senha por e-mail ou cobrança real. A opção de login e a reserva pública foram exercitadas; a alteração de turno pela UI ainda deve ser ampliada em E2E automatizado.
+
+CI remoto aprovado no commit b26e65e: https://github.com/diogobr231/webfidelize_saas/actions/runs/39152145048. Incluiu instalação congelada, TypeScript, 41 testes locais e build.
 
 ## Mercado Pago
 
 Avanço feito: consulta à documentação oficial, escolha do fluxo de assinatura pendente com checkout hospedado, roteiro de credenciais e validação em `MERCADO_PAGO.md`, painel oficial aberto. O proprietário informou não ter a aplicação. O painel permanece em login, sem credenciais de teste no ambiente; checkout/webhook ainda não foram implementados nem anunciados como prontos.
 
 A skill Marketplace orienta provisionar antes de implementar e interromper essa etapa quando depender da conta do usuário. A descoberta pelo CLI Vercel foi tentada, mas falhou por dependência ausente (`is-node-process`). Não foi provisionado outro provedor ou simulado pagamento. A próxima ação é entrar na conta Mercado Pago, criar a aplicação e configurar credenciais privadas; depois implementar checkout, notificação verificada, idempotência persistida e conciliação em sandbox.
+
