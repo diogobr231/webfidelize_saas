@@ -11,6 +11,8 @@ import {
   saoPauloDay,
 } from "@/lib/scheduling";
 import { money } from "@/lib/catalog";
+import { Icon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export type CalendarAppointment = {
   id: string;
@@ -102,15 +104,19 @@ function AppointmentDialog({
           onClick={() => dialog.current?.close()}
           aria-label="Fechar atendimento"
         >
-          ✕
+          Fechar <Icon name="close" size={16} />
         </button>
       </div>
       <h2 id="appointment-title">{item.customer_name}</h2>
-      <p>
+      <p className="appointment-service">
+        <Icon name="briefcase" size={16} />
         {item.service_name} · {item.professional_name}
       </p>
       <div className="appointment-summary">
-        <strong>{dayLabel(saoPauloDay(new Date(item.starts_at)), true)}</strong>
+        <strong>
+          <Icon name="calendar" size={16} />{" "}
+          {dayLabel(saoPauloDay(new Date(item.starts_at)), true)}
+        </strong>
         <span>
           {appointmentTime(item.starts_at)}–{appointmentTime(item.ends_at)}
         </span>
@@ -151,7 +157,9 @@ function AppointmentDialog({
                 A duração e o profissional serão mantidos. Confirmaremos a
                 disponibilidade ao salvar.
               </p>
-              <Submit>Confirmar remarcação</Submit>
+              <Submit>
+                Confirmar remarcação <Icon name="check" size={16} />
+              </Submit>
             </form>
           </details>
           {Date.parse(item.ends_at) <= Date.now() && (
@@ -160,7 +168,9 @@ function AppointmentDialog({
               <input type="hidden" name="appointment_id" value={item.id} />
               <input type="hidden" name="operation" value="complete" />
               <input type="hidden" name="return_day" value={day} />
-              <Submit>Marcar como concluído</Submit>
+              <Submit>
+                Marcar como concluído <Icon name="check" size={16} />
+              </Submit>
             </form>
           )}
           <details className="cancel-details">
@@ -260,27 +270,36 @@ export function AgendaExperience(props: Props) {
   return (
     <>
       <div className="agenda-overview">
-        <div>
+        <div className="agenda-period-stat">
+          <span className="agenda-stat-icon">
+            <Icon name="calendar" size={18} />
+          </span>
           <strong>{live.length}</strong>
           <span>atendimentos no período</span>
         </div>
-        <div>
+        <div className="agenda-period-stat">
+          <span className="agenda-stat-icon completed">
+            <Icon name="check" size={18} />
+          </span>
           <strong>{live.filter((a) => a.status === "completed").length}</strong>
           <span>concluídos</span>
         </div>
-        <div>
-          <span className="agenda-dot" />
-          Agendado <span className="agenda-dot done" />
+        <div className="agenda-legend">
+          <span className="agenda-dot" aria-hidden="true" />
+          Agendado <span className="agenda-dot done" aria-hidden="true" />
           Concluído
         </div>
       </div>
       {!appointments.length && (
-        <p className="agenda-empty">
-          Nenhum agendamento neste período.{" "}
-          {managed
-            ? "Escolha uma hora na agenda ou use Novo agendamento."
-            : "Os seus próximos atendimentos aparecerão aqui."}
-        </p>
+        <div className="agenda-empty">
+          <Icon name="calendar" size={20} />
+          <p>
+            <strong>Nenhum agendamento neste período.</strong>{" "}
+            {managed
+              ? "Escolha uma hora na agenda ou use Novo agendamento."
+              : "Os seus próximos atendimentos aparecerão aqui."}
+          </p>
+        </div>
       )}
       {columns.length ? (
         <div
@@ -366,7 +385,9 @@ export function AgendaExperience(props: Props) {
                           openSlot(column.day, h, column.professional)
                         }
                       >
-                        <span>＋ {clock(h * 60)}</span>
+                        <span>
+                          <Icon name="plus" size={12} /> {clock(h * 60)}
+                        </span>
                       </button>
                     ) : (
                       <div
@@ -415,13 +436,16 @@ export function AgendaExperience(props: Props) {
           </div>
         </div>
       ) : (
-        <p className="empty">
-          Cadastre um profissional para começar a organizar os horários.
-        </p>
+        <EmptyState
+          icon="user"
+          title="Prepare sua agenda"
+          description="Cadastre um profissional para começar a organizar os horários."
+        />
       )}
       <p className="calendar-caption">
-        A faixa iluminada indica os turnos cadastrados. Clique em um atendimento
-        para ver os detalhes. A disponibilidade é confirmada ao salvar.
+        <Icon name="clock" size={14} /> A faixa colorida indica os turnos
+        cadastrados. Clique em um atendimento para ver os detalhes. A
+        disponibilidade é confirmada ao salvar.
       </p>
       {appointments.length > 0 && (
         <details className="agenda-list">
@@ -430,13 +454,16 @@ export function AgendaExperience(props: Props) {
           </summary>
           <div className="table-wrap">
             <table>
+              <caption className="sr-only">
+                Lista de atendimentos e cancelamentos do período selecionado
+              </caption>
               <thead>
                 <tr>
-                  <th>Data e hora</th>
-                  <th>Cliente / serviço</th>
-                  <th>Profissional</th>
-                  <th>Status</th>
-                  <th>Detalhes</th>
+                  <th scope="col">Data e hora</th>
+                  <th scope="col">Cliente / serviço</th>
+                  <th scope="col">Profissional</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Detalhes</th>
                 </tr>
               </thead>
               <tbody>
@@ -454,13 +481,19 @@ export function AgendaExperience(props: Props) {
                       {item.service_name}
                     </td>
                     <td>{item.professional_name}</td>
-                    <td>{appointmentStatus[item.status]}</td>
+                    <td>
+                      <span
+                        className={`appointment-status status-${item.status}`}
+                      >
+                        {appointmentStatus[item.status]}
+                      </span>
+                    </td>
                     <td>
                       <button
                         className="secondary"
                         onClick={() => setSelected(item)}
                       >
-                        Abrir
+                        Abrir <Icon name="arrow-up-right" size={14} />
                       </button>
                     </td>
                   </tr>
@@ -473,7 +506,9 @@ export function AgendaExperience(props: Props) {
       {managed && (
         <section className="panel appointment-create" id="novo-agendamento">
           <div>
-            <span className="tag">RESERVE UM HORÁRIO</span>
+            <span className="agenda-create-icon">
+              <Icon name="plus" size={20} />
+            </span>
             <h2>Novo agendamento</h2>
             <p>
               Escolha os dados do atendimento. A duração vem do serviço
@@ -564,7 +599,9 @@ export function AgendaExperience(props: Props) {
                   />
                 </label>
               </div>
-              <Submit>Salvar agendamento →</Submit>
+              <Submit>
+                Salvar agendamento <Icon name="check" size={16} />
+              </Submit>
             </form>
           )}
         </section>

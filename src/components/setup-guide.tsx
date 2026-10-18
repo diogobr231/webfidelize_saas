@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { setupProgress } from "@/lib/onboarding";
+import { Icon } from "@/components/ui/icon";
 
 type SetupStep = {
   label: string;
@@ -88,7 +89,7 @@ export function SetupGuide({
               className="setup-step-number"
               aria-label={step.done ? "Concluída" : `Etapa ${index + 1}`}
             >
-              {step.done ? "✓" : index + 1}
+              {step.done ? <Icon name="check" size={16} /> : index + 1}
             </span>
             <div>
               <strong>{step.label}</strong>

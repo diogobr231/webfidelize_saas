@@ -9,6 +9,8 @@ import {
 } from "@/lib/scheduling";
 import { SetupGuide } from "@/components/setup-guide";
 import { ShareBooking } from "@/components/share-booking";
+import { Icon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Appointment = {
   id: string;
@@ -152,7 +154,7 @@ export default async function Dashboard({
         <div className="workspace-metrics">
           <div className="card">
             <span className="workspace-metric-icon" aria-hidden="true">
-              ▦
+              <Icon name="calendar" size={18} />
             </span>
             <p>
               {managed ? "Atendimentos de hoje" : "Meus atendimentos de hoje"}
@@ -162,7 +164,7 @@ export default async function Dashboard({
           </div>
           <div className="card">
             <span className="workspace-metric-icon" aria-hidden="true">
-              ✓
+              <Icon name="check" size={18} />
             </span>
             <p>Concluídos hoje</p>
             <strong className="stat">{completed.count ?? 0}</strong>
@@ -173,7 +175,7 @@ export default async function Dashboard({
             href={`/painel/${companyId}/agenda`}
           >
             <span className="workspace-metric-icon" aria-hidden="true">
-              →
+              <Icon name="arrow-up-right" size={18} />
             </span>
             <p>Sua agenda completa</p>
             <strong>Planeje a semana</strong>
@@ -181,95 +183,98 @@ export default async function Dashboard({
           </Link>
         </div>
       )}
-      <section
-        className="panel workspace-next"
-        aria-labelledby="upcoming-title"
-      >
-        <div className="workspace-section-heading">
-          <div>
-            <span className="tag">O que vem a seguir</span>
-            <h2 id="upcoming-title">Próximos atendimentos</h2>
-          </div>
-          <Link
-            className="workspace-text-link"
-            href={`/painel/${companyId}/agenda`}
-          >
-            Ver agenda →
-          </Link>
-        </div>
-        {upcoming.error ? (
-          <p role="alert" className="notice error">
-            Não foi possível carregar os próximos atendimentos.
-          </p>
-        ) : records.length ? (
-          <ul className="workspace-appointments">
-            {records.map((appointment) => (
-              <li key={appointment.id}>
-                <div className="workspace-appointment-time">
-                  <strong>{appointmentTime(appointment.starts_at)}</strong>
-                  <span>
-                    {new Date(appointment.starts_at).toLocaleDateString(
-                      "pt-BR",
-                      {
-                        timeZone: "America/Sao_Paulo",
-                        day: "2-digit",
-                        month: "short",
-                      },
-                    )}
-                  </span>
-                </div>
-                <div>
-                  <strong>
-                    {appointment.customers?.name || "Cliente indisponível"}
-                  </strong>
-                  <p>
-                    {appointment.services?.name || "Serviço indisponível"} ·{" "}
-                    {appointment.professionals?.name ||
-                      "Profissional indisponível"}
-                  </p>
-                </div>
-                <span className="badge">
-                  {new Date(appointment.starts_at) <= now
-                    ? "Em horário de atendimento"
-                    : "Agendado"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="workspace-empty">
-            <span aria-hidden="true">◷</span>
-            <h3>Sua agenda está esperando o próximo encontro</h3>
-            <p>
-              {managed
-                ? "Adicione um atendimento ou compartilhe seu link para receber reservas."
-                : "Quando houver um atendimento atribuído a você, ele aparecerá aqui."}
-            </p>
+      <div className={`workspace-overview-grid ${managed ? "has-setup" : ""}`}>
+        <section
+          className="panel workspace-next"
+          aria-labelledby="upcoming-title"
+        >
+          <div className="workspace-section-heading">
+            <div>
+              <span className="tag">O que vem a seguir</span>
+              <h2 id="upcoming-title">Próximos atendimentos</h2>
+            </div>
             <Link
-              className="button secondary"
+              className="workspace-text-link"
               href={`/painel/${companyId}/agenda`}
             >
-              Abrir agenda
+              Ver agenda →
             </Link>
           </div>
-        )}
-      </section>
-      {managed &&
-        (setupError ? (
-          <p className="notice error" role="alert">
-            Não foi possível carregar o progresso da configuração.
-          </p>
-        ) : (
-          <SetupGuide
-            companyId={companyId}
-            services={services?.count ?? 0}
-            professionals={professionals?.count ?? 0}
-            shifts={shifts?.count ?? 0}
-            published={published}
-            owner={role === "OWNER"}
-            writable={writable}
-          />
-        ))}
+          {upcoming.error ? (
+            <p role="alert" className="notice error">
+              Não foi possível carregar os próximos atendimentos.
+            </p>
+          ) : records.length ? (
+            <ul className="workspace-appointments">
+              {records.map((appointment) => (
+                <li key={appointment.id}>
+                  <div className="workspace-appointment-time">
+                    <strong>{appointmentTime(appointment.starts_at)}</strong>
+                    <span>
+                      {new Date(appointment.starts_at).toLocaleDateString(
+                        "pt-BR",
+                        {
+                          timeZone: "America/Sao_Paulo",
+                          day: "2-digit",
+                          month: "short",
+                        },
+                      )}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>
+                      {appointment.customers?.name || "Cliente indisponível"}
+                    </strong>
+                    <p>
+                      {appointment.services?.name || "Serviço indisponível"} ·{" "}
+                      {appointment.professionals?.name ||
+                        "Profissional indisponível"}
+                    </p>
+                  </div>
+                  <span className="badge">
+                    {new Date(appointment.starts_at) <= now
+                      ? "Em horário de atendimento"
+                      : "Agendado"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon="calendar"
+              title="Sua agenda está esperando o próximo encontro"
+              description={
+                managed
+                  ? "Adicione um atendimento ou compartilhe seu link para receber reservas."
+                  : "Quando houver um atendimento atribuído a você, ele aparecerá aqui."
+              }
+            >
+              <Link
+                className="button secondary"
+                href={`/painel/${companyId}/agenda`}
+              >
+                Abrir agenda
+              </Link>
+            </EmptyState>
+          )}
+        </section>
+        {managed &&
+          (setupError ? (
+            <p className="notice error" role="alert">
+              Não foi possível carregar o progresso da configuração.
+            </p>
+          ) : (
+            <SetupGuide
+              companyId={companyId}
+              services={services?.count ?? 0}
+              professionals={professionals?.count ?? 0}
+              shifts={shifts?.count ?? 0}
+              published={published}
+              owner={role === "OWNER"}
+              writable={writable}
+            />
+          ))}
+      </div>
       {managed && published && writable && (
         <section className="panel workspace-share">
           <span className="tag">Leve sua agenda até seus clientes</span>

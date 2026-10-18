@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { niches } from "@/lib/catalog";
 import { logout } from "@/app/auth/actions";
 import "./painel.css";
+import { Brand } from "@/components/ui/brand";
 export const dynamic = "force-dynamic";
 export default async function Companies({
   searchParams,
@@ -37,9 +38,7 @@ export default async function Companies({
   return (
     <main className="workspace-shell companies-page">
       <nav>
-        <Link className="brand" href="/">
-          web<span>fidelize</span>
-        </Link>
+        <Brand />
         <div className="links">
           {admin && <Link href="/admin">Super admin</Link>}
           <form action={logout}>

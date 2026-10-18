@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth";
 import { logout } from "@/app/auth/actions";
 import { OnboardingFrame } from "@/components/onboarding/frame";
 import { CompanySetupForm } from "@/components/onboarding/forms";
+import { Brand } from "@/components/ui/brand";
+import { Icon } from "@/components/ui/icon";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +26,12 @@ export default async function Start() {
   return (
     <main className="onb-entry">
       <nav aria-label="Conta">
-        <Link className="brand" href="/">
-          web<span>fidelize</span>
-        </Link>
+        <Brand href="/" />
         <form action={logout}>
-          <button className="secondary">Sair</button>
+          <button className="secondary">
+            <Icon name="logout" size={16} />
+            Sair
+          </button>
         </form>
       </nav>
       {admin.error || ownership.error ? (

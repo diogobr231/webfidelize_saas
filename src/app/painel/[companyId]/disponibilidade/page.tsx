@@ -3,7 +3,11 @@ import { requireCompany } from "@/lib/auth";
 import { canManage, hasAccess } from "@/lib/permissions";
 import { PendingButton } from "@/components/pending-button";
 import { ShareBooking } from "@/components/share-booking";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Icon } from "@/components/ui/icon";
 import { addShift, removeShift, configure, configureProfile } from "./actions";
+import "../../operations.css";
 
 const days = [
   "",
@@ -69,22 +73,23 @@ export default async function Availability({
   };
   return (
     <>
-      <div className="workspace-page-heading">
-        <div>
-          <span className="tag">Cada negócio tem seu ritmo</span>
-          <h1>{managed ? "Horários e sua página" : "Meus horários"}</h1>
-          <p>
-            {managed
-              ? "Organize os turnos da equipe e prepare a página que seus clientes vão conhecer."
-              : "Confira os turnos disponíveis para receber seus atendimentos."}
-          </p>
-        </div>
+      <PageHeader
+        eyebrow="Disponibilidade e presença online"
+        title={managed ? "Horários e sua página" : "Meus horários"}
+        description={
+          managed
+            ? "Organize os turnos da equipe e prepare a página que seus clientes vão conhecer."
+            : "Confira os turnos disponíveis para receber seus atendimentos."
+        }
+      />
+      <div className="operations-context">
+        <Icon name="clock" size={18} />
+        <p>
+          Horários no fuso de São Paulo. Turnos separados permitem reservar um
+          intervalo para almoço. Alterar os turnos preserva os agendamentos já
+          feitos.
+        </p>
       </div>
-      <p className="notice">
-        Horários no fuso de São Paulo. Turnos separados permitem reservar um
-        intervalo para almoço. Alterar os turnos preserva os agendamentos já
-        feitos.
-      </p>
       {!writable && (
         <p className="notice error">
           Sua assinatura permite consultar os horários, mas as alterações estão
@@ -115,23 +120,34 @@ export default async function Availability({
         </p>
       )}
       <div className="availability-columns" id="turnos">
-        <section className="panel">
-          <h2>Sua semana de atendimento</h2>
+        <section className="panel availability-week-panel">
+          <div className="operations-section-title">
+            <span className="operations-icon">
+              <Icon name="calendar" size={18} />
+            </span>
+            <h2>Sua semana de atendimento</h2>
+          </div>
           <p>
             {managed
               ? "Confira a disponibilidade de cada profissional."
               : "Estes são os turnos vinculados ao seu perfil."}
           </p>
           {shifts.error || professionals.error ? (
-            <p className="empty">
-              A semana ficará disponível quando os dados forem carregados.
-            </p>
+            <EmptyState
+              icon="calendar"
+              title="Não foi possível carregar a semana"
+              description="Atualize a página para tentar carregar os horários novamente."
+            />
           ) : !professionals.data?.length ? (
-            <p className="empty">
-              {managed
-                ? "Cadastre um profissional para configurar os horários."
-                : "Ainda não há um profissional vinculado ao seu perfil. Peça ao proprietário para configurar seu acesso."}
-            </p>
+            <EmptyState
+              icon="user"
+              title="Prepare quem vai atender"
+              description={
+                managed
+                  ? "Cadastre um profissional para configurar os horários."
+                  : "Ainda não há um profissional vinculado ao seu perfil. Peça ao proprietário para configurar seu acesso."
+              }
+            />
           ) : (
             professionals.data.map((professional) => (
               <section
@@ -140,6 +156,12 @@ export default async function Availability({
                 aria-labelledby={`professional-${professional.id}`}
               >
                 <h3 id={`professional-${professional.id}`}>
+                  <span
+                    className="availability-professional-avatar"
+                    aria-hidden="true"
+                  >
+                    {professional.name.slice(0, 2).toLocaleUpperCase("pt-BR")}
+                  </span>
                   {professional.name}
                 </h3>
                 <ul className="availability-week">
@@ -200,7 +222,13 @@ export default async function Availability({
           )}
         </section>
         {managed && writable && (
-          <form action={addShift} className="panel">
+          <form
+            action={addShift}
+            className="panel operations-form availability-add-form"
+          >
+            <span className="operations-icon">
+              <Icon name="plus" size={18} />
+            </span>
             <h2>Adicionar um turno</h2>
             <p>
               Para ajustar um horário, remova o turno anterior e adicione o
@@ -254,7 +282,9 @@ export default async function Availability({
             <p className="availability-help">
               Exemplo com almoço: um turno das 8h às 12h e outro das 13h às 18h.
             </p>
-            <PendingButton>Adicionar turno</PendingButton>
+            <PendingButton>
+              Adicionar turno <Icon name="plus" size={16} />
+            </PendingButton>
           </form>
         )}
       </div>
@@ -263,10 +293,12 @@ export default async function Availability({
           <section className="panel booking-settings" id="pagina-publica">
             <div className="workspace-section-heading">
               <div>
-                <span className="tag">Seu negócio, com sua identidade</span>
+                <span className="tag">Página de agendamento</span>
                 <h2>Apresente sua empresa</h2>
               </div>
-              <span className="badge">
+              <span
+                className={`operations-status${enabled ? " is-active" : ""}`}
+              >
                 {enabled ? "Página ativada" : "Página desativada"}
               </span>
             </div>
@@ -274,7 +306,7 @@ export default async function Availability({
               Essas informações aparecem para quem abre seu link de agendamento.
             </p>
             {writable ? (
-              <form action={configureProfile}>
+              <form action={configureProfile} className="operations-form">
                 <input type="hidden" name="company_id" value={companyId} />
                 <div className="booking-profile-grid">
                   <div>
@@ -354,10 +386,14 @@ export default async function Availability({
                     <p>
                       {company.booking_address || "Seu endereço de atendimento"}
                     </p>
-                    <span>Uma página fácil de usar no celular</span>
+                    <span className="booking-preview-label">
+                      <Icon name="link" size={14} /> Apresentação salva
+                    </span>
                   </aside>
                 </div>
-                <PendingButton>Salvar apresentação</PendingButton>
+                <PendingButton>
+                  Salvar apresentação <Icon name="check" size={16} />
+                </PendingButton>
               </form>
             ) : (
               <p>
@@ -367,13 +403,18 @@ export default async function Availability({
             )}
           </section>
           <section className="panel booking-settings">
-            <h2>Publique e compartilhe</h2>
+            <div className="operations-section-title">
+              <span className="operations-icon">
+                <Icon name="link" size={18} />
+              </span>
+              <h2>Publique e compartilhe</h2>
+            </div>
             <p>
               Escolha o endereço da página. Ative quando seus serviços,
               profissionais e turnos estiverem preparados.
             </p>
             {writable && (
-              <form action={configure}>
+              <form action={configure} className="operations-form">
                 <input type="hidden" name="company_id" value={companyId} />
                 <label htmlFor="slug">Endereço da sua página</label>
                 <input
@@ -400,7 +441,9 @@ export default async function Availability({
                   Receber agendamentos pela página pública
                 </label>
                 <div>
-                  <PendingButton>Salvar publicação</PendingButton>
+                  <PendingButton>
+                    Salvar publicação <Icon name="check" size={16} />
+                  </PendingButton>
                 </div>
               </form>
             )}

@@ -1,0 +1,349 @@
+.records-layout {
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+  align-items: start;
+}
+.records-layout.has-editor {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+}
+.records-list {
+  padding: 0;
+  overflow: hidden;
+  min-width: 0;
+  box-shadow: var(--shadow-sm);
+}
+.records-list-heading {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.records-list-heading > div,
+.operations-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.records-list-heading h2,
+.operations-section-title h2 {
+  font-size: 16px;
+  margin: 0;
+}
+.operations-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  color: var(--cyan);
+  background: #eaf5f3;
+}
+.operations-count {
+  padding: 5px 8px;
+  color: var(--muted);
+  background: var(--surface-subtle);
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.records-table {
+  margin: 0;
+}
+.records-table th,
+.records-table td {
+  padding: 18px 24px;
+}
+.records-table th {
+  background: var(--surface-subtle);
+}
+.records-table td {
+  font-size: 13px;
+}
+.record-name {
+  font-weight: 600;
+  color: var(--text);
+}
+.record-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.record-link:hover {
+  text-decoration: underline;
+}
+.record-editor {
+  padding: 24px;
+  scroll-margin-top: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.record-editor > h2,
+.availability-add-form > h2 {
+  font-size: 19px;
+  margin: 18px 0 8px;
+}
+.record-editor > p {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0 0 24px;
+}
+.operations-form > button {
+  margin-top: 20px;
+}
+.record-editor .operations-form > button,
+.availability-add-form > button {
+  width: 100%;
+}
+.operations-form label {
+  font-size: 13px;
+}
+.operations-form .form-grid {
+  gap: 16px;
+}
+.operations-field-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 16px 0 0;
+}
+.operations-field-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.team-members {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.team-members > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.team-members > li:last-child {
+  border-bottom: 0;
+}
+.team-member-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.team-member-info {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+.team-member-info strong {
+  font-size: 14px;
+}
+.team-member-info span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.team-member-info code {
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.team-role {
+  color: var(--muted);
+  background: var(--surface-subtle);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 5px 7px;
+  border-radius: 5px;
+}
+.team-access-note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 20px 24px;
+  background: var(--surface-subtle);
+  border-top: 1px solid var(--line);
+}
+.team-access-note > svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.team-access-note p {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+}
+.team-access-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--cyan);
+  font-weight: 600;
+}
+.team-invite-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.team-invite-result > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.team-invite-url {
+  overflow-wrap: anywhere;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 13px;
+}
+.operations-context {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 24px 0;
+  padding: 16px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.operations-context > svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: var(--cyan);
+}
+.operations-context p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+.availability-week-panel {
+  min-width: 0;
+}
+.availability-week-panel > p {
+  font-size: 13px;
+  margin: 12px 0 24px;
+}
+.availability-pro h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.availability-professional-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+}
+.availability-add-form {
+  align-self: start;
+}
+.availability-add-form > p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.booking-settings .operations-section-title {
+  margin-bottom: 12px;
+}
+.operations-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.operations-status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+}
+.operations-status.is-active {
+  background: #e9f5ee;
+  color: #1a775a;
+}
+.booking-preview-label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+@media (max-width: 1100px) {
+  .records-layout.has-editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .record-editor {
+    max-width: 660px;
+    width: 100%;
+  }
+}
+@media (max-width: 600px) {
+  .records-layout {
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .records-list-heading {
+    padding: 16px;
+    gap: 8px;
+  }
+  .records-list-heading > div {
+    gap: 8px;
+  }
+  .records-list-heading h2 {
+    font-size: 14px;
+  }
+  .operations-count {
+    font-size: 10px;
+  }
+  .records-table th,
+  .records-table td {
+    padding: 16px;
+  }
+  .record-editor {
+    padding: 20px;
+  }
+  .team-members > li {
+    padding: 20px 16px;
+    gap: 10px;
+  }
+  .team-role {
+    display: none;
+  }
+  .team-access-note {
+    padding: 20px 16px;
+  }
+  .operations-context {
+    padding: 16px;
+  }
+}

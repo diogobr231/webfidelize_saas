@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Brand } from "@/components/ui/brand";
+import { Icon } from "@/components/ui/icon";
 import { requireCompany } from "@/lib/auth";
 import { WorkspaceNav } from "@/components/workspace-nav";
 import { logout } from "@/app/auth/actions";
@@ -18,9 +19,11 @@ export default async function CompanyLayout({
         Ir para o conteúdo
       </a>
       <header className="workspace-header">
-        <Link className="brand" href={`/painel/${companyId}`}>
-          web<span>fidelize</span>
-        </Link>
+        <Brand href={`/painel/${companyId}`} />
+        <span className="workspace-header-context">
+          <span />
+          Seu espaço de trabalho
+        </span>
         <div className="workspace-account">
           <span className="company-avatar" aria-hidden="true">
             {company.name.slice(0, 2).toLocaleUpperCase("pt-BR")}
@@ -38,7 +41,10 @@ export default async function CompanyLayout({
             </span>
           </div>
           <form action={logout}>
-            <button className="secondary">Sair</button>
+            <button className="secondary" aria-label="Sair">
+              <Icon name="logout" size={16} />
+              <span>Sair</span>
+            </button>
           </form>
         </div>
       </header>

@@ -9,6 +9,18 @@ import {
   type SetupActionState,
 } from "@/lib/onboarding";
 import { niches } from "@/lib/catalog";
+import { Icon } from "@/components/ui/icon";
+
+const nicheIcons = {
+  salao: "scissors",
+  "pet-shop": "paw",
+  clinica: "heart",
+  escritorio: "briefcase",
+  restaurante: "utensils",
+  fornecedores: "building",
+  logistica: "truck",
+  academia: "dumbbell",
+} as const;
 
 type SetupAction = (
   previous: SetupActionState,
@@ -47,7 +59,7 @@ function FormActions({ nextLabel }: { nextLabel: string }) {
           disabled={pending}
         >
           {pending && !pausing ? "Salvando sua configuração…" : nextLabel}
-          <span aria-hidden="true">→</span>
+          <Icon name="arrow-right" size={16} />
         </button>
         <button
           className="onb-secondary"
@@ -137,7 +149,7 @@ export function CompanySetupForm() {
                 aria-invalid={Boolean(state.fields?.niche)}
               />
               <span className="onb-niche-icon" aria-hidden="true">
-                {item.icon}
+                <Icon name={nicheIcons[item.slug]} size={20} />
               </span>
               <span className="onb-niche-copy">
                 <strong>{item.name}</strong>
@@ -154,7 +166,9 @@ export function CompanySetupForm() {
         <FieldError id="setup-niche-error" message={state.fields?.niche} />
       </fieldset>
       <div className="onb-tip">
-        <span aria-hidden="true">✦</span>
+        <span aria-hidden="true">
+          <Icon name="sparkles" size={18} />
+        </span>
         <p>
           Seu teste de 7 dias começa ao criar a empresa, no plano Essencial com
           1 profissional na agenda. Sem cartão e sem cobrança automática.
@@ -275,7 +289,9 @@ export function ServiceSetupForm({
         </div>
       </div>
       <div className="onb-tip">
-        <span aria-hidden="true">◷</span>
+        <span aria-hidden="true">
+          <Icon name="clock" size={18} />
+        </span>
         <p>
           Comece com um serviço real do seu negócio. Você poderá adicionar
           outros na área de serviços do painel.
@@ -347,7 +363,9 @@ export function ProfessionalSetupForm({
         />
       </div>
       <div className="onb-tip">
-        <span aria-hidden="true">♙</span>
+        <span aria-hidden="true">
+          <Icon name="users" size={18} />
+        </span>
         <p>
           <strong>
             Profissional na agenda é diferente de acesso ao sistema.

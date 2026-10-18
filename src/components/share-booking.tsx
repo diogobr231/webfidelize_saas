@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Icon } from "@/components/ui/icon";
 
 export function ShareBooking({
   url,
@@ -33,6 +34,7 @@ export function ShareBooking({
       />
       <div className="workspace-actions">
         <button type="button" onClick={copy}>
+          <Icon name="copy" size={16} />
           Copiar link
         </button>
         <a

@@ -1,0 +1,218 @@
+.admin-shell {
+  min-height: 100vh;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  color: var(--text);
+  background: var(--bg);
+}
+.admin-topbar {
+  min-height: 80px;
+  padding: 16px max(24px, calc((100vw - 1200px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.admin-topbar-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.admin-access {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--muted);
+}
+.admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+.admin-billing-note {
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+  background: #f0f6fa;
+  border: 1px solid #dce8f0;
+  border-radius: var(--radius-md);
+  margin: 28px 0;
+  color: #33566d;
+}
+.admin-billing-note > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.admin-billing-note strong {
+  font-size: 14px;
+}
+.admin-billing-note p {
+  color: #4d6678;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 6px 0 0;
+}
+.admin-companies {
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.admin-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.admin-section-heading h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+.admin-section-heading p {
+  margin: 0;
+  font-size: 13px;
+}
+.admin-count {
+  padding: 6px 10px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.admin-companies table {
+  margin: 0;
+}
+.admin-companies th {
+  background: var(--surface-subtle);
+}
+.admin-companies th,
+.admin-companies td {
+  padding: 18px 24px;
+}
+.admin-companies td {
+  vertical-align: top;
+}
+.admin-company-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+}
+.admin-company-name strong {
+  font-size: 14px;
+}
+.admin-company-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf5f3;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+.admin-company-controls {
+  margin: 10px 0 0 44px;
+}
+.admin-company-controls summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+.admin-company-controls summary:hover {
+  text-decoration: underline;
+}
+.admin-manage-form {
+  padding: 16px;
+  margin-top: 12px;
+  min-width: 270px;
+  border: 1px solid var(--line);
+  background: var(--surface-subtle);
+  border-radius: 10px;
+}
+.admin-manage-form label {
+  font-size: 12px;
+}
+.admin-manage-form input,
+.admin-manage-form select {
+  margin-top: 6px;
+}
+.admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #edf0f4;
+  color: #536171;
+  white-space: nowrap;
+}
+.admin-status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+}
+.admin-status-trialing {
+  color: #3b63a0;
+  background: #eef3fd;
+}
+.admin-status-active {
+  color: #147057;
+  background: #eaf6ef;
+}
+.admin-status-past_due {
+  color: #996719;
+  background: #fff6df;
+}
+.admin-status-suspended,
+.admin-status-canceled {
+  color: #a3474a;
+  background: #fcf0f0;
+}
+@media (max-width: 700px) {
+  .admin-topbar {
+    padding: 16px;
+    flex-wrap: wrap;
+  }
+  .admin-topbar-actions {
+    gap: 8px;
+  }
+  .admin-topbar-actions .button {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+  .admin-access {
+    font-size: 9px;
+  }
+  .admin-content {
+    padding: 28px 16px 40px;
+  }
+  .admin-section-heading {
+    padding: 20px 16px;
+    align-items: flex-start;
+  }
+  .admin-companies th,
+  .admin-companies td {
+    padding: 16px;
+  }
+  .admin-companies table {
+    min-width: 650px;
+  }
+}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { setupProgress, type SetupStep } from "@/lib/onboarding";
 import { niches } from "@/lib/catalog";
+import { Icon } from "@/components/ui/icon";
 import "./onboarding.css";
 
 const stepContent: Record<
@@ -63,13 +64,16 @@ export function OnboardingFrame({
     <section className="onb-page" aria-labelledby="onb-title">
       <div className="onb-container">
         <header className="onb-header">
-          <span className="onb-header-label">Primeiros passos</span>
+          <span className="onb-header-label">
+            <Icon name="layout" size={18} />
+            Primeiros passos
+          </span>
           <Link
             href={pauseHref}
             className="onb-pause-link"
             aria-describedby="onb-pause-hint"
           >
-            Continuar depois <span aria-hidden="true">↗</span>
+            Continuar depois <Icon name="arrow-up-right" size={16} />
           </Link>
         </header>
         <div className="onb-intro">
@@ -95,7 +99,7 @@ export function OnboardingFrame({
               const contents = (
                 <>
                   <span className="onb-step-marker" aria-hidden="true">
-                    {complete ? "✓" : index + 1}
+                    {complete ? <Icon name="check" size={16} /> : index + 1}
                   </span>
                   <span className="onb-step-copy">
                     <strong>{step.name}</strong>
@@ -143,19 +147,7 @@ export function OnboardingFrame({
           <aside className="onb-context" aria-label="Progresso salvo">
             <div className="onb-context-header">
               <span className="onb-context-icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="25"
-                  height="25"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="4" y="4" width="16" height="17" rx="3" />
-                  <path d="M8 2v4M16 2v4M8 12l3 3 5-6" />
-                </svg>
+                <Icon name="check" size={20} />
               </span>
               <span>O que já está salvo</span>
             </div>
@@ -210,7 +202,7 @@ export function OnboardingFrame({
             </p>
             {company ? (
               <Link href={`/painel/${company.id}`} className="onb-context-link">
-                Abrir painel da empresa <span aria-hidden="true">→</span>
+                Abrir painel da empresa <Icon name="arrow-right" size={16} />
               </Link>
             ) : null}
             <div className="onb-context-next">
