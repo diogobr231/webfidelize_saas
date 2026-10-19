@@ -1,0 +1,104 @@
+.team-member-info strong {
+  overflow-wrap: anywhere;
+}
+.team-member-info .team-unassigned-note {
+  color: #8a531d;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.team-revoke-form {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.team-revoke-form > button {
+  min-height: 40px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.team-assignment-panel {
+  margin-top: 24px;
+}
+.team-assignment-heading {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+.team-assignment-heading h2 {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+.team-assignment-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 760px;
+}
+.team-assignments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  gap: 16px;
+}
+.team-assignment-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.team-assignment-card label {
+  margin: 0;
+  font-size: 12px;
+}
+.team-assignment-card > button {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+.team-professional-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.team-professional-title > .ui-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.team-professional-title h3 {
+  font-size: 15px;
+  margin: 0 0 5px;
+}
+.team-professional-title p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.team-assignment-panel > .operations-field-note {
+  margin: 18px 0 0;
+}
+@media (max-width: 600px) {
+  .team-members > li {
+    flex-wrap: wrap;
+  }
+  .team-revoke-form {
+    margin-left: 56px;
+    width: calc(100% - 56px);
+  }
+  .team-revoke-form > button {
+    min-height: 44px;
+  }
+  .team-assignment-card {
+    padding: 16px;
+  }
+  .team-assignment-card > button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
