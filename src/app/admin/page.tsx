@@ -5,11 +5,17 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { Brand } from "@/components/ui/brand";
+import { ConfirmSubmit } from "@/components/confirm-submit";
 import { niches } from "@/lib/catalog";
 import { manageCompany } from "./actions";
 import "./admin.css";
 export const dynamic = "force-dynamic";
-export default async function Admin() {
+export default async function Admin({
+  searchParams,
+}: {
+  searchParams: Promise<{ erro?: string; salvo?: string }>;
+}) {
+  const feedback = await searchParams;
   const { db } = await requireUser();
   const { data: admin, error: authError } = await db.rpc("is_super_admin");
   if (authError || !admin) notFound();
@@ -23,6 +29,9 @@ export default async function Admin() {
       <nav className="admin-topbar" aria-label="Administração da plataforma">
         <Brand href="/painel" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/ajuda">
+            Ajuda e solicitações
+          </Link>
           <span className="admin-access">
             <Icon name="shield" size={14} /> SUPER_ADMIN
           </span>
@@ -32,6 +41,17 @@ export default async function Admin() {
         </div>
       </nav>
       <div className="admin-content">
+        {feedback.erro && (
+          <p role="alert" className="notice error">
+            Não foi possível aplicar a alteração. Confira os valores, permissões
+            e confirme a operação.
+          </p>
+        )}
+        {feedback.salvo === "1" && !feedback.erro && (
+          <p role="status" className="notice">
+            Configuração da empresa atualizada.
+          </p>
+        )}
         <PageHeader
           eyebrow="Visão administrativa"
           title="Empresas da plataforma"
@@ -131,10 +151,10 @@ export default async function Admin() {
                                   required
                                 />
                               </label>
-                              <button>
-                                Aplicar alteração{" "}
-                                <Icon name="check" size={16} />
-                              </button>
+                              <ConfirmSubmit
+                                label="Aplicar alteração"
+                                description={`Esta operação altera o plano, a situação e o prazo de teste de ${c.name}. Suspender ou cancelar bloqueia alterações na empresa. Confira os campos antes de confirmar.`}
+                              />
                             </form>
                           </details>
                         </td>

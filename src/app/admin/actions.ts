@@ -7,6 +7,7 @@ export async function manageCompany(form: FormData) {
   const { db } = await requireUser();
   const { data: admin } = await db.rpc("is_super_admin");
   if (!admin) notFound();
+  if (form.get("confirm_action") !== "yes") redirect("/admin?erro=confirmacao");
   const input = z
     .object({
       c: z.uuid(),
@@ -19,5 +20,5 @@ export async function manageCompany(form: FormData) {
   const { error } = await db.rpc("admin_company", input.data);
   if (error) redirect("/admin?erro=alteracao");
   revalidatePath("/admin");
-  redirect("/admin");
+  redirect("/admin?salvo=1");
 }
