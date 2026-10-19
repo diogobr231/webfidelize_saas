@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { money, niches, plans } from "@/lib/catalog";
+import { money, niches } from "@/lib/catalog";
+import { commercialPlans } from "@/lib/commercial";
 import { landingStructuredData } from "@/lib/seo";
 import { Icon } from "@/components/ui/icon";
 import { Brand } from "@/components/ui/brand";
 import "./landing.css";
 
 export { landingMetadata as metadata } from "@/lib/seo";
+export const dynamic = "force-dynamic";
 
 const whatsapp =
   "https://wa.me/5518997695445?text=Ol%C3%A1!%20Quero%20conhecer%20a%20Web%20Fidelize.";
@@ -65,7 +67,8 @@ const questions = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const plans = await commercialPlans();
   return (
     <main className="wf-site" id="inicio">
       <script
@@ -606,9 +609,18 @@ export default function Home() {
             tamanho de agenda.
           </h2>
           <p>Os mesmos recursos essenciais. Espaço para diferentes equipes.</p>
+          <Link href="/planos" className="wf-inline-link">
+            Comparar planos e condições <Icon name="arrow-right" size={16} />
+          </Link>
         </div>
         <div className="wf-plans-grid">
-          {plans.map((plan, index) => (
+          {!plans && (
+            <p role="status">
+              Os preços estão indisponíveis no momento. Fale conosco pelo
+              WhatsApp para consultar os planos.
+            </p>
+          )}
+          {(plans || []).map((plan, index) => (
             <article
               className={`wf-plan ${index === 1 ? "wf-plan-featured" : ""}`}
               key={plan.id}
