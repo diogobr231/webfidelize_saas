@@ -238,7 +238,7 @@ async function main() {
     );
     const dashboard = await html(`/painel/${companyId}`);
     check(
-      dashboard.includes("Seu dia, mais organizado.") &&
+      dashboard.includes("Seu negócio, em perspectiva.") &&
         dashboard.includes("Próximos atendimentos"),
       "Dashboard content was incomplete.",
     );
@@ -394,6 +394,7 @@ async function main() {
       "name",
       "slug",
       "is_demo",
+      "logo_path",
       "description",
       "address",
       "phone",
