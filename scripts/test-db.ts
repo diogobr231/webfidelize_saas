@@ -2,12 +2,14 @@ import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
 import assert from "node:assert/strict";
+import { storageFixture } from "./storage-fixture";
 // Disposable PostgreSQL WASM. No production data or external database required.
 const db = new PGlite({ extensions: { btree_gist } });
 await db.exec(
   `create role anon nologin; create role authenticated nologin; create schema auth; create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz); create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; grant usage on schema auth to authenticated,anon; grant execute on function auth.uid() to authenticated,anon;`,
 );
 const migrations = await readdir("supabase/migrations").catch(() => []);
+await db.exec(storageFixture);
 for (const name of migrations.filter((n) => n.endsWith(".sql")).sort())
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
 if (!migrations.length) throw new Error("Versioned migrations missing");
@@ -559,6 +561,7 @@ await check("owner publishes only explicit public profile fields", async () => {
     "address",
     "description",
     "is_demo",
+    "logo_path",
     "name",
     "phone",
     "professionals",
@@ -567,6 +570,7 @@ await check("owner publishes only explicit public profile fields", async () => {
     "theme",
   ]);
   assert.equal(catalog.description, profileValues[1]);
+  assert.equal(catalog.logo_path, null);
   assert.equal(catalog.address, profileValues[2]);
   assert.equal(catalog.phone, profileValues[3]);
   assert.equal(catalog.theme, "violet");

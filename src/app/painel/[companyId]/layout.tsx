@@ -1,9 +1,11 @@
 import { Brand } from "@/components/ui/brand";
 import { Icon } from "@/components/ui/icon";
 import { requireCompany } from "@/lib/auth";
+import { signedCompanyLogo } from "@/lib/company-logo";
 import { WorkspaceNav } from "@/components/workspace-nav";
 import { logout } from "@/app/auth/actions";
 import "../painel.css";
+import "./company-preferences.css";
 export default async function CompanyLayout({
   children,
   params,
@@ -12,9 +14,14 @@ export default async function CompanyLayout({
   params: Promise<{ companyId: string }>;
 }) {
   const { companyId } = await params;
-  const { company, role } = await requireCompany(companyId);
+  const { db, company, role } = await requireCompany(companyId);
+  const logo = company.logo_path
+    ? await signedCompanyLogo(db, companyId, company.logo_path)
+    : null;
+  const density =
+    company.display_density === "compact" ? "compact" : "comfortable";
   return (
-    <main className="workspace-shell">
+    <main className="workspace-shell" data-density={density}>
       <a href="#workspace-content" className="workspace-skip-link">
         Ir para o conteúdo
       </a>
@@ -26,7 +33,18 @@ export default async function CompanyLayout({
         </span>
         <div className="workspace-account">
           <span className="company-avatar" aria-hidden="true">
-            {company.name.slice(0, 2).toLocaleUpperCase("pt-BR")}
+            {logo ? (
+              <img
+                className="company-logo"
+                src={logo}
+                alt=""
+                width={36}
+                height={36}
+                decoding="async"
+              />
+            ) : (
+              company.name.slice(0, 2).toLocaleUpperCase("pt-BR")
+            )}
           </span>
           <div>
             <strong>{company.name}</strong>

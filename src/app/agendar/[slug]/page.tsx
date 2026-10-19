@@ -2,6 +2,7 @@ import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import { publicDatabase } from "@/lib/supabase/public";
+import { signedPublicLogo } from "@/lib/company-logo";
 import { money } from "@/lib/catalog";
 import {
   bookingReceiptSchema,
@@ -24,6 +25,7 @@ type Catalog = {
   address?: string;
   phone?: string;
   theme?: string;
+  logo_path?: string | null;
   services: {
     id: string;
     name: string;
@@ -56,6 +58,7 @@ export default async function Booking({
   if (error) throw new Error("Catálogo temporariamente indisponível");
   if (!data) notFound();
   const catalog = data as Catalog;
+  const logo = await signedPublicLogo(db, catalog.logo_path);
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
@@ -136,7 +139,22 @@ export default async function Booking({
         <div className="booking-shell booking-topbar-inner">
           <Link href={`/agendar/${slug}`} className="booking-business">
             <span className="booking-avatar" aria-hidden="true">
-              {initials}
+              {logo ? (
+                <img
+                  src={logo}
+                  alt=""
+                  width={40}
+                  height={40}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: "inherit",
+                  }}
+                />
+              ) : (
+                initials
+              )}
             </span>
             <span>{catalog.name}</span>
           </Link>

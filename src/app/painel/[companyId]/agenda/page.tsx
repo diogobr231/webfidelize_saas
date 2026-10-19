@@ -31,7 +31,12 @@ export default async function Agenda({
   const q = await searchParams;
   const { db, role, company } = await requireCompany(companyId);
   const day = validDay(q.day) ? q.day : saoPauloDay();
-  const view = q.view === "week" ? "week" : "day";
+  const view =
+    q.view === "day" || q.view === "week"
+      ? q.view
+      : company.agenda_view === "week"
+        ? "week"
+        : "day";
   const range = agendaRange(day, view);
   const managed =
     canManage(role) && hasAccess(company.status, company.trial_ends_at);

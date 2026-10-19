@@ -1,0 +1,242 @@
+.personalization-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.personalization-form,
+.personalization-sidebar,
+.personalization-logo-form {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.personalization-form .panel {
+  display: grid;
+  gap: 18px;
+}
+.personalization-section-heading h2 {
+  font-size: 19px;
+  margin: 10px 0 6px;
+}
+.personalization-section-heading p,
+.personalization-related p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0;
+}
+.personalization-form small,
+.personalization-logo-form small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  margin-top: 6px;
+}
+.personalization-colors {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.personalization-colors legend {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.personalization-colors > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.personalization-swatch {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.personalization-swatch[data-selected="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.personalization-swatch > span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.personalization-swatch strong {
+  font-size: 12px;
+}
+.personalization-preview {
+  --preview-accent: #0d8078;
+  --preview-soft: #e6f4f0;
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--preview-soft);
+}
+.personalization-preview[data-theme="blue"] {
+  --preview-accent: #2462c7;
+  --preview-soft: #eaf1ff;
+}
+.personalization-preview[data-theme="violet"] {
+  --preview-accent: #7651c5;
+  --preview-soft: #f0ebfa;
+}
+.personalization-preview[data-theme="rose"] {
+  --preview-accent: #b73f70;
+  --preview-soft: #faebf1;
+}
+.personalization-preview > strong {
+  color: #17212b;
+  overflow-wrap: anywhere;
+}
+.personalization-preview > p {
+  color: #536171;
+  font-size: 13px;
+  margin: 0;
+}
+.personalization-preview > .tag {
+  width: fit-content;
+}
+.personalization-preview-button {
+  width: fit-content;
+  background: var(--preview-accent);
+  border-radius: 8px;
+  color: white;
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.personalization-save {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.personalization-save > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.personalization-sidebar > .panel {
+  padding: 22px;
+}
+.personalization-logo-preview {
+  display: grid;
+  place-items: center;
+  min-height: 146px;
+  margin: 20px 0;
+  background: var(--subtle);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.personalization-logo-preview img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.personalization-logo-preview > span {
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 18px;
+  font-size: 26px;
+  font-weight: 650;
+}
+.personalization-logo-form input[type="file"] {
+  max-width: 100%;
+  padding: 9px;
+  font-size: 12px;
+}
+.personalization-logo-form input[type="file"]::file-selector-button {
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  margin-right: 8px;
+}
+.personalization-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+  font-size: 13px;
+  cursor: pointer;
+}
+.personalization-check > input {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.personalization-related {
+  display: grid;
+  gap: 12px;
+}
+.personalization-related > .ui-icon {
+  color: var(--accent);
+}
+.personalization-related h2 {
+  font-size: 16px;
+  margin: 0;
+}
+.personalization-related a {
+  font-size: 13px;
+}
+.personalization-success {
+  border-color: #add7c5;
+  color: #155c42;
+  background: #edf8f2;
+}
+.personalization-field-error {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #a72e41;
+  margin-top: 6px;
+}
+@media (max-width: 1100px) {
+  .personalization-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .personalization-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .personalization-sidebar > .panel:first-child {
+    grid-row: span 2;
+  }
+}
+@media (max-width: 640px) {
+  .personalization-sidebar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .personalization-save {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .personalization-swatch {
+    padding: 10px 8px;
+    gap: 6px;
+  }
+  .personalization-swatch strong {
+    font-size: 11px;
+  }
+  .personalization-logo-form input[type="file"] {
+    font-size: 14px;
+  }
+}
