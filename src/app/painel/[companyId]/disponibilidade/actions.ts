@@ -40,6 +40,8 @@ export async function removeShift(form: FormData) {
   if (!input.success) redirect("/painel?erro=validacao");
   const { company_id: c, id } = input.data;
   const { db } = await requireCompany(c, true, true);
+  if (form.get("confirm_action") !== "yes")
+    redirect(`/painel/${c}/disponibilidade?erro=confirmacao`);
   const { error } = await db
     .from("availability")
     .delete()

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser, requireCompany } from "@/lib/auth";
 import { niches } from "@/lib/catalog";
+import { setupServiceSchema } from "@/lib/onboarding";
 import {
   localAppointmentInstant,
   saoPauloDay,
@@ -53,24 +54,19 @@ export async function saveRecord(form: FormData) {
       .min(5)
       .max(480)
       .safeParse(form.get("duration"));
-    const price = z.coerce
-      .number()
-      .finite()
-      .min(0)
-      .max(100000)
-      .safeParse(form.get("price"));
+    const price = setupServiceSchema.shape.price.safeParse(form.get("price"));
     if (!duration.success || !price.success)
       redirect(`/painel/${company.data}/services?erro=validacao`);
     record = {
       ...record,
       duration_minutes: duration.data,
-      price_cents: Math.round(price.data * 100),
+      price_cents: price.data,
     };
   }
   const { error } = await db.from(kind.data).insert(record);
   if (error) redirect(`/painel/${company.data}/${kind.data}?erro=salvar`);
   revalidatePath(`/painel/${company.data}`, "layout");
-  redirect(`/painel/${company.data}/${kind.data}`);
+  redirect(`/painel/${company.data}/${kind.data}?salvo=1`);
 }
 export async function createAppointment(form: FormData) {
   const company = id.safeParse(form.get("company_id"));

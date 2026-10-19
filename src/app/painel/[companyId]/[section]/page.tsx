@@ -3,12 +3,18 @@ import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
 import { canManage } from "@/lib/permissions";
 import { money } from "@/lib/catalog";
+import {
+  recordFilters,
+  recordNamePattern,
+  recordPagination,
+} from "@/lib/record-list";
 import { saveRecord, createAppointment } from "../../actions";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { PendingButton } from "@/components/pending-button";
 import "../../operations.css";
+import "./records.css";
 const labels = {
   customers: "Clientes",
   services: "Serviços",
@@ -53,19 +59,47 @@ export default async function Records({
   searchParams,
 }: {
   params: Promise<{ companyId: string; section: string }>;
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{
+    erro?: string;
+    salvo?: string;
+    q?: string | string[];
+    pagina?: string | string[];
+  }>;
 }) {
   const { companyId, section } = await params;
-  if (!(section in labels)) notFound();
+  if (!Object.hasOwn(labels, section)) notFound();
   const { db, role } = await requireCompany(companyId);
   const p = await searchParams;
+  const filters = recordFilters(p);
   const table = section === "agenda" ? "appointments" : section;
-  const { data: rows, error } = await db
+  const searchable = section !== "agenda";
+  const search = searchable ? filters.search : "";
+  const base = `/painel/${companyId}/${section}`;
+  let countQuery = db
+    .from(table)
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId);
+  if (search) countQuery = countQuery.ilike("name", recordNamePattern(search));
+  const countResult = await countQuery;
+  const pagination = recordPagination(filters.page, countResult.count ?? 0);
+  let recordsQuery = db
     .from(table)
     .select("*")
     .eq("company_id", companyId)
     .order(section === "agenda" ? "starts_at" : "name")
-    .limit(100);
+    .order("id")
+    .range(pagination.from, pagination.to);
+  if (search)
+    recordsQuery = recordsQuery.ilike("name", recordNamePattern(search));
+  const result = countResult.error
+    ? { data: null, error: countResult.error }
+    : countResult.count === 0
+      ? { data: [], error: null }
+      : await recordsQuery;
+  const { data: rows, error } = result;
+  const total = countResult.count ?? 0;
+  const pageLink = (page: number) =>
+    `${base}?${new URLSearchParams({ ...(search ? { q: search } : {}), pagina: String(page) })}#registros`;
   const managed = canManage(role);
   const display = presentation[section as keyof typeof presentation];
   const [customers, services, professionals] =
@@ -97,8 +131,18 @@ export default async function Records({
             : "Não foi possível concluir. Confira os campos, seu plano e suas permissões."}
         </div>
       )}
+      {p.salvo === "1" && !p.erro && !error && (
+        <p className="notice" role="status">
+          Cadastro salvo. As informações já estão disponíveis para sua empresa.
+        </p>
+      )}
+      {filters.warning && (
+        <p className="notice" role="status">
+          {filters.warning}
+        </p>
+      )}
       <div className={`records-layout${managed ? " has-editor" : ""}`}>
-        <section className="panel records-list">
+        <section className="panel records-list" id="registros">
           <div className="records-list-heading">
             <div>
               <span className="operations-icon">
@@ -112,24 +156,58 @@ export default async function Records({
               </h2>
             </div>
             <span className="operations-count">
-              {rows?.length ?? 0} exibidos
+              {error
+                ? "Indisponível"
+                : `${total.toLocaleString("pt-BR")} ${search ? "encontrados" : "cadastrados"}`}
             </span>
           </div>
+          {searchable && (
+            <form
+              className="record-search"
+              role="search"
+              action={base}
+              method="get"
+            >
+              <label htmlFor="record-search">Buscar por nome</label>
+              <div>
+                <input
+                  type="search"
+                  id="record-search"
+                  name="q"
+                  defaultValue={search}
+                  maxLength={80}
+                  placeholder={`Buscar ${display.singular}…`}
+                />
+                <button className="button secondary" type="submit">
+                  <Icon name="search" size={16} /> Buscar
+                </button>
+              </div>
+              {search && <Link href={`${base}#registros`}>Limpar busca</Link>}
+            </form>
+          )}
           {!rows?.length ? (
             <EmptyState
               icon={display.icon}
-              title={error ? "Dados indisponíveis" : display.empty}
+              title={
+                error
+                  ? "Dados indisponíveis"
+                  : search
+                    ? "Nenhum resultado para esta busca"
+                    : display.empty
+              }
               description={
                 error
                   ? "Atualize a página para tentar carregar os dados novamente."
-                  : managed
-                    ? display.hint
-                    : "Os registros disponíveis para seu perfil aparecerão aqui."
+                  : search
+                    ? "Confira o nome digitado ou limpe a busca para ver todos os registros autorizados."
+                    : managed
+                      ? display.hint
+                      : "Os registros disponíveis para seu perfil aparecerão aqui."
               }
             />
           ) : (
             <div className="table-wrap">
-              <table className="records-table">
+              <table className="records-table" role="table">
                 <caption className="sr-only">
                   Registros de{" "}
                   {labels[section as keyof typeof labels].toLocaleLowerCase(
@@ -137,27 +215,36 @@ export default async function Records({
                   )}{" "}
                   da empresa
                 </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">
+                <thead role="rowgroup">
+                  <tr role="row">
+                    <th scope="col" role="columnheader">
                       {section === "agenda" ? "Início" : "Nome"}
                     </th>
-                    <th scope="col">
+                    <th scope="col" role="columnheader">
                       {section === "customers" ? "Telefone" : "Detalhes"}
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody role="rowgroup">
                   {rows.map((row) => (
-                    <tr key={row.id}>
-                      <td className="record-name">
+                    <tr key={row.id} role="row">
+                      <td
+                        role="cell"
+                        className="record-name"
+                        data-label={section === "agenda" ? "Início" : "Nome"}
+                      >
                         {section === "agenda"
                           ? new Date(row.starts_at).toLocaleString("pt-BR", {
                               timeZone: "America/Sao_Paulo",
                             })
                           : row.name}
                       </td>
-                      <td>
+                      <td
+                        role="cell"
+                        data-label={
+                          section === "customers" ? "Telefone" : "Detalhes"
+                        }
+                      >
                         {section === "services" ? (
                           `${row.duration_minutes} min · ${money(row.price_cents)}`
                         ) : section === "customers" ? (
@@ -179,6 +266,42 @@ export default async function Records({
                 </tbody>
               </table>
             </div>
+          )}
+          {!error && total > 0 && (
+            <nav
+              className="record-pagination"
+              aria-label="Páginas dos registros"
+            >
+              <p>
+                Exibindo {pagination.from + 1}–
+                {pagination.from + (rows?.length ?? 0)} de{" "}
+                {total.toLocaleString("pt-BR")}{" "}
+                <span>
+                  · Página {pagination.page} de {pagination.pages}
+                </span>
+              </p>
+              <div>
+                {pagination.page > 1 && (
+                  <Link
+                    className="button secondary"
+                    href={pageLink(pagination.page - 1)}
+                    rel="prev"
+                  >
+                    <Icon name="chevron-left" size={16} /> Anterior
+                  </Link>
+                )}
+                {pagination.page < pagination.pages &&
+                  pagination.page < 10_000 && (
+                    <Link
+                      className="button secondary"
+                      href={pageLink(pagination.page + 1)}
+                      rel="next"
+                    >
+                      Próxima <Icon name="chevron-right" size={16} />
+                    </Link>
+                  )}
+              </div>
+            </nav>
           )}
         </section>
         {managed && (
@@ -281,10 +404,10 @@ export default async function Records({
                         <input
                           id="price"
                           name="price"
-                          type="number"
-                          min={0}
-                          max={100000}
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
+                          maxLength={9}
+                          placeholder="50,00"
                           required
                         />
                       </div>

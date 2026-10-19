@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { requireCompany } from "@/lib/auth";
+import { ConfirmSubmit } from "@/components/confirm-submit";
 import { canManage, hasAccess } from "@/lib/permissions";
 import { PendingButton } from "@/components/pending-button";
 import { ShareBooking } from "@/components/share-booking";
@@ -61,6 +62,7 @@ export default async function Availability({
       ).toString()
     : "";
   const messages: Record<string, string> = {
+    confirmacao: "Confirme a remoção do turno antes de continuar.",
     turno:
       "Não foi possível adicionar o turno. Confira se o fim é depois do início e se já existe outro turno nesse horário.",
     remover:
@@ -198,11 +200,10 @@ export default async function Availability({
                                       name="id"
                                       value={shift.id}
                                     />
-                                    <button
-                                      aria-label={`Remover turno de ${professional.name}, ${day}, ${time(shift.start_minute)} a ${time(shift.end_minute)}`}
-                                    >
-                                      ×
-                                    </button>
+                                    <ConfirmSubmit
+                                      label="Remover turno"
+                                      description={`Remover o turno de ${professional.name}, ${day}, das ${time(shift.start_minute)} às ${time(shift.end_minute)}. Os agendamentos existentes serão preservados.`}
+                                    />
                                   </form>
                                 )}
                               </div>

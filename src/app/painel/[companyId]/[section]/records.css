@@ -1,0 +1,68 @@
+.record-search {
+  display: grid;
+  gap: 8px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.record-search label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.record-search > div {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  min-width: 0;
+}
+.record-search input {
+  flex: 1;
+  min-width: 0;
+}
+.record-search button {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.record-search > a {
+  justify-self: start;
+  color: var(--cyan);
+  font-size: 12px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+}
+.record-pagination {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 24px;
+  border-top: 1px solid var(--line);
+}
+.record-pagination p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.record-pagination > div {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.record-pagination .button {
+  min-height: 44px;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .record-search,
+  .record-pagination {
+    padding: 16px;
+  }
+  .record-search > a {
+    min-height: 44px;
+  }
+  .record-pagination p span {
+    display: block;
+  }
+}
