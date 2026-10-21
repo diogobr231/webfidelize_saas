@@ -10,6 +10,8 @@ Preparação de acesso por e-mail: [configuração, testes e pendências de prod
 
 Situação consolidada mais recente: [revisão para o primeiro piloto](docs/STATUS-PILOTO.md), de 21/10/2026, incluindo testes por segmento, perfis e limites comerciais.
 
+Lembretes por WhatsApp: [configuração e operação](docs/WHATSAPP.md). Inclui confirmação de presença, antecedências configuráveis, consentimento e teto mensal por empresa. O envio fica desabilitado até configurar a conexão oficial, aprovar o modelo e ativar o agendador de produção; não depende do Mercado Pago.
+
 O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a identidade grafite e menta, a área de trabalho clara, os tokens, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
 
 ## Executar
@@ -36,8 +38,10 @@ pnpm test:help:db
 pnpm test:team:db
 pnpm test:operations:db
 pnpm test:personalization:db
+pnpm test:whatsapp:db
 pnpm build
 pnpm test:auth:isolated
+pnpm test:whatsapp:http
 ```
 
 As suítes `*:db` usam PostgreSQL descartável via PGlite e não alteram empresas reais. `test:db` verifica as migrações e o isolamento com os papéis authenticated/anon; as suítes específicas cobrem agregações do dashboard, ajuda e chamados, vínculos/revogação de acessos, edição/arquivamento/bloqueios operacionais e personalização. As fixtures locais do Storage verificam políticas SQL, mas não substituem o serviço HTTP real. `scripts/remote-isolation.sql` verifica parte das garantias no Supabase real, dentro de transação com ROLLBACK. Auth, SMTP, Storage e pagamentos exigem também homologação própria.
