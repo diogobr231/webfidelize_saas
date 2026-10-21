@@ -28,9 +28,12 @@ jobs:
       - run: pnpm test:personalization:db
       - run: pnpm test:operations:db
       - run: pnpm test:sales:db
+      - run: pnpm test:trial:db
+      - run: pnpm test:team-insights:db
       - run: pnpm test:whatsapp:db
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm test:auth:isolated
       - run: pnpm test:whatsapp:http
+      - run: pnpm test:team-insights:http

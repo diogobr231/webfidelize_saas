@@ -97,7 +97,7 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Site responsivo, página `/planos`, comparação de recursos e limites, plano recomendado e WhatsApp comercial. Landing e páginas de planos consultam o mesmo catálogo do banco; não há preços alternativos fixados na interface.
 - Entradas por oito nichos, com autenticação compartilhada e autorização por vínculo.
 - Cadastro, login, confirmação, recuperação e troca de senha com Supabase SSR.
-- Criação transacional de empresa e OWNER, trial de sete dias calculado no banco.
+- Criação transacional de empresa e OWNER. Novas empresas ficam em `pending_card`, sem consumir o teste de sete dias, até autorização do cartão pelo provedor. A integração de ativação ainda está pendente; os testes anteriores conservam seus prazos.
 - Clientes, serviços, profissionais e criação de agendamentos; duração vem do serviço. As listas possuem busca por nome, paginação de 25 registros, total exato autorizado e ordenação estável, sem o corte anterior de 100 cadastros.
 - Fichas de clientes, serviços e profissionais com edição, controle de versão concorrente, arquivamento e reativação confirmados. Filtros Ativos/Arquivados/Todos e histórico paginado do cliente preservam vínculos e atendimentos. Arquivar profissional não revoga seu login; o OWNER gerencia acessos separadamente em **Equipe e acessos**. Veja as [regras operacionais](docs/STATUS-OPERACOES.md).
 - Agenda visual diária e semanal, filtros por profissional, horários clicáveis e detalhes com nomes de cliente, serviço e profissional. OWNER e MANAGER podem remarcar, cancelar e concluir atendimentos conforme as permissões e o estado da assinatura.
@@ -117,7 +117,7 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Central de ajuda por assunto/módulo, busca, FAQs, tutoriais, orientações de primeiro acesso, solicitações e WhatsApp. Chamados são isolados por empresa; colaboradores consultam seus próprios pedidos. SUPER_ADMIN edita/publica conteúdos e responde às solicitações. Suporte permanece acessível após o fim do trial.
 - Página de assinatura por empresa com plano, utilização, prazo e estado consultados no backend. O contato comercial não altera o plano nem concede acesso pago. Checkout e webhook do Mercado Pago ainda não estão implementados.
 - Navegação adaptada para celular, tablet e computador, atalhos móveis, tabelas com apresentação por registro, formulários responsivos, skeletons, feedback de sucesso/erro, botões com estado pendente e confirmações nas ações que retiram dados ou acesso. As transições respeitam a preferência de movimento reduzido.
-- SUPER_ADMIN: consulta empresas, ajusta plano, suspende/cancela e estende trial até 30 dias. Ativação paga não está disponível manualmente.
+- SUPER_ADMIN: consulta empresas, ajusta plano, suspende/cancela e administra os trials anteriores à exigência de cartão (até 30 dias). Não pode iniciar manualmente novos trials nem ativar assinatura paga.
 
 ## Ainda pendente antes da primeira venda
 
@@ -168,11 +168,23 @@ Implementação conforme as convenções oficiais de [metadados e imagens sociai
 
 ## Primeiro acesso e retomada
 
-Quem entra sem empresa é encaminhado a `/comecar`, onde informa nome e segmento, sem nicho pré-selecionado. Criar a empresa inicia o trial já definido no banco. A configuração continua em `/painel/[companyId]/configuracao`, com as etapas `empresa`, `servicos`, `equipe` e `resumo`. Proprietários com empresa existente retomam o cadastro atual; não recebem outro trial ao reabrir o fluxo.
+Quem entra sem empresa é encaminhado a `/comecar`, onde informa nome e segmento, sem nicho pré-selecionado. Novas empresas seguem para `/painel/[companyId]/assinatura`, aguardando autorização do cartão; criar a empresa não inicia o teste. Após a futura integração confirmar a autorização e programar a primeira mensalidade para depois dos sete dias, a configuração continuará em `/painel/[companyId]/configuracao`, com as etapas `empresa`, `servicos`, `equipe` e `resumo`. Proprietários com empresa existente retomam o cadastro atual; não recebem outro trial ao reabrir o fluxo. Convites de colaboradores não exigem cartão.
 
 **Salvar e continuar depois** valida e persiste a etapa antes de voltar ao painel. O link **Continuar depois** apenas sai da tela: mantém o que já foi salvo, mas não guarda os campos ainda não enviados. Erros de validação preservam o preenchimento no formulário; o roteiro live verifica também a resposta HTML completa de erro sem JavaScript, com os campos preservados e o formulário aberto. Não há rascunho em localStorage. O menu **Primeiros passos** permite retomar e revisar os cadastros. O resumo distingue os três cadastros iniciais da configuração de horários e da publicação da página.
 
 Um profissional é quem aparece na agenda; cadastrá-lo não cria usuário nem envia convite. O proprietário que atende também ocupa uma vaga de profissional. Em **Equipe e acessos**, o OWNER pode vincular uma conta já pertencente à empresa a um profissional existente, desvinculá-la ou revogar o acesso de gerentes/colaboradores, preservando os atendimentos. OWNER e MANAGER podem usar a configuração inicial conforme suas permissões; as ações continuam sujeitas à assinatura, autorização no servidor e RLS. A revogação de acessos permanece disponível mesmo após bloqueio comercial.
+
+### Benefícios dos planos e trabalho da equipe
+
+- **Essencial — R$ 69,90/mês, 1 profissional:** conserva agenda, CRM, reservas públicas e os recursos já existentes. **Meu dia** está disponível em todos os planos: colaborador vinculado consulta seus atendimentos e confirma a conclusão somente depois do horário final, sem poder editar os demais dados da agenda.
+- **Profissional — R$ 119,90/mês, até 3 profissionais:** acrescenta indicadores por profissional, disponíveis ao proprietário e gerente: agendados, concluídos, cancelados, presenças confirmadas e minutos reservados, consultados em períodos de até 31 dias.
+- **Empresarial — R$ 199,90/mês, até 10 profissionais:** acrescenta períodos de até 90 dias e exportação CSV dos indicadores agregados. A exportação não inclui nomes nem contatos dos clientes e protege células contra fórmulas de planilha.
+
+As permissões extras vêm de `plans.team_insights` e `plans.team_export`, consultadas novamente no banco a cada RPC. Colaboradores não podem consultar indicadores de outros profissionais nem exportar relatórios gerenciais. Profissionais arquivados permanecem no relatório quando têm histórico no período. “Minutos reservados” não é taxa de ocupação nem faturamento; cancelamentos ficam fora desse total. O catálogo do banco continua sendo a fonte de preços e limites exibidos. Pagamentos e mudanças automáticas de plano dependem da futura integração.
+
+Validação local: `pnpm test:trial:db` verifica a nova regra de cartão sem contornar a autorização; `pnpm test:team-insights:db` verifica plano, período, isolamento e conclusão própria. As suítes de regressão usam `scripts/legacy-trial-fixture.ts` exclusivamente no PGlite descartável para representar empresas anteriores à mudança. Esse helper nunca deve ser executado no banco real ou importado pela aplicação.
+
+Após `pnpm build`, `pnpm test:team-insights:http` inicia um Next isolado com Auth/REST sintéticos e bloqueio de chamadas externas: verifica acesso, renderização, conclusão via Server Action, mudanças de permissão, exportação e falhas, e executa a regressão de landing/planos/cadastro. Em 21/10/2026 passaram 14 grupos de política de trial, 15 de equipe no banco, 8 de equipe HTTP e 14 de páginas públicas, além das regressões existentes, TypeScript e build. As duas migrações foram aplicadas ao Supabase; os status e prazos das nove empresas existentes foram preservados. Verificação visual/mobile, concorrência entre conexões PostgreSQL e autorização/cobrança real do cartão continuam fora dessa evidência automatizada. Permanece o aviso preexistente de [proteção contra senhas vazadas desabilitada](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
 O fluxo inicial reutiliza as tabelas e regras existentes. Serviços e profissionais recebem um UUID de registro por formulário: repetir o mesmo envio com o mesmo conteúdo retoma o cadastro salvo, sem inserir outro. O UUID não substitui a autorização por empresa.
 

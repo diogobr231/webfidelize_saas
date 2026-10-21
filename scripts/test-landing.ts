@@ -140,11 +140,12 @@ const responses = await Promise.all([
   get("/entrar"),
   get("/planos"),
   get("/__qa_page_not_found__", 404),
+  get("/cadastro"),
+  get(`/cadastro?next=${encodeURIComponent(`/convite/${"a".repeat(64)}`)}`),
 ]);
 assert.match(responses[0].headers.get("content-type") || "", /^text\/html\b/i);
-const [home, robots, sitemap, login, plans, missing] = await Promise.all(
-  responses.map((response) => response.text()),
-);
+const [home, robots, sitemap, login, plans, missing, signup, invitationSignup] =
+  await Promise.all(responses.map((response) => response.text()));
 
 const headings = [...home.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/gi)];
 assert.equal(headings.length, 1, "A landing deve ter um único H1.");
@@ -207,6 +208,43 @@ for (const anchor of whatsappLinks) {
   );
 }
 pass("H1 único, CTA de 7 dias para cadastro e contato comercial correto");
+
+const homeText = readableText(home);
+assert.match(homeText, /cartão obrigatório para ativar/i);
+assert.match(homeText, /primeira mensalidade somente após os 7 dias/i);
+assert.match(homeText, /renovação mensal/i);
+assert.match(
+  homeText,
+  /cancelar antes do fim do teste evita a primeira cobrança/i,
+);
+assert.match(homeText, /ativação do teste em preparação/i);
+assert.doesNotMatch(
+  homeText,
+  /sem cartão|nenhum cartão é solicitado|começam na criação da empresa/i,
+);
+assert.match(
+  readableText(signup),
+  /exige cartão cadastrado e autorizado no Mercado Pago/i,
+);
+assert.match(
+  readableText(signup),
+  /criar sua conta agora não inicia o período/i,
+);
+assert.doesNotMatch(
+  signup,
+  /autocomplete="cc-|name="(?:card|card_number|cvv|cvc)"/i,
+);
+assert.match(
+  readableText(invitationSignup),
+  /usando o e-mail que recebeu o convite/i,
+);
+assert.doesNotMatch(
+  readableText(invitationSignup),
+  /cartão|mensalidade|ativação do teste/i,
+);
+pass(
+  "Oferta exige cartão antes do teste sem coletar dados de pagamento ou impor cobrança ao colaborador convidado",
+);
 
 const ids = new Set(
   [...home.matchAll(/<[^>]+\bid\s*=\s*["']([^"']+)["'][^>]*>/gi)].map((match) =>
@@ -366,15 +404,24 @@ const plansText = readableText(plans);
 for (const condition of [
   /7 dias no Essencial/i,
   /1 profissional/i,
-  /sem cartão/i,
-  /sem cobrança automática/i,
-  /começa quando você cria a empresa/i,
+  /cartão obrigatório/i,
+  /primeira mensalidade após 7 dias/i,
+  /período começa após a confirmação do cartão/i,
+  /criar a empresa não inicia o teste/i,
+  /renovação mensal/i,
+  /cancelar antes do fim do teste evita a primeira cobrança/i,
+  /ativação em preparação/i,
   /proprietário também conta quando atende/i,
   /convite para acessar o painel é diferente/i,
   /cobrança online ainda não está disponível/i,
   /não ativa uma assinatura nem altera o plano/i,
 ])
   assert.match(plansText, condition);
+assert.doesNotMatch(
+  plansText,
+  /sem cartão|sem cobrança automática|começa quando você cria a empresa/i,
+  "O teste exige cartão e não pode começar apenas com o cadastro da empresa.",
+);
 const planLinks = links(plans);
 const planTrials = planLinks.filter((link) =>
   /Testar grátis por 7 dias/.test(link.text),
@@ -422,8 +469,78 @@ for (const link of planLinks) {
     "A comparação deve encaminhar ao cadastro ou contato, sem ativação simulada.",
   );
 }
+// React streams some price-card children into hidden fragments after the shell.
+// Reconstruct only the literal template/fragment moves announced by React's
+// transport; do not execute any scripts or treat its serialized RSC as DOM text.
+function resolvedHtmlFragments(html: string) {
+  const moves = new Map<string, string>();
+  for (const match of html.matchAll(/\$R([SC])\("([^"]+)","([^"]+)"\)/g)) {
+    moves.set(
+      match[1] === "S" ? match[3] : match[2],
+      match[1] === "S" ? match[2] : match[3],
+    );
+  }
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+  const sources = new Map<string, string>();
+  const ranges: { start: number; end: number }[] = [];
+  for (const opening of markup.matchAll(
+    /<([a-z][\w:-]*)\b[^>]*\bid="S:[^"]+"[^>]*>/g,
+  )) {
+    const id = attributes(opening[0]).id;
+    const start = opening.index;
+    const contentStart = start + opening[0].length;
+    const tags = new RegExp(`<\\/?${opening[1]}\\b[^>]*>`, "g");
+    tags.lastIndex = contentStart;
+    let depth = 1;
+    let close: RegExpExecArray | null;
+    while ((close = tags.exec(markup))) {
+      depth += close[0].startsWith("</") ? -1 : 1;
+      if (depth === 0) {
+        sources.set(id, markup.slice(contentStart, close.index));
+        ranges.push({ start, end: tags.lastIndex });
+        break;
+      }
+    }
+    assert.equal(
+      depth,
+      0,
+      "Fragmento HTML deve possuir um fechamento completo.",
+    );
+  }
+  let shell = markup;
+  const outerRanges = ranges.filter(
+    (range) =>
+      !ranges.some(
+        (parent) =>
+          parent !== range &&
+          parent.start < range.start &&
+          parent.end >= range.end,
+      ),
+  );
+  for (const range of outerRanges.sort((a, b) => b.start - a.start))
+    shell = shell.slice(0, range.start) + shell.slice(range.end);
+  const expand = (value: string, seen = new Set<string>()): string =>
+    value.replace(/<template\b[^>]*><\/template>/g, (template) => {
+      const sourceId = moves.get(attributes(template).id);
+      if (!sourceId) return template;
+      assert.ok(!seen.has(sourceId), "Fragmentos não podem formar ciclos.");
+      const source = sources.get(sourceId);
+      assert.notEqual(
+        source,
+        undefined,
+        "Todo fragmento referenciado precisa ser entregue.",
+      );
+      return expand(source!, new Set([...seen, sourceId]));
+    });
+  return expand(shell);
+}
+
 function displayedPlans(html: string) {
-  return [...html.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)]
+  return [
+    ...resolvedHtmlFragments(html).matchAll(
+      /<article\b[^>]*>([\s\S]*?)<\/article>/gi,
+    ),
+  ]
     .flatMap((match) => {
       const text = readableText(match[1]);
       const price = text.match(/R\$\s*[\d.]+,\d{2}/)?.[0];

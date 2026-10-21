@@ -28,7 +28,10 @@
     "test:personalization": "tsx scripts/test-personalization-live.ts",
     "test:experience": "tsx scripts/test-experience-live.ts",
     "test:landing": "tsx scripts/test-landing.ts",
-    "test:onboarding": "tsx scripts/test-onboarding-live.ts"
+    "test:onboarding": "tsx scripts/test-onboarding-live.ts",
+    "test:trial:db": "tsx scripts/test-card-trial-db.ts",
+    "test:team-insights:db": "tsx scripts/test-team-insights-db.ts",
+    "test:team-insights:http": "tsx scripts/test-team-insights-http.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
