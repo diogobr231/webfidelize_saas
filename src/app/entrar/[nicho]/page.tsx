@@ -5,6 +5,7 @@ import { login } from "@/app/auth/actions";
 import { AuthShell } from "@/components/auth-shell";
 import { PendingButton } from "@/components/pending-button";
 import { Icon } from "@/components/ui/icon";
+import { authDestination, authPageUrl } from "@/lib/auth-flow";
 
 const nicheIcons = {
   salao: "scissors",
@@ -23,10 +24,13 @@ export function generateStaticParams() {
 }
 export default async function NicheLogin({
   params,
+  searchParams,
 }: {
   params: Promise<{ nicho: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
   const { nicho } = await params;
+  const next = authDestination((await searchParams).next);
   const n = niches.find((n) => n.slug === nicho);
   if (!n) notFound();
   return (
@@ -40,9 +44,12 @@ export default async function NicheLogin({
       }
       footer={
         <>
-          <Link href="/entrar">Todos os segmentos</Link>
+          <Link href={authPageUrl("/entrar", { next })}>
+            Todos os segmentos
+          </Link>
           <p>
-            É seu primeiro acesso? <Link href="/cadastro">Criar conta</Link>
+            É seu primeiro acesso?{" "}
+            <Link href={authPageUrl("/cadastro", { next })}>Criar conta</Link>
           </p>
         </>
       }
@@ -51,12 +58,14 @@ export default async function NicheLogin({
         <Icon name={nicheIcons[n.slug]} />
       </div>
       <form action={login}>
+        <input type="hidden" name="next" value={next} />
         <label htmlFor="email">E-mail</label>
         <input
           id="email"
           name="email"
           type="email"
           required
+          maxLength={254}
           autoComplete="email"
           placeholder="voce@empresa.com.br"
         />

@@ -15,6 +15,13 @@ const config: NextConfig = {
           },
         ],
       },
+      ...["/auth/:path*", "/convite/:path*", "/nova-senha"].map((source) => ({
+        source,
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      })),
     ];
   },
 };

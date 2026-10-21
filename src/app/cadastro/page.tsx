@@ -3,44 +3,59 @@ import { signup } from "@/app/auth/actions";
 import { PendingButton } from "@/components/pending-button";
 import { AuthShell } from "@/components/auth-shell";
 import { Icon } from "@/components/ui/icon";
+import {
+  authDestination,
+  authErrorMessage,
+  authPageUrl,
+} from "@/lib/auth-flow";
 
 export default async function Signup({
   searchParams,
 }: {
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{ erro?: string; next?: string }>;
 }) {
   const p = await searchParams;
+  const next = authDestination(p.next);
   return (
     <AuthShell
       eyebrow="SEU PRÓXIMO PASSO COMEÇA AQUI"
       title="Um novo começo para seu negócio."
-      description="Crie sua conta e confirme seu e-mail. Depois, vamos guiar você pelo cadastro da empresa, dos serviços e dos profissionais."
+      description={
+        next === "/painel"
+          ? "Crie sua conta e confirme seu e-mail. Depois, vamos guiar você pelo cadastro da empresa, dos serviços e dos profissionais."
+          : "Crie sua conta usando o e-mail que recebeu o convite. Após confirmar o cadastro, você poderá aceitar sua participação na empresa."
+      }
       footer={
         <>
-          Já tem uma conta? <Link href="/entrar">Entrar na Web Fidelize</Link>
+          Já tem uma conta?{" "}
+          <Link href={authPageUrl("/entrar", { next })}>
+            Entrar na Web Fidelize
+          </Link>
         </>
       }
     >
       <div className="auth-trial-note">
         <Icon name="check" size={17} />
         <span>
-          7 dias grátis, sem cartão. Seu teste começa quando você cria a
-          empresa.
+          {next === "/painel"
+            ? "7 dias grátis, sem cartão. Seu teste começa quando você cria a empresa."
+            : "Você revisará o convite antes de participar. Criar uma conta não aceita o convite automaticamente."}
         </span>
       </div>
       {p.erro && (
         <p className="notice error" role="alert">
-          Não foi possível cadastrar. Confira os campos e a configuração do
-          ambiente.
+          {authErrorMessage(p.erro)}
         </p>
       )}
       <form action={signup}>
+        <input type="hidden" name="next" value={next} />
         <label htmlFor="email">E-mail</label>
         <input
           id="email"
           name="email"
           type="email"
           required
+          maxLength={254}
           autoComplete="email"
           placeholder="voce@empresa.com.br"
         />

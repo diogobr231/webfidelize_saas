@@ -1,58 +1,166 @@
 "use server";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { createClient, configured } from "@/lib/supabase/server";
-const credentials = z.object({
-  email: z.email().max(254),
-  password: z.string().min(8).max(128),
-});
+import {
+  authCallbackUrl,
+  authCredentials,
+  authDestination,
+  authEmail,
+  authErrorMessage,
+  authFailureCode,
+  authPageUrl,
+  isNeutralEmailError,
+  newPassword,
+  parseEmailConfirmation,
+} from "@/lib/auth-flow";
+import { getAuthOrigin } from "@/lib/auth-origin";
+import {
+  clearRecoveryProof,
+  isRecoverySession,
+  issueRecoveryProof,
+  recoveryProofConfigured,
+  requireRecoverySession,
+} from "@/lib/auth-recovery";
+
+function emailOrigin(page: "/cadastro" | "/recuperar", next: string) {
+  if (!configured())
+    redirect(authPageUrl(page, { next, erro: "configuracao" }));
+  try {
+    return getAuthOrigin();
+  } catch {
+    redirect(authPageUrl(page, { next, erro: "configuracao" }));
+  }
+}
+
 export async function login(form: FormData) {
-  if (!configured()) redirect("/entrar?erro=configuracao");
-  const input = credentials.safeParse(Object.fromEntries(form));
-  if (!input.success) redirect("/entrar?erro=credenciais");
+  const next = authDestination(form.get("next"));
+  if (!configured())
+    redirect(authPageUrl("/entrar", { next, erro: "configuracao" }));
+  const input = authCredentials.safeParse(Object.fromEntries(form));
+  if (!input.success)
+    redirect(authPageUrl("/entrar", { next, erro: "credenciais" }));
   const db = await createClient();
   const { error } = await db.auth.signInWithPassword(input.data);
-  if (error) redirect("/entrar?erro=credenciais");
+  if (error)
+    redirect(
+      authPageUrl("/entrar", { next, erro: authFailureCode(error, "login") }),
+    );
+  await clearRecoveryProof();
+  if (next !== "/painel") redirect(next);
   const { data: admin } = await db.rpc("is_super_admin");
   if (admin) redirect("/admin");
   redirect("/painel");
 }
 export async function signup(form: FormData) {
-  if (!configured()) redirect("/cadastro?erro=configuracao");
-  const input = credentials.safeParse(Object.fromEntries(form));
-  if (!input.success) redirect("/cadastro?erro=validacao");
+  const next = authDestination(form.get("next"));
+  const origin = emailOrigin("/cadastro", next);
+  const input = authCredentials.safeParse(Object.fromEntries(form));
+  if (!input.success)
+    redirect(authPageUrl("/cadastro", { next, erro: "validacao" }));
   const db = await createClient();
-  const { error } = await db.auth.signUp({
+  const { data, error } = await db.auth.signUp({
     ...input.data,
-    options: { emailRedirectTo: `${process.env.APP_URL}/auth/callback` },
+    options: { emailRedirectTo: authCallbackUrl(origin, next) },
   });
-  if (error) redirect("/cadastro?erro=cadastro");
-  redirect("/entrar?aviso=confirme-email");
+  if (error && !isNeutralEmailError(error))
+    redirect(
+      authPageUrl("/cadastro", { next, erro: authFailureCode(error, "email") }),
+    );
+  if (!error && data.session) redirect(next);
+  redirect(authPageUrl("/entrar", { next, aviso: "confirme-email" }));
 }
 export async function recover(form: FormData) {
-  if (!configured()) redirect("/recuperar?erro=configuracao");
-  const email = z.email().safeParse(form.get("email"));
-  if (email.success) {
-    const db = await createClient();
-    await db.auth.resetPasswordForEmail(email.data, {
-      redirectTo: `${process.env.APP_URL}/auth/callback?next=/nova-senha`,
-    });
-  }
+  const origin = emailOrigin("/recuperar", "/painel");
+  if (!recoveryProofConfigured()) redirect("/recuperar?erro=configuracao");
+  const email = authEmail.safeParse(form.get("email"));
+  if (!email.success) redirect("/recuperar?erro=email");
+  const db = await createClient();
+  const { error } = await db.auth.resetPasswordForEmail(email.data, {
+    redirectTo: authCallbackUrl(origin, "/painel", true),
+  });
+  if (error && !isNeutralEmailError(error))
+    redirect(
+      authPageUrl("/recuperar", { erro: authFailureCode(error, "email") }),
+    );
   redirect("/recuperar?aviso=enviado");
 }
-export async function updatePassword(form: FormData) {
-  const password = z.string().min(8).max(128).safeParse(form.get("password"));
-  if (!password.success) redirect("/nova-senha?erro=validacao");
+
+export type ResendState = { error?: string; sentAt?: number };
+export async function resendConfirmation(
+  _previous: ResendState,
+  form: FormData,
+): Promise<ResendState> {
+  const next = authDestination(form.get("next"));
+  const email = authEmail.safeParse(form.get("email"));
+  if (!email.success) return { error: authErrorMessage("email") };
+  let origin: string;
+  try {
+    origin = getAuthOrigin();
+  } catch {
+    return { error: authErrorMessage("configuracao") };
+  }
+  if (!configured()) return { error: authErrorMessage("configuracao") };
   const db = await createClient();
-  const {
-    data: { user },
-  } = await db.auth.getUser();
-  if (!user) redirect("/recuperar");
-  const { error } = await db.auth.updateUser({ password: password.data });
-  if (error) redirect("/nova-senha?erro=senha");
-  redirect("/painel");
+  const { error } = await db.auth.resend({
+    type: "signup",
+    email: email.data,
+    options: { emailRedirectTo: authCallbackUrl(origin, next) },
+  });
+  // The Auth service enforces the cooldown; client timers are only visual feedback.
+  if (error && !isNeutralEmailError(error))
+    return { error: authErrorMessage(authFailureCode(error, "email")) };
+  return { sentAt: Date.now() };
+}
+
+export async function confirmEmail(form: FormData) {
+  const confirmation = parseEmailConfirmation(Object.fromEntries(form));
+  if (!confirmation) redirect("/entrar?erro=link");
+  const { token_hash, type, next } = confirmation;
+  if (!configured())
+    redirect(
+      authPageUrl(type === "recovery" ? "/recuperar" : "/entrar", {
+        next,
+        erro: "configuracao",
+      }),
+    );
+  if (type === "recovery") {
+    if (!recoveryProofConfigured()) redirect("/recuperar?erro=configuracao");
+    emailOrigin("/recuperar", "/painel");
+  }
+  const db = await createClient();
+  const { data, error } = await db.auth.verifyOtp({ token_hash, type });
+  if (error || !data.session || !data.user)
+    redirect(
+      authPageUrl(type === "recovery" ? "/recuperar" : "/entrar", {
+        next,
+        erro: authFailureCode(error, "confirmation"),
+      }),
+    );
+  if (type === "recovery") {
+    if (!(await issueRecoveryProof(db)))
+      redirect("/recuperar?erro=recuperacao");
+    redirect("/nova-senha");
+  }
+  const recovery = await isRecoverySession(db);
+  if (recovery) redirect("/nova-senha");
+  redirect(next);
+}
+
+export async function updatePassword(form: FormData) {
+  const { db } = await requireRecoverySession();
+  const input = newPassword.safeParse(Object.fromEntries(form));
+  if (!input.success) redirect("/nova-senha?erro=confirmacao-senha");
+  const { error } = await db.auth.updateUser({ password: input.data.password });
+  if (error)
+    redirect(
+      authPageUrl("/nova-senha", { erro: authFailureCode(error, "password") }),
+    );
+  await clearRecoveryProof();
+  await db.auth.signOut({ scope: "local" });
+  redirect("/entrar?aviso=senha-atualizada");
 }
 export async function logout() {
+  await clearRecoveryProof();
   const db = await createClient();
   await db.auth.signOut();
   redirect("/entrar");

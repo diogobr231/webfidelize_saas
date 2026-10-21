@@ -30,3 +30,4 @@ jobs:
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+      - run: pnpm test:auth:isolated

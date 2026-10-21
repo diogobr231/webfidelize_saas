@@ -3,6 +3,7 @@ import { recover } from "@/app/auth/actions";
 import { AuthShell } from "@/components/auth-shell";
 import { PendingButton } from "@/components/pending-button";
 import { Icon } from "@/components/ui/icon";
+import { authErrorMessage } from "@/lib/auth-flow";
 
 export default async function Recover({
   searchParams,
@@ -19,12 +20,13 @@ export default async function Recover({
     >
       {p.aviso && (
         <p className="notice" role="status">
-          Se a conta existir, você receberá as instruções por e-mail.
+          Se a conta existir, você receberá as instruções por e-mail. Confira a
+          pasta de spam e aguarde alguns minutos antes de solicitar outro link.
         </p>
       )}
       {p.erro && (
         <p className="notice error" role="alert">
-          Ambiente de autenticação não configurado.
+          {authErrorMessage(p.erro)}
         </p>
       )}
       <form action={recover}>
@@ -34,6 +36,7 @@ export default async function Recover({
           name="email"
           type="email"
           required
+          maxLength={254}
           autoComplete="email"
           placeholder="O e-mail da sua conta"
         />
