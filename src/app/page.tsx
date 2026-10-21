@@ -94,6 +94,7 @@ export default async function Home() {
             <a href="#como-funciona">Como funciona</a>
             <a href="#recursos">Recursos</a>
             <a href="#planos">Planos</a>
+            <Link href="/diagnostico">Implantação</Link>
             <a href="#duvidas">Dúvidas</a>
           </div>
           <details className="wf-mobile-nav">
@@ -106,6 +107,7 @@ export default async function Home() {
               <a href="#demonstracao">Como seu cliente agenda</a>
               <a href="#como-funciona">Primeiros passos</a>
               <a href="#planos">Planos e condições</a>
+              <Link href="/diagnostico">Implantação acompanhada</Link>
               <a href="#duvidas">Perguntas frequentes</a>
             </div>
           </details>
@@ -516,6 +518,65 @@ export default async function Home() {
         </div>
       </section>
       <section
+        className="wf-container wf-implementation-section"
+        aria-labelledby="implementation-title"
+      >
+        <div className="wf-implementation-card">
+          <div>
+            <span className="wf-eyebrow">UM COMEÇO ACOMPANHADO</span>
+            <h2 id="implementation-title">
+              Quer ajuda para colocar
+              <br />a operação em ordem?
+            </h2>
+            <p>
+              Converse sobre a implantação da Web Fidelize no seu negócio:
+              serviços, profissionais, horários e página de agendamento
+              organizados com você.
+            </p>
+            <Link className="wf-button" href="/diagnostico">
+              Solicitar diagnóstico <Icon name="arrow-right" size={17} />
+            </Link>
+            <span className="wf-implementation-note">
+              Escopo e investimento sob consulta. Sem contratação automática.
+            </span>
+          </div>
+          <div className="wf-implementation-deliverables">
+            <span>DA CONFIGURAÇÃO AO USO</span>
+            <ul>
+              <li>
+                <Icon name="calendar" />
+                <div>
+                  <strong>Agenda e disponibilidade</strong>
+                  <p>Configuração alinhada à sua rotina de atendimento.</p>
+                </div>
+              </li>
+              <li>
+                <Icon name="users" />
+                <div>
+                  <strong>Clientes, serviços e equipe</strong>
+                  <p>
+                    Orientação para organizar os cadastros e o acesso ao painel.
+                  </p>
+                </div>
+              </li>
+              <li>
+                <Icon name="link" />
+                <div>
+                  <strong>Seu link pronto para compartilhar</strong>
+                  <p>
+                    Identidade e página pública dentro dos recursos disponíveis.
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <p>
+              A proposta confirma as entregas. A implantação acompanhada é um
+              serviço separado dos planos da plataforma.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section
         className="wf-container wf-section wf-pricing"
         id="planos"
         aria-labelledby="pricing-title"
@@ -680,6 +741,7 @@ export default async function Home() {
         <div className="wf-footer-links">
           <a href="#recursos">Recursos</a>
           <a href="#planos">Planos</a>
+          <Link href="/diagnostico">Implantação acompanhada</Link>
           <a href="#duvidas">Dúvidas</a>
           <Link href="/entrar">Entrar na minha conta</Link>
           <a href={whatsapp} target="_blank" rel="noopener noreferrer">

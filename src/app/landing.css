@@ -13,6 +13,118 @@
   background: var(--wf-bg);
   overflow: clip;
 }
+.wf-implementation-section {
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+.wf-implementation-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 56px;
+  padding: 44px;
+  border: 1px solid #3b5147;
+  border-radius: 18px;
+  background: linear-gradient(125deg, #1c2c26, #171e22);
+}
+.wf-site .wf-implementation-card h2 {
+  margin: 16px 0 20px;
+  font-size: clamp(27px, 3vw, 36px);
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -1.1px;
+}
+.wf-implementation-card > div > p {
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 470px;
+  color: #b2c2b9;
+}
+.wf-implementation-card .wf-button {
+  margin-top: 8px;
+}
+.wf-implementation-note {
+  display: block;
+  margin-top: 14px;
+  color: #a7bcb0;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.wf-implementation-deliverables {
+  border-left: 1px solid #3a4b41;
+  padding-left: 36px;
+  align-self: center;
+}
+.wf-implementation-deliverables > span {
+  color: #b5d3c0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+}
+.wf-implementation-deliverables ul {
+  display: grid;
+  gap: 24px;
+  padding: 0;
+  margin: 25px 0;
+  list-style: none;
+}
+.wf-implementation-deliverables li {
+  display: flex;
+  align-items: start;
+  gap: 14px;
+}
+.wf-implementation-deliverables li > svg {
+  color: #9bd2ba;
+  margin-top: 2px;
+}
+.wf-implementation-deliverables strong {
+  font-size: 13px;
+  font-weight: 550;
+  color: #e1ebe5;
+}
+.wf-site .wf-implementation-deliverables li p,
+.wf-site .wf-implementation-deliverables > p {
+  margin: 6px 0 0;
+  color: #b2c2b9;
+  font-size: 12px;
+  line-height: 1.8;
+}
+@media (min-width: 801px) and (max-width: 960px) {
+  .wf-site .wf-navigation {
+    gap: 18px;
+  }
+  .wf-navigation .wf-nav-links {
+    gap: 14px;
+  }
+  .wf-navigation .wf-nav-links a {
+    font-size: 11px;
+  }
+  .wf-navigation .wf-login {
+    padding-inline: 12px;
+  }
+}
+@media (max-width: 800px) {
+  .wf-implementation-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+    padding: 30px;
+  }
+  .wf-implementation-deliverables {
+    border-left: 0;
+    border-top: 1px solid #3a4b41;
+    padding: 28px 0 0;
+  }
+}
+@media (max-width: 540px) {
+  .wf-implementation-card {
+    padding: 26px 22px;
+  }
+  .wf-site .wf-implementation-card h2 {
+    font-size: 28px;
+  }
+  .wf-implementation-card .wf-button {
+    width: 100%;
+  }
+}
 .wf-site h1,
 .wf-site h2,
 .wf-site h3,
