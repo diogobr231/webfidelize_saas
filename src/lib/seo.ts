@@ -101,6 +101,8 @@ export function siteRobots(config = site): MetadataRoute.Robots {
         "/recuperar",
         "/nova-senha",
         "/convite/",
+        "/confirmar/",
+        "/api/whatsapp/",
         "/agendar/",
       ],
     },

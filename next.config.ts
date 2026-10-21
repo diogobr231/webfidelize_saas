@@ -15,7 +15,12 @@ const config: NextConfig = {
           },
         ],
       },
-      ...["/auth/:path*", "/convite/:path*", "/nova-senha"].map((source) => ({
+      ...[
+        "/auth/:path*",
+        "/convite/:path*",
+        "/nova-senha",
+        "/confirmar/:path*",
+      ].map((source) => ({
         source,
         headers: [
           { key: "Referrer-Policy", value: "no-referrer" },

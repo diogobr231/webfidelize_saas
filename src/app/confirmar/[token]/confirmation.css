@@ -1,0 +1,63 @@
+.confirmation-page {
+  min-height: 100svh;
+  padding: clamp(1.2rem, 5vw, 3rem) 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  background: radial-gradient(ellipse at top, #eef2ff, #f8fafc 65%);
+}
+.confirmation-card {
+  width: 100%;
+  max-width: 480px;
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 24px;
+  padding: clamp(1.25rem, 5vw, 2.5rem);
+  background: #fff;
+  box-shadow: 0 16px 60px #3341550d;
+}
+.confirmation-card h1 {
+  font-size: clamp(1.65rem, 5vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin: 1rem 0;
+}
+.confirmation-card p {
+  color: #526078;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.confirmation-card .confirmation-company {
+  color: #17233b;
+  font-weight: 600;
+}
+.confirmation-appointment {
+  margin: 1.5rem 0;
+  padding: 1.2rem;
+  border: 1px solid #e0e7ff;
+  border-radius: 16px;
+  background: #f5f7ff;
+  display: grid;
+  gap: 0.4rem;
+}
+.confirmation-appointment span {
+  font-size: 2rem;
+  font-weight: 650;
+  color: #4338ca;
+}
+.confirmation-appointment small,
+.confirmation-footer {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+.confirmation-card button {
+  width: 100%;
+  min-height: 48px;
+  white-space: normal;
+}
+.confirmation-optout {
+  margin-top: 1.75rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+  font-size: 0.85rem;
+}
