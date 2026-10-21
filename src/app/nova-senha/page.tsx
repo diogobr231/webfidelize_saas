@@ -5,6 +5,9 @@ import { AuthShell } from "@/components/auth-shell";
 import { PendingButton } from "@/components/pending-button";
 import { Icon } from "@/components/ui/icon";
 
+// Recovery depends on the current session even when Auth is configured only at runtime.
+export const dynamic = "force-dynamic";
+
 export default async function NewPassword({
   searchParams,
 }: {
