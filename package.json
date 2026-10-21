@@ -14,6 +14,8 @@
     "test:help:db": "tsx scripts/test-help-db.ts",
     "test:team:db": "tsx scripts/test-team-db.ts",
     "test:team": "tsx scripts/test-team-live.ts",
+    "test:manager": "tsx scripts/test-manager-live.ts",
+    "test:niches": "tsx scripts/test-niches-live.ts",
     "test:operations:db": "tsx scripts/test-operations-db.ts",
     "test:operations": "tsx scripts/test-operations-live.ts",
     "test:records": "tsx scripts/test-record-list-live.ts",

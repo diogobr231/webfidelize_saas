@@ -266,7 +266,8 @@ async function main() {
     const result = await db
       .from(table)
       .select("id", { count: "exact", head: true })
-      .eq("company_id", companyId);
+      .eq("company_id", companyId)
+      .is("archived_at", null);
     check(
       !result.error && result.count !== null,
       "Could not verify demo record counts.",

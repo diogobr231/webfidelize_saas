@@ -129,6 +129,7 @@ async function main() {
         .from(section)
         .select("id,name", { count: "exact" })
         .eq("company_id", companyId)
+        .is("archived_at", null)
         .order("name")
         .order("id")
         .range(0, 24);
@@ -192,6 +193,7 @@ async function main() {
           .from(section)
           .select("id", { head: true, count: "exact" })
           .eq("company_id", companyId)
+          .is("archived_at", null)
           .ilike("name", recordNamePattern(search));
         check(!matching.error, "Expected search query failed.");
         const result = await page(
