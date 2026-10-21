@@ -52,11 +52,19 @@ export default async function Dashboard({
   const managed = canManage(role);
   const now = new Date();
   const range = dashboardRange(p, now);
-  const count = (table: string) =>
-    db
+  const count = (table: "services" | "professionals" | "availability") => {
+    const query = db
       .from(table)
-      .select("id", { count: "exact", head: true })
+      .select(
+        table === "availability" ? "id,professionals!inner(archived_at)" : "id",
+        { count: "exact", head: true },
+      )
       .eq("company_id", companyId);
+    return query.is(
+      table === "availability" ? "professionals.archived_at" : "archived_at",
+      null,
+    );
+  };
   const [metrics, upcoming, services, professionals, shifts] =
     await Promise.all([
       db.rpc("executive_dashboard", {
@@ -218,7 +226,7 @@ export default async function Dashboard({
                 label="Clientes cadastrados"
                 value={format(data.customers.total)}
                 icon="users"
-                detail="Total atual da sua base de clientes."
+                  detail="Total da base, incluindo clientes arquivados."
                 trend={
                   <span>
                     <strong>{format(data.customers.new)}</strong> novos no

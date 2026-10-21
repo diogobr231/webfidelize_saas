@@ -26,12 +26,14 @@ export default async function Setup({
       .from("services")
       .select("id,name,duration_minutes,price_cents", { count: "exact" })
       .eq("company_id", companyId)
+      .is("archived_at", null)
       .order("name")
       .limit(5),
     db
       .from("professionals")
       .select("id,name", { count: "exact" })
       .eq("company_id", companyId)
+      .is("archived_at", null)
       .order("name")
       .limit(10),
     db
@@ -41,8 +43,12 @@ export default async function Setup({
       .single(),
     db
       .from("availability")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", companyId),
+      .select("id,professionals!inner(archived_at)", {
+        count: "exact",
+        head: true,
+      })
+      .eq("company_id", companyId)
+      .is("professionals.archived_at", null),
   ]);
   const base = `/painel/${companyId}`;
   // Bind on the server so useActionState receives a stable serialized action

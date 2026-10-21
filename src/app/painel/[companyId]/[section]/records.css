@@ -19,6 +19,45 @@
   flex: 1;
   min-width: 0;
 }
+.record-search select {
+  min-height: 44px;
+  width: 100%;
+}
+.record-filter-help {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+.record-detail-name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+}
+.record-detail-name:hover {
+  text-decoration-color: currentColor;
+}
+.record-archived-label {
+  display: block;
+  width: fit-content;
+  padding: 4px 7px;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.record-actions .record-link {
+  min-height: 44px;
+  white-space: nowrap;
+}
 .record-search button {
   flex-shrink: 0;
   min-height: 44px;

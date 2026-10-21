@@ -123,7 +123,9 @@ async function saveSetupRecord(
   form: FormData,
 ): Promise<SetupActionState> {
   const columns =
-    table === "services" ? "id,name,duration_minutes,price_cents" : "id,name";
+    table === "services"
+      ? "id,name,duration_minutes,price_cents,archived_at"
+      : "id,name,archived_at";
   const read = () =>
     db
       .from(table)
@@ -134,7 +136,10 @@ async function saveSetupRecord(
   const matches = (value: unknown) => {
     if (!value || typeof value !== "object") return false;
     const saved = value as Record<string, unknown>;
-    return Object.entries(record).every(([key, entry]) => saved[key] === entry);
+    return (
+      saved.archived_at === null &&
+      Object.entries(record).every(([key, entry]) => saved[key] === entry)
+    );
   };
   const existing = await read();
   if (existing.error)
@@ -143,6 +148,13 @@ async function saveSetupRecord(
       form,
     );
   if (existing.data) {
+    if (
+      (existing.data as unknown as { archived_at: string | null }).archived_at
+    )
+      return failure(
+        "Este cadastro foi arquivado. Reative-o na lista de cadastros ou inicie um novo envio.",
+        form,
+      );
     if (matches(existing.data)) finish(companyId, next, form);
     return failure(
       "Este envio já foi utilizado. Atualize a página antes de iniciar outro cadastro.",

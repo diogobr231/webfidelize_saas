@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { canManage } from "@/lib/permissions";
+import { canManage, hasAccess } from "@/lib/permissions";
+import { archiveFilter, businessListQuery } from "@/lib/business-records";
 import { money } from "@/lib/catalog";
 import {
   recordFilters,
@@ -64,15 +65,17 @@ export default async function Records({
     salvo?: string;
     q?: string | string[];
     pagina?: string | string[];
+    estado?: string | string[];
   }>;
 }) {
   const { companyId, section } = await params;
   if (!Object.hasOwn(labels, section)) notFound();
-  const { db, role } = await requireCompany(companyId);
+  const { db, role, company } = await requireCompany(companyId);
   const p = await searchParams;
   const filters = recordFilters(p);
   const table = section === "agenda" ? "appointments" : section;
   const searchable = section !== "agenda";
+  const state = archiveFilter(p.estado);
   const search = searchable ? filters.search : "";
   const base = `/painel/${companyId}/${section}`;
   let countQuery = db
@@ -80,6 +83,11 @@ export default async function Records({
     .select("id", { count: "exact", head: true })
     .eq("company_id", companyId);
   if (search) countQuery = countQuery.ilike("name", recordNamePattern(search));
+  if (searchable && state !== "todos")
+    countQuery =
+      state === "ativos"
+        ? countQuery.is("archived_at", null)
+        : countQuery.not("archived_at", "is", null);
   const countResult = await countQuery;
   const pagination = recordPagination(filters.page, countResult.count ?? 0);
   let recordsQuery = db
@@ -91,6 +99,11 @@ export default async function Records({
     .range(pagination.from, pagination.to);
   if (search)
     recordsQuery = recordsQuery.ilike("name", recordNamePattern(search));
+  if (searchable && state !== "todos")
+    recordsQuery =
+      state === "ativos"
+        ? recordsQuery.is("archived_at", null)
+        : recordsQuery.not("archived_at", "is", null);
   const result = countResult.error
     ? { data: null, error: countResult.error }
     : countResult.count === 0
@@ -99,14 +112,19 @@ export default async function Records({
   const { data: rows, error } = result;
   const total = countResult.count ?? 0;
   const pageLink = (page: number) =>
-    `${base}?${new URLSearchParams({ ...(search ? { q: search } : {}), pagina: String(page) })}#registros`;
-  const managed = canManage(role);
+    `${base}?${businessListQuery(state, search, page)}#registros`;
+  const managed =
+    canManage(role) && hasAccess(company.status, company.trial_ends_at);
   const display = presentation[section as keyof typeof presentation];
   const [customers, services, professionals] =
     section === "agenda" && managed
       ? await Promise.all(
           ["customers", "services", "professionals"].map((t) =>
-            db.from(t).select("id,name").eq("company_id", companyId),
+            db
+              .from(t)
+              .select("id,name")
+              .eq("company_id", companyId)
+              .is("archived_at", null),
           ),
         )
       : [];
@@ -182,7 +200,20 @@ export default async function Records({
                   <Icon name="search" size={16} /> Buscar
                 </button>
               </div>
-              {search && <Link href={`${base}#registros`}>Limpar busca</Link>}
+              <label htmlFor="record-state">Situação do cadastro</label>
+              <select id="record-state" name="estado" defaultValue={state}>
+                <option value="ativos">Ativos</option>
+                <option value="arquivados">Arquivados</option>
+                <option value="todos">Todos</option>
+              </select>
+              <p className="record-filter-help">
+                Escolha a situação e clique em Buscar para aplicar.
+              </p>
+              {search && (
+                <Link href={`${base}?estado=${state}#registros`}>
+                  Limpar busca
+                </Link>
+              )}
             </form>
           )}
           {!rows?.length ? (
@@ -193,16 +224,20 @@ export default async function Records({
                   ? "Dados indisponíveis"
                   : search
                     ? "Nenhum resultado para esta busca"
-                    : display.empty
+                    : state === "arquivados"
+                      ? "Nenhum cadastro arquivado"
+                      : display.empty
               }
               description={
                 error
                   ? "Atualize a página para tentar carregar os dados novamente."
                   : search
                     ? "Confira o nome digitado ou limpe a busca para ver todos os registros autorizados."
-                    : managed
-                      ? display.hint
-                      : "Os registros disponíveis para seu perfil aparecerão aqui."
+                    : state === "arquivados"
+                      ? "Os cadastros arquivados aparecerão aqui. O histórico dos atendimentos é preservado."
+                      : managed
+                        ? display.hint
+                        : "Os registros disponíveis para seu perfil aparecerão aqui."
               }
             />
           ) : (
@@ -223,6 +258,11 @@ export default async function Records({
                     <th scope="col" role="columnheader">
                       {section === "customers" ? "Telefone" : "Detalhes"}
                     </th>
+                    {searchable && (
+                      <th scope="col" role="columnheader">
+                        Ações
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody role="rowgroup">
@@ -233,11 +273,25 @@ export default async function Records({
                         className="record-name"
                         data-label={section === "agenda" ? "Início" : "Nome"}
                       >
-                        {section === "agenda"
-                          ? new Date(row.starts_at).toLocaleString("pt-BR", {
-                              timeZone: "America/Sao_Paulo",
-                            })
-                          : row.name}
+                        {section === "agenda" ? (
+                          new Date(row.starts_at).toLocaleString("pt-BR", {
+                            timeZone: "America/Sao_Paulo",
+                          })
+                        ) : (
+                          <>
+                            <Link
+                              className="record-detail-name"
+                              href={`${base}/${row.id}`}
+                            >
+                              {row.name}
+                            </Link>
+                            {row.archived_at ? (
+                              <span className="record-archived-label">
+                                Arquivado
+                              </span>
+                            ) : null}
+                          </>
+                        )}
                       </td>
                       <td
                         role="cell"
@@ -261,6 +315,25 @@ export default async function Records({
                           </Link>
                         )}
                       </td>
+                      {searchable ? (
+                        <td
+                          role="cell"
+                          data-label="Ações"
+                          className="record-actions"
+                        >
+                          <Link
+                            className="record-link"
+                            href={`${base}/${row.id}`}
+                          >
+                            {section === "customers"
+                              ? "Ver ficha"
+                              : managed && !row.archived_at
+                                ? "Editar"
+                                : "Ver detalhes"}
+                            <Icon name="arrow-right" size={14} />
+                          </Link>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>

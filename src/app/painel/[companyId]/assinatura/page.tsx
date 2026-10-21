@@ -15,7 +15,8 @@ export default async function Subscription({
     db
       .from("professionals")
       .select("id", { head: true, count: "exact" })
-      .eq("company_id", companyId),
+      .eq("company_id", companyId)
+      .is("archived_at", null),
   ]);
   const current = plans?.find((p) => p.id === company.plan_id);
   const labels: Record<string, string> = {
@@ -44,7 +45,7 @@ export default async function Subscription({
           <small>
             {professionals.error || !current
               ? "Não foi possível consultar a utilização."
-              : `${professionals.count ?? 0} de ${current.staff} profissionais cadastrados`}
+              : `${professionals.count ?? 0} de ${current.staff} profissionais ativos`}
           </small>
         </div>
         <div>

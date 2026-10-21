@@ -10,7 +10,12 @@ import { assignProfessionalMember, invite, revokeMember } from "./actions";
 import "../../operations.css";
 import "./equipe.css";
 type TeamMember = { user_id: string; role: string; email?: string | null };
-type TeamProfessional = { id: string; name: string; user_id: string | null };
+type TeamProfessional = {
+  id: string;
+  name: string;
+  user_id: string | null;
+  archived_at: string | null;
+};
 const errors: Record<string, string> = {
   convite:
     "Não foi possível criar o convite. Confira sua assinatura e permissões.",
@@ -44,7 +49,7 @@ export default async function Team({
     role === "OWNER"
       ? db
           .from("professionals")
-          .select("id,name,user_id")
+          .select("id,name,user_id,archived_at")
           .eq("company_id", companyId)
           .order("name")
       : Promise.resolve({ data: [], error: null }),
@@ -290,12 +295,21 @@ export default async function Team({
                     <div className="team-professional-title">
                       <Icon name="user" size={18} />
                       <div>
-                        <h3>{professional.name}</h3>
+                        <h3>
+                          {professional.name}
+                          {professional.archived_at ? " · Arquivado" : ""}
+                        </h3>
                         <p>
                           {professional.user_id
                             ? `Conta vinculada: ${currentMember?.email || "e-mail indisponível"}`
                             : "Nenhuma conta vinculada"}
                         </p>
+                        {professional.archived_at ? (
+                          <p>
+                            O histórico e o acesso vinculado foram mantidos.
+                            Reative o cadastro para associar uma nova conta.
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                     <label htmlFor={`member-${professional.id}`}>
@@ -311,11 +325,15 @@ export default async function Team({
                         <option
                           key={member.user_id}
                           value={member.user_id}
-                          disabled={professionals.some(
-                            (person) =>
-                              person.id !== professional.id &&
-                              person.user_id === member.user_id,
-                          )}
+                          disabled={
+                            (Boolean(professional.archived_at) &&
+                              member.user_id !== professional.user_id) ||
+                            professionals.some(
+                              (person) =>
+                                person.id !== professional.id &&
+                                person.user_id === member.user_id,
+                            )
+                          }
                         >
                           {member.email || "Conta sem e-mail disponível"} ·{" "}
                           {teamRoleLabels[member.role] || member.role}
@@ -334,6 +352,12 @@ export default async function Team({
                         label="Alterar vínculo"
                         description={`Alterar ou remover o vínculo de ${professional.name} muda quais dados o colaborador pode consultar. O histórico da agenda será preservado.`}
                       />
+                    ) : professional.archived_at ? (
+                      <Link
+                        href={`/painel/${companyId}/professionals/${professional.id}`}
+                      >
+                        Ver cadastro arquivado
+                      </Link>
                     ) : (
                       <PendingButton>
                         Vincular conta <Icon name="link" size={15} />

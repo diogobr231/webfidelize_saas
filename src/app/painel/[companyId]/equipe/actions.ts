@@ -38,11 +38,17 @@ export async function assignProfessionalMember(form: FormData) {
   // Bound database state is checked again by the RPC; hidden values cannot bypass confirmation.
   const current = await db
     .from("professionals")
-    .select("user_id")
+    .select("user_id,archived_at")
     .eq("company_id", input.company_id)
     .eq("id", input.professional_id)
     .single();
   if (current.error || !current.data) redirect(`${route}?erro=vinculo`);
+  if (
+    current.data.archived_at &&
+    input.member_id &&
+    input.member_id !== current.data.user_id
+  )
+    redirect(`${route}?erro=vinculo`);
   if (
     current.data.user_id &&
     current.data.user_id !== input.member_id &&
