@@ -79,15 +79,24 @@ export function WorkspaceNav({
         ]
       : []),
   ];
-  function currentLocation(href: string) {
-    if (pathname === href || pathname === `${href}/`) return "page" as const;
-    if (href !== base && pathname.startsWith(`${href}/`))
-      return "location" as const;
-    return undefined;
-  }
   const currentEntry = navigation
     .toSorted((a, b) => b.path.length - a.path.length)
-    .find((entry) => currentLocation(`${base}${entry.path}`));
+    .find((entry) => {
+      const href = `${base}${entry.path}`;
+      return (
+        pathname === href ||
+        pathname === `${href}/` ||
+        (href !== base && pathname.startsWith(`${href}/`))
+      );
+    });
+  function currentLocation(href: string) {
+    // Only the most specific item is current within this navigation set.
+    if (!currentEntry || href !== `${base}${currentEntry.path}`)
+      return undefined;
+    return pathname === href || pathname === `${href}/`
+      ? ("page" as const)
+      : ("location" as const);
+  }
   return (
     <>
       <aside
