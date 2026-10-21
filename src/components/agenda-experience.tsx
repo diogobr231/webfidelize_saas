@@ -23,6 +23,7 @@ export type CalendarAppointment = {
   customer_name: string;
   service_name: string;
   professional_name: string;
+  attendance_confirmed_at?: string | null;
 };
 type Option = { id: string; name: string; archived_at?: string | null };
 type Props = {
@@ -109,6 +110,13 @@ function AppointmentDialog({
         </button>
       </div>
       <h2 id="appointment-title">{item.customer_name}</h2>
+      {item.status === "scheduled" ? (
+        <p className={item.attendance_confirmed_at ? "notice" : "muted"}>
+          {item.attendance_confirmed_at
+            ? `Presença confirmada pelo cliente em ${new Date(item.attendance_confirmed_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}.`
+            : "Presença ainda não confirmada pelo cliente."}
+        </p>
+      ) : null}
       <p className="appointment-service">
         <Icon name="briefcase" size={16} />
         {item.service_name} · {item.professional_name}
@@ -443,6 +451,10 @@ export function AgendaExperience(props: Props) {
                           {event.customer_name}
                         </b>
                         <span>{event.service_name}</span>
+                        {event.attendance_confirmed_at &&
+                        event.status === "scheduled" ? (
+                          <small>✓ Presença confirmada</small>
+                        ) : null}
                         {view === "week" && (
                           <small>{event.professional_name}</small>
                         )}
@@ -506,6 +518,10 @@ export function AgendaExperience(props: Props) {
                       >
                         {appointmentStatus[item.status]}
                       </span>
+                      {item.attendance_confirmed_at &&
+                      item.status === "scheduled" ? (
+                        <p className="muted">Presença confirmada</p>
+                      ) : null}
                     </td>
                     <td>
                       <button

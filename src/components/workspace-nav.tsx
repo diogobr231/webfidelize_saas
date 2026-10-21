@@ -61,6 +61,11 @@ export function WorkspaceNav({
     ...(canManage(role)
       ? [
           {
+            path: "/lembretes",
+            label: "Lembretes WhatsApp",
+            icon: "phone" as const,
+          },
+          {
             path: "/assinatura",
             label: "Planos e assinatura",
             icon: "briefcase" as const,

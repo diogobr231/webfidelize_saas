@@ -48,6 +48,7 @@ export default async function Booking({
     confirmado?: string;
     proof?: string;
     recibo?: string;
+    aviso?: string;
   }>;
 }) {
   const { slug } = await params;
@@ -245,6 +246,13 @@ export default async function Booking({
             ),
           )}
         </ol>
+        {confirmed && q.aviso === "lembrete" ? (
+          <div className="booking-notice" role="status">
+            Seu agendamento foi reservado, mas não foi possível registrar a
+            autorização para o lembrete. Guarde o horário e avise a empresa caso
+            queira receber lembretes pelo WhatsApp.
+          </div>
+        ) : null}
         {q.erro ? (
           <div className="booking-notice booking-error" role="alert">
             <strong>

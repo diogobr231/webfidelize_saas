@@ -29,6 +29,7 @@ export async function reserve(form: FormData) {
         .pipe(z.string().regex(/^\d{10,13}$/)),
       request_id: z.uuid(),
       consent: z.literal("on"),
+      whatsapp_consent: z.literal("on").optional(),
       website: z.literal(""),
     })
     .safeParse(Object.fromEntries(form));
@@ -40,7 +41,7 @@ export async function reserve(form: FormData) {
     process.env.VERCEL === "1"
       ? h.get("x-vercel-forwarded-for") || "unknown"
       : "local";
-  const { consent, website, ...values } = input.data;
+  const { consent, website, whatsapp_consent, ...values } = input.data;
   void consent;
   void website;
   const db = publicDatabase();
@@ -51,6 +52,23 @@ export async function reserve(form: FormData) {
     ip_hash: createHmac("sha256", secret).update(ip).digest("hex"),
   });
   if (error) redirect(`/agendar/${slug.data}?erro=horario`);
+  // Optional reminders must never undo a successful reservation. Permission
+  // is resolved against the stored booking, not a client-provided customer ID.
+  let reminderNotice = "";
+  if (whatsapp_consent === "on") {
+    try {
+      const permission = await db.rpc("public_booking_whatsapp_consent", {
+        p_slug: slug.data,
+        p_request_id: values.request_id,
+        p_gateway_secret: secret,
+        p_allowed: true,
+      });
+      if (permission.error || permission.data !== true)
+        reminderNotice = "&aviso=lembrete";
+    } catch {
+      reminderNotice = "&aviso=lembrete";
+    }
+  }
   // Read the stored reservation for this idempotency key: a retried request
   // may carry changed form fields but must still describe the original booking.
   const result = await db.rpc("public_booking_receipt", {
@@ -66,9 +84,9 @@ export async function reserve(form: FormData) {
       receipt.data,
       secret,
     );
-    redirect(`/agendar/${slug.data}?recibo=${token}`);
+    redirect(`/agendar/${slug.data}?recibo=${token}${reminderNotice}`);
   }
   redirect(
-    `/agendar/${slug.data}?confirmado=${data}&proof=${signReceipt(slug.data, data, secret)}`,
+    `/agendar/${slug.data}?confirmado=${data}&proof=${signReceipt(slug.data, data, secret)}${reminderNotice}`,
   );
 }

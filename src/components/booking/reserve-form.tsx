@@ -162,6 +162,13 @@ export function ReserveForm({
           Não inclua informações de saúde. Nenhum pagamento é solicitado nesta
           reserva.
         </p>
+        <label className="booking-consent">
+          <input name="whatsapp_consent" type="checkbox" />
+          <span>
+            Quero receber lembretes deste agendamento pelo WhatsApp informado,
+            quando disponíveis. É opcional e posso deixar de receber depois.
+          </span>
+        </label>
         <ConfirmButton />
       </section>
     </form>
