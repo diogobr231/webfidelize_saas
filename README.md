@@ -4,6 +4,8 @@ SaaS B2B multiempresa em reconstrução. Next.js App Router, TypeScript, Tailwin
 
 Auditoria atual, correções, evidências de testes e prioridades para o lançamento: [auditoria para a primeira venda](docs/AUDITORIA-PRIMEIRA-VENDA.md), de 19/10/2026.
 
+Incremento operacional posterior: [edição, arquivamento e bloqueios de agenda](docs/STATUS-OPERACOES.md), com migração aplicada, testes de regressão e evidências dos fluxos DEMO.
+
 O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a identidade grafite e menta, a área de trabalho clara, os tokens, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
 
 ## Executar
@@ -28,23 +30,25 @@ pnpm test:db
 pnpm test:dashboard:db
 pnpm test:help:db
 pnpm test:team:db
+pnpm test:operations:db
 pnpm test:personalization:db
 pnpm build
 ```
 
-As suítes `*:db` usam PostgreSQL descartável via PGlite e não alteram empresas reais. `test:db` verifica as migrações e o isolamento com os papéis authenticated/anon; as suítes específicas cobrem agregações do dashboard, ajuda e chamados, vínculos/revogação de acessos e personalização. As fixtures locais do Storage verificam políticas SQL, mas não substituem o serviço HTTP real. `scripts/remote-isolation.sql` verifica parte das garantias no Supabase real, dentro de transação com ROLLBACK. Auth, SMTP, Storage e pagamentos exigem também homologação própria.
+As suítes `*:db` usam PostgreSQL descartável via PGlite e não alteram empresas reais. `test:db` verifica as migrações e o isolamento com os papéis authenticated/anon; as suítes específicas cobrem agregações do dashboard, ajuda e chamados, vínculos/revogação de acessos, edição/arquivamento/bloqueios operacionais e personalização. As fixtures locais do Storage verificam políticas SQL, mas não substituem o serviço HTTP real. `scripts/remote-isolation.sql` verifica parte das garantias no Supabase real, dentro de transação com ROLLBACK. Auth, SMTP, Storage e pagamentos exigem também homologação própria.
 
 Os testes HTTP abaixo requerem um build local atualizado em execução. A senha deve ser fornecida apenas ao processo por entrada segura; não a inclua no código ou em arquivos:
 
-| Comando                     | Opt-in e comportamento                                                                                                                                                                                                                                                                       |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm test:landing`         | Consulta páginas públicas, CTAs e metadados; não cria contas.                                                                                                                                                                                                                                |
-| `pnpm test:records`         | `TEST_RECORDS_LIVE=1` e `SEED_PASSWORD`; consulta clientes, serviços e profissionais de uma empresa DEMO, verifica busca, contagens, paginação e semântica mobile. Não grava dados comerciais.                                                                                               |
-| `pnpm test:team`            | `TEST_TEAM_LIVE=1` e `SEED_PASSWORD`; convite, aceite, vínculo e revogação entre duas contas DEMO. Remove sua participação temporária e mantém a auditoria do convite fictício aceito; não envia e-mails. |
-| `pnpm test:audit`           | `TEST_AUDIT_LIVE=1` e `SEED_PASSWORD`; compara dashboard e planos com dados autorizados, verifica acessos e suporte. O modo padrão pode abrir uma solicitação identificada como fictícia em empresa DEMO; `TEST_AUDIT_MODE=validation` executa o subconjunto de validação sem essa abertura. |
-| `pnpm test:personalization` | `TEST_PERSONALIZATION_LIVE=1` e `SEED_PASSWORD`; valida upload, isolamento, publicação e despublicação em empresa DEMO. Recusa substituir um logotipo preexistente e remove somente o arquivo fictício criado pelo teste.                                                                    |
-| `pnpm test:experience`      | Usa conta DEMO e cria uma reserva fictícia, mantida cancelada ao terminar; veja o roteiro abaixo.                                                                                                                                                                                            |
-| `pnpm test:onboarding`      | `TEST_ONBOARDING_LIVE=1` e `SEED_PASSWORD`; cadastra serviços/profissionais fictícios em empresa DEMO, com pausa, retomada e reenvio.                                                                                                                                                        |
+| Comando                     | Opt-in e comportamento                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test:landing`         | Consulta páginas públicas, CTAs e metadados; não cria contas.                                                                                                                                                                                                                                                                                                                 |
+| `pnpm test:records`         | `TEST_RECORDS_LIVE=1` e `SEED_PASSWORD`; consulta clientes, serviços e profissionais de uma empresa DEMO, verifica busca, contagens, paginação e semântica mobile. Não grava dados comerciais.                                                                                                                                                                                |
+| `pnpm test:operations`      | `TEST_OPERATIONS_LIVE=1` e `SEED_PASSWORD`; usa somente servidor local e empresas DEMO. Cria cadastros e agendamentos fictícios para testar edição, arquivamento, histórico, bloqueios e isolamento. Ao terminar, mantém seus cadastros arquivados e agendamentos cancelados, removendo seus bloqueios temporários; veja o [relatório operacional](docs/STATUS-OPERACOES.md). |
+| `pnpm test:team`            | `TEST_TEAM_LIVE=1` e `SEED_PASSWORD`; convite, aceite, vínculo e revogação entre duas contas DEMO. Remove sua participação temporária e mantém a auditoria do convite fictício aceito; não envia e-mails.                                                                                                                                                                     |
+| `pnpm test:audit`           | `TEST_AUDIT_LIVE=1` e `SEED_PASSWORD`; compara dashboard e planos com dados autorizados, verifica acessos e suporte. O modo padrão pode abrir uma solicitação identificada como fictícia em empresa DEMO; `TEST_AUDIT_MODE=validation` executa o subconjunto de validação sem essa abertura.                                                                                  |
+| `pnpm test:personalization` | `TEST_PERSONALIZATION_LIVE=1` e `SEED_PASSWORD`; valida upload, isolamento, publicação e despublicação em empresa DEMO. Recusa substituir um logotipo preexistente e remove somente o arquivo fictício criado pelo teste.                                                                                                                                                     |
+| `pnpm test:experience`      | Usa conta DEMO e cria uma reserva fictícia, mantida cancelada ao terminar; veja o roteiro abaixo.                                                                                                                                                                                                                                                                             |
+| `pnpm test:onboarding`      | `TEST_ONBOARDING_LIVE=1` e `SEED_PASSWORD`; cadastra serviços/profissionais fictícios em empresa DEMO, com pausa, retomada e reenvio.                                                                                                                                                                                                                                         |
 
 As suítes autenticadas usam sessões isoladas em memória, sem ler cookies do navegador. `TEST_BASE_URL` deve apontar para a aplicação local; `DEMO_EMAIL` seleciona uma conta sintética `@example.invalid`. Consulte as validações de cada script antes de executá-lo: autenticação, trial, banco e segredos necessários devem estar configurados. Não use empresas reais como fixtures.
 
@@ -84,11 +88,13 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Cadastro, login, confirmação, recuperação e troca de senha com Supabase SSR.
 - Criação transacional de empresa e OWNER, trial de sete dias calculado no banco.
 - Clientes, serviços, profissionais e criação de agendamentos; duração vem do serviço. As listas possuem busca por nome, paginação de 25 registros, total exato autorizado e ordenação estável, sem o corte anterior de 100 cadastros.
+- Fichas de clientes, serviços e profissionais com edição, controle de versão concorrente, arquivamento e reativação confirmados. Filtros Ativos/Arquivados/Todos e histórico paginado do cliente preservam vínculos e atendimentos. Arquivar profissional não revoga seu login; o OWNER gerencia acessos separadamente em **Equipe e acessos**. Veja as [regras operacionais](docs/STATUS-OPERACOES.md).
 - Agenda visual diária e semanal, filtros por profissional, horários clicáveis e detalhes com nomes de cliente, serviço e profissional. OWNER e MANAGER podem remarcar, cancelar e concluir atendimentos conforme as permissões e o estado da assinatura.
 - Entrada direta no painel para quem possui uma empresa, mantendo o seletor em `/painel?empresas=1`. Dashboard executivo com indicadores reais de agendamentos, conclusões, clientes cadastrados e crescimento da agenda, filtros hoje/7/30/90 dias ou intervalo de até 90 dias, comparação com período equivalente, gráfico interativo acessível, próximos atendimentos e atalhos.
 - Agregações do dashboard executadas no banco com RLS, sem truncamento pelo limite de linhas da API. OWNER/MANAGER recebem a visão da empresa; EMPLOYEE recebe apenas seus atendimentos atribuídos. Datas antigas de criação de clientes permanecem desconhecidas, sem backfill fictício. Faturamento e vendas ficam indisponíveis enquanto não houver registros financeiros próprios; preços de serviços não são somados como receita.
 - Primeiro acesso em `/comecar` e configuração por empresa, serviços, profissional e resumo. Retomada pelo menu **Primeiros passos**, erros por campo e opção de salvar a etapa antes de continuar depois. O progresso considera cadastros persistidos; não ativa a página pública automaticamente.
 - Restrição transacional de horários sobrepostos; disponibilidade semanal configurável por profissional, no fuso de São Paulo.
+- Bloqueios por data para um profissional ou toda a empresa, com motivo interno, criação idempotente, remoção confirmada e listagem paginada por período. Bloqueios recusam sobreposição com agendamento em estado Agendado; novas reservas e remarcações respeitam os bloqueios no banco e na disponibilidade pública. Nenhum atendimento é cancelado automaticamente.
 - RLS, autorização no servidor, chaves estrangeiras compostas, limite de profissionais.
 - Página pública `/agendar/[slug]`, ativada pelo OWNER: cartões de serviços, seleção de profissional e horário, resumo antes da reserva, confirmação assinada, idempotência e limites por IP/telefone/empresa.
 - Personalização pelo OWNER: nome comercial, descrição, endereço, WhatsApp, quatro paletas, logotipo, densidade de exibição e visualização inicial da agenda. Horários usam a disponibilidade existente. A identidade Web Fidelize é preservada e cada empresa mantém suas preferências isoladas.
@@ -105,8 +111,8 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 ## Ainda pendente antes da primeira venda
 
 - Mercado Pago: implementar checkout de assinatura, webhook validado, idempotência persistida, conciliação e tratamento de inadimplência; depois homologar em sandbox. Também faltam aplicação/credenciais do provedor e endpoint HTTPS de homologação. **A pendência inclui desenvolvimento, não apenas configuração. Nenhuma cobrança foi habilitada.**
-- Exceções por data para feriados e bloqueios pontuais, turnos que atravessam a meia-noite e proteção adicional anti-bot conforme volume. Cancelamento e remarcação pelo próprio cliente ainda dependem de contato com a empresa; os responsáveis já podem fazê-los no painel.
-- Edição/arquivamento dos cadastros operacionais e seleção pesquisável de clientes/serviços na criação de agendamentos para bases maiores. A listagem já possui busca e paginação; o formulário da agenda ainda carrega até 1.000 clientes e serviços.
+- Turnos que atravessam a meia-noite e proteção adicional anti-bot conforme volume. Cancelamento e remarcação pelo próprio cliente ainda dependem de contato com a empresa; os responsáveis já podem fazê-los no painel.
+- Seleção pesquisável de clientes/serviços na criação de agendamentos para bases maiores. A listagem já possui busca e paginação; o formulário da agenda ainda carrega até 1.000 clientes e serviços ativos.
 - SUPER_ADMIN: editor de preços/limites do catálogo, gerenciamento de módulos, métricas financeiras e trilha de auditoria administrativa. Conteúdo de ajuda e chamados já possuem gerenciamento.
 - Homologação completa de confirmação de e-mail, recuperação, login, convite e criação da primeira empresa.
 - SMTP de produção, termos e privacidade, rotina de backup e teste de restauração.
@@ -117,7 +123,7 @@ Restaurante/comandas, pets/tutores, tarefas, rotas, chatbot, site adicional, IA 
 
 Arquivos SQL em `supabase/migrations`, em ordem. O projeto desta aplicação é o separado `devmjeiblhrgjyaiaukm`, na região São Paulo; não executar contra o outro projeto do proprietário. A instalação inicial utilizou o conector Supabase e preservou as versões retornadas. O CLI oficial está disponível e as migrações recentes foram geradas com ele. Antes de aplicar novas versões, compare o histórico local com o do projeto correto.
 
-Todas as migrações deste incremento estão aplicadas, incluindo `20261019125532_professional_membership.sql`. O histórico local espelha as versões retornadas pelo projeto remoto. A revogação de acessos permanece disponível ao OWNER mesmo após o bloqueio comercial; novos convites e vínculos continuam sujeitos ao estado da assinatura.
+Migrações aplicadas até `20261021013325_business_operations.sql`, com versão conferida no histórico remoto. Evidências e limites da validação em [STATUS-OPERACOES](docs/STATUS-OPERACOES.md). A revogação de acessos permanece disponível ao OWNER mesmo após o bloqueio comercial; novos convites e vínculos continuam sujeitos ao estado da assinatura.
 
 Em um novo ambiente, use o Supabase CLI oficial: consulte `supabase --help`, inicialize/vincule ao projeto correto e aplique as migrações. Antes de uma mudança, gere arquivo com `supabase migration new nome`, revise, execute testes e verifique advisors. Não edite migrações já aplicadas: crie nova migração.
 
@@ -172,5 +178,7 @@ Orientações de recuperação local: [docs/RECUPERACAO-LEGADO.md](docs/RECUPERA
 ## Demonstração e próxima integração
 
 Contas e roteiro: [docs/DEMONSTRACAO.md](docs/DEMONSTRACAO.md). Mercado Pago: [docs/MERCADO_PAGO.md](docs/MERCADO_PAGO.md).
+
+A integração de pagamentos permanece por último nesta sequência, após concluir a validação operacional. Checkout, webhook e conciliação continuam pendentes; nenhum estado de assinatura paga deve ser concedido por simulação.
 
 Reserva pública exige BOOKING_GATEWAY_SECRET privado no servidor e seu hash em private.booking_gateway. O segredo não vai ao navegador. Para deploy, copie a variável privada do ambiente local para o ambiente servidor da Vercel com cuidado; não gere um segredo diferente sem atualizar o hash no banco. Localmente, as reservas compartilham o limite de IP; na Vercel é usado o header de IP definido pela plataforma. Somente o provedor pode preencher esse header em produção.
