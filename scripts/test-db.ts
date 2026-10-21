@@ -22,10 +22,12 @@ await db.query("insert into auth.users(id) values ($1),($2),($3)", [
   b,
   employee,
 ]);
-async function as(user: string) {
+async function as(user: string | null) {
   await db.exec("reset role");
-  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [user]);
-  await db.exec("set role authenticated");
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [
+    user ?? "",
+  ]);
+  await db.exec(user === null ? "set role anon" : "set role authenticated");
 }
 async function scalar(sql: string, args: unknown[] = []) {
   const r = await db.query<Record<string, unknown>>(sql, args);
@@ -237,7 +239,7 @@ await check("expired trial blocks direct database writes", async () => {
 await check("expired company remains readable", async () => {
   assert.equal(await scalar("select count(*) from public.customers"), "1");
 });
-await db.exec("reset role; set role anon");
+await as(null);
 await check("anonymous has no customer access or privileged RPC", async () => {
   await assert.rejects(
     () => db.query("select * from public.customers"),
@@ -399,7 +401,7 @@ await check("employee cannot change availability", async () => {
     /row-level security|row level security/,
   );
 });
-await db.exec("reset role; set role anon");
+await as(null);
 await check(
   "public catalogue exposes no CRM or customer information",
   async () => {
@@ -493,7 +495,7 @@ await db.query(
   "insert into private.booking_limits values($1,date_trunc('hour',now()),10) on conflict(key,bucket) do update set hits=10",
   ["ip:" + "a".repeat(64)],
 );
-await db.exec("set role anon");
+await as(null);
 await check("server-enforced IP quota blocks excess bookings", async () => {
   const limited = [...args];
   limited[3] = day + "T08:00:00-03:00";
@@ -504,7 +506,7 @@ await db.exec("reset role");
 await db.query("update public.companies set status='past_due' where id=$1", [
   ca,
 ]);
-await db.exec("set role anon");
+await as(null);
 await check(
   "unpaid company has no public catalogue or bookable slots",
   async () => {
@@ -553,7 +555,7 @@ await db.query("update public.companies set status='active' where id=$1", [ca]);
 await as(a);
 await db.query(profile, profileValues);
 await check("owner publishes only explicit public profile fields", async () => {
-  await db.exec("reset role; set role anon");
+  await as(null);
   const catalog = JSON.parse(
     await scalar("select public.public_catalog('demo-salao')::text"),
   );
@@ -667,7 +669,7 @@ await check("employee cannot manage appointments", async () => {
 await check(
   "anonymous and null-auth callers cannot mutate profile or agenda",
   async () => {
-    await db.exec("reset role; set role anon");
+    await as(null);
     await assert.rejects(
       () => db.query(manage, [ca, managedAppointment, "cancel", null]),
       /permission denied/,
@@ -805,7 +807,7 @@ const receiptSql = "select public.public_booking_receipt($1,$2,$3)::text";
 await check(
   "receipt rejects invalid gateway and returns authoritative data without PII",
   async () => {
-    await db.exec("reset role; set role anon");
+    await as(null);
     for (const invalid of ["invalid", null])
       await assert.rejects(
         () => db.query(receiptSql, ["demo-salao", request, invalid]),
@@ -860,7 +862,7 @@ await db.query("select public.configure_booking($1,'demo-outro',true)", [cb]);
 await check(
   "receipt rejects cross-company and unknown request lookup",
   async () => {
-    await db.exec("reset role; set role anon");
+    await as(null);
     assert.equal(
       await scalar(receiptSql, ["demo-outro", request, "test-only-gateway"]),
       "null",
@@ -980,7 +982,7 @@ await check(
       "update public.companies set status='past_due' where id=$1",
       [ca],
     );
-    await db.exec("set role anon");
+    await as(null);
     assert.equal(
       await scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]),
       "null",

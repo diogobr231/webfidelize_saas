@@ -88,6 +88,9 @@ const serviceB = await scalar(
   "insert into public.services(company_id,name,duration_minutes,price_cents) values($1,'Serviço B',30,20000) returning id",
   [cb],
 );
+// Professional creation now revalidates the acting membership after the company
+// lock, even for fixture SQL; seed each tenant with its own owner's identity.
+await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ownerA]);
 const employeeProfessional = await scalar(
   "insert into public.professionals(company_id,name,user_id) values($1,'Profissional colaborador',$2) returning id",
   [ca, employee],
@@ -96,6 +99,7 @@ const ownerProfessional = await scalar(
   "insert into public.professionals(company_id,name,user_id) values($1,'Profissional proprietário',$2) returning id",
   [ca, ownerA],
 );
+await db.query("select set_config('request.jwt.claim.sub',$1,false)", [ownerB]);
 const otherProfessional = await scalar(
   "insert into public.professionals(company_id,name,user_id) values($1,'Profissional empresa B',$2) returning id",
   [cb, ownerB],
