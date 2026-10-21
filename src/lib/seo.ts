@@ -36,7 +36,7 @@ export function resolveSite(raw?: string, deployment?: string) {
 export const site = resolveSite(process.env.APP_URL, process.env.VERCEL_ENV);
 export const siteTitle = "Web Fidelize | Agenda online e gestão de clientes";
 export const siteDescription =
-  "Organize clientes, serviços e profissionais em uma agenda visual. Receba reservas pela sua página de agendamento. Teste a Web Fidelize grátis por 7 dias.";
+  "Agenda online, clientes e equipe em um só lugar. Teste de 7 dias com cartão obrigatório e primeira mensalidade após o período. Ativação em preparação.";
 
 export const landingMetadata: Metadata = {
   title: siteTitle,

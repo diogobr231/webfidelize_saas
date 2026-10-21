@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { money } from "@/lib/catalog";
 import type { CommercialPlan } from "@/lib/commercial";
+import { teamPlanBenefits } from "@/lib/plan-benefits";
 import { Icon } from "./ui/icon";
 import "./plans-comparison.css";
 
@@ -54,7 +55,7 @@ export function PlansComparison({
                 na agenda
               </p>
               <ul>
-                {features.map((feature) => (
+                {[...features, ...teamPlanBenefits(plan)].map((feature) => (
                   <li key={feature}>
                     <Icon name="check" size={16} />
                     {feature}
@@ -88,7 +89,7 @@ export function PlansComparison({
               <p className="plan-caption">
                 {authenticated
                   ? "O contato não altera seu plano nem ativa cobrança."
-                  : "O teste começa no Essencial, com 1 profissional."}
+                  : "7 dias no Essencial, com 1 profissional. Cartão obrigatório; ativação em preparação."}
               </p>
             </article>
           ))}
@@ -99,16 +100,19 @@ export function PlansComparison({
         <div>
           <h3>Condições claras, desde o primeiro dia</h3>
           <p>
-            Os 7 dias de teste começam ao criar a empresa. Sem cartão e sem
-            cobrança automática. O proprietário ocupa uma vaga quando também
-            atende; cadastrar um profissional é diferente de convidar alguém
-            para acessar o painel.
+            Os 7 dias de teste exigem cartão cadastrado e autorizado no Mercado
+            Pago. O período começa somente após a confirmação do cartão. A
+            primeira mensalidade será cobrada apenas depois dos 7 dias, com
+            renovação mensal pelo valor do plano contratado. Cancelar antes do
+            fim do teste evita a primeira cobrança.
           </p>
           <p>
-            A cobrança online pelo Mercado Pago ainda não está disponível. Fale
-            no WhatsApp para consultar as condições de contratação. Recursos
-            específicos de nicho, IA, caixa e mensagens automáticas não estão
-            incluídos nesta versão.
+            A cobrança online pelo Mercado Pago e a ativação de novos testes
+            ainda estão em preparação. Criar a empresa agora não inicia o teste
+            nem gera cobrança. O proprietário ocupa uma vaga quando também
+            atende; cadastrar um profissional é diferente de convidar alguém
+            para acessar o painel. Recursos específicos de nicho, IA, caixa e
+            mensagens automáticas não estão incluídos nesta versão.
           </p>
         </div>
       </div>

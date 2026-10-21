@@ -40,7 +40,10 @@ export default function SocialImage() {
           Agenda online · Clientes · Profissionais
         </div>
         <div style={{ display: "flex", fontSize: 24, color: "#22e2ed" }}>
-          Teste grátis por 7 dias
+          7 dias de teste · cartão obrigatório
+        </div>
+        <div style={{ display: "flex", fontSize: 18, color: "#b6c7d9" }}>
+          Ativação em preparação · primeira mensalidade após o teste
         </div>
       </div>
     ),

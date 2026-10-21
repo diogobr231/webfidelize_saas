@@ -21,8 +21,17 @@ export default async function Start() {
       .maybeSingle(),
   ]);
   if (!admin.error && admin.data) redirect("/admin");
-  if (!ownership.error && ownership.data)
-    redirect(`/painel/${ownership.data.company_id}/configuracao`);
+  if (!ownership.error && ownership.data) {
+    const { data: company, error } = await db
+      .from("companies")
+      .select("status")
+      .eq("id", ownership.data.company_id)
+      .single();
+    if (error) redirect("/painel?empresas=1&erro=consulta");
+    redirect(
+      `/painel/${ownership.data.company_id}/${company.status === "pending_card" ? "assinatura" : "configuracao"}`,
+    );
+  }
   return (
     <main className="onb-entry">
       <nav aria-label="Conta">

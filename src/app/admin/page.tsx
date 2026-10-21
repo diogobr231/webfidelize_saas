@@ -21,7 +21,7 @@ export default async function Admin({
   if (authError || !admin) notFound();
   const { data: companies, error } = await db
     .from("companies")
-    .select("id,name,niche,status,trial_ends_at,plan_id")
+    .select("id,name,niche,status,trial_ends_at,plan_id,trial_card_required")
     .order("created_at", { ascending: false })
     .limit(100);
   return (
@@ -49,8 +49,9 @@ export default async function Admin({
       <div className="admin-content">
         {feedback.erro && (
           <p role="alert" className="notice error">
-            Não foi possível aplicar a alteração. Confira os valores, permissões
-            e confirme a operação.
+            {feedback.erro === "cartao"
+              ? "O teste de novas empresas depende da autorização do cartão pelo provedor. Não é possível iniciá-lo manualmente."
+              : "Não foi possível aplicar a alteração. Confira os valores, permissões e confirme a operação."}
           </p>
         )}
         {feedback.salvo === "1" && !feedback.erro && (
@@ -69,7 +70,9 @@ export default async function Admin({
             <strong>Ativação paga em preparação</strong>
             <p>
               A ativação de assinaturas depende da conciliação Mercado Pago,
-              ainda pendente. Aqui você pode administrar empresas e trials.
+              ainda pendente. Novos testes exigem cartão autorizado pelo
+              provedor. Os testes anteriores mantêm seus prazos; não é possível
+              liberar cartão ou assinatura paga manualmente.
             </p>
           </div>
         </div>
@@ -143,20 +146,57 @@ export default async function Admin({
                               </label>
                               <label>
                                 Status manual
-                                <select name="new_status">
-                                  <option value="trialing">Trial</option>
+                                <select
+                                  name="new_status"
+                                  required
+                                  defaultValue={
+                                    [
+                                      c.trial_card_required
+                                        ? "pending_card"
+                                        : "trialing",
+                                      "suspended",
+                                      "canceled",
+                                    ].includes(c.status)
+                                      ? c.status
+                                      : ""
+                                  }
+                                >
+                                  <option value="" disabled>
+                                    Selecione a situação
+                                  </option>
+                                  {c.trial_card_required ? (
+                                    <option value="pending_card">
+                                      Aguardando cartão
+                                    </option>
+                                  ) : (
+                                    <option value="trialing">Em teste</option>
+                                  )}
                                   <option value="suspended">Suspenso</option>
                                   <option value="canceled">Cancelado</option>
                                 </select>
                               </label>
-                              <label>
-                                Fim do trial (ISO com fuso)
-                                <input
-                                  name="new_trial"
-                                  defaultValue={c.trial_ends_at}
-                                  required
-                                />
-                              </label>
+                              {c.trial_card_required ? (
+                                <>
+                                  <input
+                                    type="hidden"
+                                    name="new_trial"
+                                    value=""
+                                  />
+                                  <p className="muted">
+                                    Teste aguardando autorização do cartão. O
+                                    prazo não é iniciado por este formulário.
+                                  </p>
+                                </>
+                              ) : (
+                                <label>
+                                  Fim do trial (ISO com fuso)
+                                  <input
+                                    name="new_trial"
+                                    defaultValue={c.trial_ends_at ?? ""}
+                                    required
+                                  />
+                                </label>
+                              )}
                               <ConfirmSubmit
                                 label="Aplicar alteração"
                                 description={`Esta operação altera o plano, a situação e o prazo de teste de ${c.name}. Suspender ou cancelar bloqueia alterações na empresa. Confira os campos antes de confirmar.`}
@@ -174,6 +214,7 @@ export default async function Admin({
                           >
                             {(
                               {
+                                pending_card: "Aguardando cartão",
                                 trialing: "Em teste",
                                 active: "Ativa",
                                 past_due: "Pagamento pendente",
@@ -184,12 +225,14 @@ export default async function Admin({
                           </span>
                         </td>
                         <td>
-                          {new Date(c.trial_ends_at).toLocaleDateString(
-                            "pt-BR",
-                            {
-                              timeZone: "America/Sao_Paulo",
-                            },
-                          )}
+                          {c.trial_ends_at
+                            ? new Date(c.trial_ends_at).toLocaleDateString(
+                                "pt-BR",
+                                {
+                                  timeZone: "America/Sao_Paulo",
+                                },
+                              )
+                            : "Não iniciado"}
                         </td>
                       </tr>
                     ))}

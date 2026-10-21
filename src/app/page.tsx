@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { teamPlanBenefits } from "@/lib/plan-benefits";
 import { money, niches } from "@/lib/catalog";
 import { commercialPlans } from "@/lib/commercial";
 import { landingStructuredData } from "@/lib/seo";
@@ -34,7 +35,7 @@ const questions = [
   {
     question: "Como funcionam os 7 dias gratuitos?",
     answer:
-      "Crie sua conta, confirme seu e-mail e cadastre a empresa. Os 7 dias começam na criação da empresa, com o plano Essencial e 1 profissional na agenda. O teste não solicita cartão e não gera cobrança automática.",
+      "O teste de 7 dias no Essencial, com 1 profissional na agenda, exige cartão cadastrado e autorizado no Mercado Pago. O período começa somente após a confirmação segura do cartão. A primeira mensalidade será cobrada apenas depois dos 7 dias, com renovação mensal. Cancelar antes do fim do teste evita a primeira cobrança. A ativação está em preparação: criar sua conta ou empresa agora não inicia o teste nem gera cobrança.",
   },
   {
     question: "Meu cliente precisa instalar um aplicativo?",
@@ -59,7 +60,7 @@ const questions = [
   {
     question: "Já posso contratar e pagar pelo site?",
     answer:
-      "A assinatura e a cobrança online ainda não estão disponíveis. Os valores apresentados são os preços previstos dos planos. Você pode usar o teste gratuito e falar pelo WhatsApp para conhecer a proposta para seu negócio.",
+      "A assinatura e a cobrança online ainda não estão disponíveis. O cadastro do cartão e a ativação de novos testes dependem da integração com o Mercado Pago. Você pode criar sua conta e falar pelo WhatsApp para conhecer a proposta para seu negócio; seu teste não começa enquanto a ativação estiver pendente.",
   },
   {
     question: "O sistema tem módulos específicos para cada segmento?",
@@ -157,11 +158,11 @@ export default async function Home() {
           <div className="wf-trial-facts">
             <span>
               <Icon name="check" />
-              Sem cartão para testar
+              Cartão obrigatório para ativar
             </span>
             <span>
               <Icon name="check" />
-              Acesso pelo navegador
+              Ativação do teste em preparação
             </span>
           </div>
           <a className="wf-tour-link" href="#demonstracao">
@@ -445,8 +446,9 @@ export default async function Home() {
             <span className="wf-setup-number">01</span>
             <h3>Crie seu espaço.</h3>
             <p>
-              Cadastre sua conta, confirme o e-mail e crie sua empresa para
-              iniciar os 7 dias de teste.
+              Cadastre sua conta, confirme o e-mail e crie sua empresa. O teste
+              começa após a confirmação do cartão; a ativação está em
+              preparação.
             </p>
           </article>
           <article>
@@ -635,6 +637,7 @@ export default async function Home() {
                   "Disponibilidade por profissional",
                   "Página pública de agendamento",
                   "Seu logotipo e 4 opções de cor",
+                  ...teamPlanBenefits(plan),
                 ].map((feature) => (
                   <li key={feature}>
                     <Icon name="check" />
@@ -644,7 +647,8 @@ export default async function Home() {
               </ul>
               <TrialLink secondary={plan.id !== "profissional"} />
               <span className="wf-plan-trial-note">
-                Teste de 7 dias no plano Essencial.
+                7 dias no Essencial · cartão obrigatório. Ativação em
+                preparação.
               </span>
             </article>
           ))}
@@ -654,10 +658,12 @@ export default async function Home() {
           <div>
             <p>
               <strong>
-                O teste é gratuito. A cobrança online ainda não está disponível.
+                Cartão obrigatório. Primeira mensalidade somente após os 7 dias.
               </strong>{" "}
-              Os valores acima apresentam os planos previstos. Para conhecer a
-              proposta para sua empresa,{" "}
+              Depois do teste, a assinatura tem renovação mensal pelo valor do
+              plano contratado. Cancelar antes do fim do teste evita a primeira
+              cobrança. A integração de pagamento e a ativação do teste ainda
+              estão em preparação. Para conhecer a proposta para sua empresa,{" "}
               <a href={whatsapp} target="_blank" rel="noopener noreferrer">
                 fale no WhatsApp
               </a>
@@ -665,7 +671,8 @@ export default async function Home() {
             </p>
             <p>
               O proprietário ocupa uma vaga quando cadastrado como profissional
-              na agenda. Nenhum cartão é solicitado no teste.
+              na agenda. O cartão será cadastrado no ambiente seguro do Mercado
+              Pago; criar a empresa não inicia o teste nem gera cobrança.
             </p>
           </div>
         </div>
@@ -725,7 +732,9 @@ export default async function Home() {
               <Icon name="phone" />
               Falar no WhatsApp
             </a>
-            <span>7 dias no Essencial · Sem cartão</span>
+            <span>
+              7 dias no Essencial · cartão obrigatório · ativação em preparação
+            </span>
           </div>
         </div>
       </section>

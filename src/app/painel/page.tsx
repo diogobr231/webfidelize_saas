@@ -20,7 +20,7 @@ export default async function Companies({
   const { data: companies, error } = memberships.data?.length
     ? await db
         .from("companies")
-        .select("id,name,niche")
+        .select("id,name,niche,status")
         .in(
           "id",
           memberships.data.map((m) => m.company_id),
@@ -28,8 +28,14 @@ export default async function Companies({
     : { data: [], error: memberships.error };
   const admin = adminResult.data;
   const loadError = error || memberships.error || adminResult.error;
+  const companyHref = (company: { id: string; status: string }) => {
+    const role = memberships.data?.find(
+      (membership) => membership.company_id === company.id,
+    )?.role;
+    return `/painel/${company.id}${role === "EMPLOYEE" ? "/meu-dia" : company.status === "pending_card" && (role === "OWNER" || role === "MANAGER") ? "/assinatura" : ""}`;
+  };
   if (!loadError && !p.erro && p.empresas !== "1") {
-    if (companies?.length === 1) redirect(`/painel/${companies[0].id}`);
+    if (companies?.length === 1) redirect(companyHref(companies[0]));
     if (!companies?.length && !admin) redirect("/comecar");
   }
   const alreadyOwner = memberships.data?.some(
@@ -57,13 +63,17 @@ export default async function Companies({
       )}
       <div className="grid">
         {companies?.map((c) => (
-          <Link className="card" key={c.id} href={`/painel/${c.id}`}>
+          <Link className="card" key={c.id} href={companyHref(c)}>
             <span className="company-avatar" aria-hidden="true">
               {c.name.slice(0, 2).toLocaleUpperCase("pt-BR")}
             </span>
             <h3>{c.name}</h3>
             <p>{niches.find((n) => n.slug === c.niche)?.name}</p>
-            <span className="workspace-text-link">Abrir meu dia →</span>
+            <span className="workspace-text-link">
+              {companyHref(c).endsWith("/assinatura")
+                ? "Ver ativação do teste →"
+                : "Abrir meu dia →"}
+            </span>
           </Link>
         ))}
       </div>
@@ -91,13 +101,15 @@ export default async function Companies({
               : "Bem-vindo à Web Fidelize"}
           </h2>
           <p>
-            Configure sua empresa e segmento, cadastre seus serviços e adicione
-            os profissionais. Você pode continuar depois; os cadastros salvos
-            serão mantidos.
+            Cadastre sua empresa e segmento. Após a ativação do teste, você
+            poderá configurar serviços e profissionais. Os cadastros salvos
+            serão mantidos para continuar depois.
           </p>
           <p>
-            Os sete dias de teste gratuito começam ao criar a empresa, com um
-            profissional no plano Essencial.
+            Os sete dias de teste no Essencial exigem cartão autorizado e
+            começam após sua confirmação no Mercado Pago. A primeira mensalidade
+            será cobrada somente depois do teste. A ativação está em preparação;
+            criar a empresa agora não inicia o período.
           </p>
           <Link className="button" href="/comecar">
             Continuar configuração →

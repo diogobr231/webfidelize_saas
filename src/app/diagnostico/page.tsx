@@ -270,10 +270,12 @@ export default async function Diagnosis({
               <Icon name="plus" size={17} />
             </summary>
             <p>
-              Sim. O <Link href="/cadastro">teste gratuito de 7 dias</Link>{" "}
-              continua disponível no plano Essencial, com um profissional na
-              agenda. O período começa ao criar sua empresa, sem cartão ou
-              cobrança automática.
+              O <Link href="/cadastro">teste gratuito de 7 dias</Link> no
+              Essencial, com um profissional na agenda, exige cartão cadastrado
+              e autorizado no Mercado Pago. A primeira mensalidade será cobrada
+              somente após o teste, com renovação mensal. A ativação está em
+              preparação; criar sua empresa agora não inicia o período nem gera
+              cobrança.
             </p>
           </details>
         </div>

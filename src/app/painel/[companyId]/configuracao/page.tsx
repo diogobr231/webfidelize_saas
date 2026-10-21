@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
 import { requireCompany } from "@/lib/auth";
 import { hasAccess } from "@/lib/permissions";
 import { niches, money } from "@/lib/catalog";
@@ -20,6 +21,8 @@ export default async function Setup({
 }) {
   const { companyId } = await params;
   const { db, company, role } = await requireCompany(companyId, false, true);
+  if (company.status === "pending_card")
+    redirect(`/painel/${companyId}/assinatura`);
   const [query, services, professionals, plan, shifts] = await Promise.all([
     searchParams,
     db

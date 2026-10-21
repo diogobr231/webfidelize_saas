@@ -157,7 +157,9 @@ export function PublicInquiryForm({
         <div className="sales-success-trial">
           <strong>Quer conhecer a plataforma enquanto isso?</strong>
           <p>
-            O teste gratuito continua disponível por 7 dias no plano Essencial.
+            O teste de 7 dias no Essencial exige cartão autorizado. A ativação
+            está em preparação; criar a conta agora não inicia o período nem
+            gera cobrança.
           </p>
           <Link href="/cadastro">
             Começar meu teste grátis <Icon name="arrow-right" size={16} />

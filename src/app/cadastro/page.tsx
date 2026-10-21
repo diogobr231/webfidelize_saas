@@ -22,7 +22,7 @@ export default async function Signup({
       title="Um novo começo para seu negócio."
       description={
         next === "/painel"
-          ? "Crie sua conta e confirme seu e-mail. Depois, vamos guiar você pelo cadastro da empresa, dos serviços e dos profissionais."
+          ? "Crie sua conta, confirme seu e-mail e cadastre a empresa. A configuração dos serviços e profissionais será liberada após a ativação do teste."
           : "Crie sua conta usando o e-mail que recebeu o convite. Após confirmar o cadastro, você poderá aceitar sua participação na empresa."
       }
       footer={
@@ -38,7 +38,7 @@ export default async function Signup({
         <Icon name="check" size={17} />
         <span>
           {next === "/painel"
-            ? "7 dias grátis, sem cartão. Seu teste começa quando você cria a empresa."
+            ? "O teste de 7 dias exige cartão cadastrado e autorizado no Mercado Pago. Primeira mensalidade somente após o teste. A ativação está em preparação; criar sua conta agora não inicia o período nem gera cobrança."
             : "Você revisará o convite antes de participar. Criar uma conta não aceita o convite automaticamente."}
         </span>
       </div>

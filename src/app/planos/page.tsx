@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Planos e condições | Web Fidelize",
   description:
-    "Compare planos e limites da agenda online Web Fidelize. Teste grátis por 7 dias no Essencial, sem cartão e sem cobrança automática.",
+    "Compare planos da Web Fidelize. Teste de 7 dias no Essencial com cartão obrigatório e primeira mensalidade após o período. Ativação em preparação.",
   alternates: { canonical: new URL("/planos", site.url).href },
   robots: { index: site.indexable, follow: site.indexable },
 };
@@ -41,8 +41,8 @@ export default async function Plans() {
           </h1>
           <p>
             Agenda, clientes, serviços e seu link de agendamento em todos os
-            planos. Compare o espaço para os profissionais que atendem na sua
-            empresa.
+            planos. Compare o espaço para profissionais e os recursos de análise
+            para acompanhar o crescimento da sua equipe.
           </p>
           <a
             className="plans-contact"
@@ -65,16 +65,19 @@ export default async function Plans() {
           </p>
           <div>
             <span>
-              <Icon name="check" size={15} /> Sem cartão
+              <Icon name="check" size={15} /> Cartão obrigatório
             </span>
             <span>
-              <Icon name="check" size={15} /> Sem cobrança automática
+              <Icon name="check" size={15} /> Primeira mensalidade após 7 dias
             </span>
           </div>
           <Link className="button" href="/cadastro">
             Testar grátis por 7 dias <Icon name="arrow-right" size={16} />
           </Link>
-          <small>O período começa quando você cria a empresa.</small>
+          <small>
+            Ativação em preparação. O período começa após a confirmação do
+            cartão; criar a empresa não inicia o teste.
+          </small>
         </aside>
       </header>
       <section
@@ -100,11 +103,27 @@ export default async function Plans() {
             antes de começar.
           </h2>
           <p>
-            O tamanho da equipe muda. O núcleo de agenda e atendimento está em
-            todos os planos.
+            O núcleo de agenda e atendimento está em todos os planos. Os
+            indicadores da equipe e a exportação ajudam quando sua operação
+            precisa de mais acompanhamento.
           </p>
         </div>
         <div className="plans-answers">
+          <details>
+            <summary>
+              O que muda além do número de profissionais?
+              <Icon name="plus" size={18} />
+            </summary>
+            <p>
+              Todos os planos incluem o Meu dia para colaboradores vinculados,
+              com agenda pessoal, confirmações registradas e conclusão dos
+              próprios atendimentos após o horário. O Profissional inclui
+              indicadores de equipe com consultas de até 31 dias. O Empresarial
+              amplia o período para até 90 dias e permite exportar os
+              indicadores em CSV. Esses relatórios são operacionais e não
+              representam receita.
+            </p>
+          </details>
           <details>
             <summary>
               Quem ocupa uma vaga no plano?
@@ -136,8 +155,12 @@ export default async function Plans() {
             </summary>
             <p>
               Todos os botões de teste iniciam o mesmo fluxo: cadastro da conta
-              e criação da empresa no Essencial, com 1 profissional. A contagem
-              de 7 dias começa ao criar a empresa e não há cobrança automática.
+              e criação da empresa no Essencial, com 1 profissional. O cartão é
+              obrigatório e a contagem de 7 dias começa somente após sua
+              confirmação no Mercado Pago. A primeira mensalidade será cobrada
+              depois do teste, com renovação mensal. Cancelar antes do fim do
+              teste evita a primeira cobrança. A ativação ainda está em
+              preparação.
             </p>
           </details>
           <details>
@@ -146,10 +169,12 @@ export default async function Plans() {
               <Icon name="plus" size={18} />
             </summary>
             <p>
-              A cobrança online ainda não está disponível. Os preços exibidos
-              apresentam os planos previstos. Fale pelo WhatsApp para consultar
-              as condições; entrar em contato não ativa uma assinatura nem
-              altera o plano da sua empresa.
+              A cobrança online ainda não está disponível. O cadastro do cartão
+              será feito no ambiente seguro do Mercado Pago. Enquanto essa
+              integração estiver em configuração, novos testes ficam com a
+              ativação pendente. Fale pelo WhatsApp para consultar as condições;
+              entrar em contato não ativa uma assinatura nem altera o plano da
+              sua empresa.
             </p>
           </details>
         </div>
