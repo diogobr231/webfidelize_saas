@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Brand } from "@/components/ui/brand";
 import { Icon } from "@/components/ui/icon";
 export default function ErrorPage({ reset }: { reset: () => void }) {
@@ -15,6 +16,17 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
           <Icon name="arrow-right" size={16} />
           Tentar novamente
         </button>
+        <Link className="button secondary" href="/">
+          Voltar ao início
+        </Link>
+        <a
+          className="button secondary"
+          href="https://wa.me/5518997695445"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Falar com o suporte <Icon name="phone" size={16} />
+        </a>
       </div>
     </main>
   );

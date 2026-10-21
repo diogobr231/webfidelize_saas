@@ -1,0 +1,362 @@
+.plans-public {
+  max-width: 1240px;
+  padding: 24px 40px 36px;
+}
+.plans-public > nav {
+  margin-bottom: 64px;
+}
+.plans-public .plans-back {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.plans-public .plans-skip {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  z-index: 10;
+  padding: 12px 16px;
+  background: var(--cyan);
+  color: var(--on-accent);
+  border-radius: 8px;
+}
+.plans-public .plans-skip:focus {
+  top: 12px;
+}
+.plans-hero {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-bottom: 76px;
+}
+.plans-eyebrow {
+  color: #98b6ae;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  line-height: 1.8;
+  font-weight: 600;
+}
+.plans-hero h1 {
+  margin: 20px 0;
+  font-size: clamp(34px, 3.6vw, 46px);
+  line-height: 1.12;
+  letter-spacing: -1.8px;
+  font-weight: 550;
+}
+.plans-hero h1 em {
+  color: var(--cyan);
+  font-style: normal;
+}
+.plans-hero > div > p {
+  max-width: 510px;
+  font-size: 15px;
+  line-height: 1.9;
+}
+.plans-public .plans-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  margin-top: 10px;
+  color: #c4d9d3;
+  font-size: 12px;
+}
+.plans-public .plans-contact:hover,
+.plans-public .plans-back:hover {
+  color: var(--cyan);
+}
+.plans-trial-card {
+  padding: 28px;
+  border: 1px solid #354b46;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #21312c, #171f22);
+  box-shadow: 0 16px 40px #00000012;
+}
+.plans-trial-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #5eead40c;
+  border: 1px solid #5eead425;
+  color: #84cbb9;
+}
+.plans-trial-card h2 {
+  margin: 20px 0 12px;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  font-weight: 550;
+}
+.plans-trial-card p {
+  margin-bottom: 18px;
+  line-height: 1.8;
+  font-size: 13px;
+}
+.plans-trial-card p strong {
+  color: #d6e6e0;
+  font-weight: 600;
+}
+.plans-trial-card > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 18px;
+  margin-bottom: 22px;
+}
+.plans-trial-card > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #adc6bc;
+  font-size: 11px;
+}
+.plans-trial-card .button {
+  width: 100%;
+  min-height: 46px;
+  font-size: 13px;
+}
+.plans-trial-card small {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  color: #9bb4aa;
+  font-size: 10px;
+  line-height: 1.7;
+}
+.plans-selection {
+  scroll-margin-top: 30px;
+}
+.plans-comparison-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.plans-comparison-heading h2 {
+  margin: 10px 0 0;
+  font-size: 26px;
+  letter-spacing: -0.7px;
+  font-weight: 500;
+}
+.plans-comparison-heading > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.plans-public .plan-options {
+  gap: 20px;
+}
+.plans-public .plan-option {
+  padding: 26px;
+  background: #191d24;
+  border-radius: 16px;
+}
+.plans-public .plan-option.is-recommended {
+  background: #1b2724;
+  border-color: #4c8270;
+  box-shadow:
+    0 0 0 1px #4c827030,
+    0 16px 36px #00000014;
+}
+.plans-public .plan-option h2 {
+  font-weight: 550;
+  letter-spacing: -0.5px;
+}
+.plans-public .plan-option .plan-price {
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 550;
+  letter-spacing: -1.4px;
+}
+.plans-public .plan-option ul {
+  border-top: 1px solid var(--line);
+  margin-top: 10px;
+  padding-top: 24px;
+}
+.plans-public .plan-option li {
+  font-size: 12px;
+  color: #bbc9c5;
+}
+.plans-public .plan-option .plan-caption {
+  color: #9ab0a8;
+}
+.plans-public .plan-conditions {
+  margin-top: 28px;
+  padding: 24px 26px;
+  background: #171c22;
+}
+.plans-public .plan-conditions h3 {
+  font-size: 14px;
+  font-weight: 550;
+}
+.plans-public .plan-conditions p {
+  line-height: 1.8;
+  font-size: 12px;
+}
+.plans-explained {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 70px;
+  margin: 80px 0 64px;
+}
+.plans-explained h2 {
+  margin: 15px 0;
+  font-size: 31px;
+  font-weight: 500;
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+.plans-explained > div > p {
+  max-width: 330px;
+  line-height: 1.8;
+  font-size: 13px;
+}
+.plans-answers {
+  border-top: 1px solid var(--line);
+}
+.plans-answers details {
+  border-bottom: 1px solid var(--line);
+}
+.plans-answers summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  min-height: 64px;
+  padding: 16px 0;
+  color: #d0dbd7;
+  font-size: 13px;
+  line-height: 1.7;
+  cursor: pointer;
+  list-style: none;
+}
+.plans-answers summary::-webkit-details-marker {
+  display: none;
+}
+.plans-answers summary svg {
+  flex-shrink: 0;
+  color: #93b2a5;
+  transition: transform 150ms;
+}
+.plans-answers details[open] summary svg {
+  transform: rotate(45deg);
+}
+.plans-answers p {
+  margin: 0 22px 20px 0;
+  font-size: 12px;
+  line-height: 1.85;
+}
+.plans-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.plans-footer a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.plans-footer a:hover {
+  color: var(--cyan);
+}
+.plans-public a:focus-visible,
+.plans-public summary:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+@media (min-width: 801px) and (max-width: 1000px) {
+  .plans-public .plan-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .plans-public .plan-option {
+    padding: 20px;
+  }
+  .plans-public .plan-option ul {
+    grid-template-columns: 1fr;
+  }
+  .plans-public .plan-option .button {
+    white-space: normal;
+  }
+}
+@media (max-width: 1000px) {
+  .plans-hero {
+    gap: 30px;
+  }
+  .plans-explained {
+    gap: 36px;
+  }
+}
+@media (max-width: 800px) {
+  .plans-public {
+    padding: 24px;
+  }
+  .plans-public > nav {
+    margin-bottom: 40px;
+  }
+  .plans-hero {
+    grid-template-columns: 1fr;
+    max-width: 620px;
+    margin: 0 auto 56px;
+  }
+  .plans-hero h1 {
+    font-size: 40px;
+  }
+  .plans-trial-card {
+    padding: 24px;
+  }
+  .plans-public .plan-option ul {
+    grid-template-columns: 1fr;
+  }
+  .plans-explained {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin: 56px 0 40px;
+  }
+}
+@media (max-width: 540px) {
+  .plans-public {
+    padding: 20px;
+  }
+  .plans-public > nav {
+    gap: 12px;
+  }
+  .plans-public .plans-back {
+    display: none;
+  }
+  .plans-public > nav .button {
+    padding: 10px 14px;
+  }
+  .plans-hero h1 {
+    font-size: 35px;
+    letter-spacing: -1.3px;
+  }
+  .plans-hero > div > p {
+    font-size: 14px;
+  }
+  .plans-comparison-heading h2 {
+    font-size: 25px;
+  }
+  .plans-public .plan-option {
+    padding: 24px;
+  }
+  .plans-public .plan-conditions {
+    padding: 18px;
+    gap: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plans-answers summary svg {
+    transition: none;
+  }
+}

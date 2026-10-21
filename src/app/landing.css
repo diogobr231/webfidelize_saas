@@ -49,8 +49,30 @@
 .wf-header {
   border-bottom: 1px solid #ffffff09;
 }
+.wf-mobile-nav {
+  display: none;
+}
+.wf-tour-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 12px;
+  color: #b5c8c3;
+  font-size: 12px;
+}
+.wf-tour-link:hover {
+  color: var(--wf-cyan);
+}
+.wf-site a:focus-visible,
+.wf-site summary:focus-visible {
+  outline: 2px solid var(--wf-cyan);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
 .wf-navigation {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: space-between;
   gap: 32px;
@@ -174,264 +196,6 @@
   width: 12px;
   height: 12px;
   color: var(--wf-cyan);
-}
-.wf-product-figure {
-  position: relative;
-  margin: 24px -2px 0 0;
-  min-width: 0;
-  isolation: isolate;
-}
-.wf-product-glow {
-  position: absolute;
-  z-index: -1;
-  inset: -65px -30px;
-}
-.wf-product-window {
-  border: 1px solid #abc7d637;
-  border-radius: 14px;
-  overflow: hidden;
-}
-.wf-window-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  padding: 9px 13px;
-  border-bottom: 1px solid #dde5ed;
-  font-size: 8px;
-}
-.wf-window-dots {
-  display: flex;
-  gap: 4px;
-}
-.wf-window-dots i {
-  width: 5px;
-  height: 5px;
-  border-radius: 100%;
-}
-.wf-demo-label {
-  font-size: 7px;
-  letter-spacing: 0.15px;
-  padding: 4px 7px;
-}
-.wf-product-body {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  min-height: 331px;
-}
-.wf-product-sidebar {
-  border-right: 1px solid #e1e8ef;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 20px;
-  padding-top: 17px;
-  color: #91a2b2;
-}
-.wf-product-sidebar > span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.wf-product-sidebar svg {
-  width: 17px;
-  height: 17px;
-}
-.wf-mini-mark {
-  color: #1c8e94;
-  font-weight: 850;
-  font-size: 22px;
-  letter-spacing: -2px;
-  margin-bottom: 7px;
-}
-.wf-sidebar-active {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: #d8f0f0;
-  color: #138389;
-}
-.wf-calendar-preview {
-  padding: 19px 19px 12px;
-  min-width: 0;
-}
-.wf-calendar-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.wf-calendar-title > div > span {
-  display: block;
-  font-size: 7px;
-  letter-spacing: 0.9px;
-  color: #8094a5;
-  margin-bottom: 5px;
-}
-.wf-calendar-title strong {
-  display: block;
-  font-size: 17px;
-  letter-spacing: -0.5px;
-}
-.wf-demo-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  font-size: 9px;
-  font-weight: 700;
-}
-.wf-calendar-toolbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-  margin: 18px 0 13px;
-  font-size: 9px;
-}
-.wf-calendar-toolbar > span:first-child {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
-.wf-view-switch {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  border: 1px solid #e1e7ed;
-  padding: 3px;
-  border-radius: 6px;
-  font-size: 8px;
-}
-.wf-view-switch > * {
-  padding: 4px 7px;
-}
-.wf-view-switch b {
-  border-radius: 4px;
-}
-.wf-calendar-grid {
-  border: 1px solid #e2eaf1;
-  border-radius: 7px;
-  overflow: hidden;
-}
-.wf-grid-heading,
-.wf-grid-row {
-  display: grid;
-  grid-template-columns: 38px 1fr 1fr;
-}
-.wf-grid-heading {
-  min-height: 26px;
-  align-items: center;
-  text-align: center;
-  font-size: 8px;
-}
-.wf-grid-row {
-  min-height: 66px;
-  border-top: 1px solid #e6edf3;
-}
-.wf-grid-row > div {
-  border-left: 1px solid #e6edf3;
-  padding: 4px;
-}
-.wf-grid-hour {
-  font-size: 7px;
-  padding: 9px 5px;
-  text-align: center;
-}
-.wf-appointment {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 7px;
-  border-radius: 5px;
-  height: 100%;
-  border-left: 2px solid;
-}
-.wf-appointment strong {
-  font-size: 7px;
-  font-weight: 750;
-}
-.wf-appointment > span {
-  font-size: 7px;
-}
-.wf-appointment small {
-  font-size: 6px;
-  margin-top: 2px;
-}
-.wf-appointment-cyan {
-  border-left-color: #54b9a6;
-}
-.wf-appointment-violet {
-  border-left-color: #a38cc4;
-}
-.wf-appointment-muted {
-  border: 1px dashed #d2e5e0;
-}
-.wf-calendar-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 11px;
-  font-size: 7px;
-}
-.wf-calendar-bottom > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.wf-calendar-bottom > span > span {
-  height: 4px;
-  width: 4px;
-  border-radius: 50%;
-}
-.wf-calendar-bottom > svg {
-  width: 13px;
-  height: 13px;
-}
-.wf-product-note {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  border: 1px solid #355c6b;
-  border-radius: 12px;
-  width: 255px;
-  padding: 14px 16px;
-  margin: -8px 16px 0 auto;
-  position: relative;
-}
-.wf-note-icon {
-  border-radius: 9px;
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.wf-note-icon svg {
-  width: 19px;
-  height: 19px;
-}
-.wf-product-note strong {
-  display: block;
-  font-size: 11px;
-  margin-bottom: 4px;
-}
-.wf-product-note div > span {
-  font-size: 9px;
-  display: block;
-}
-.wf-product-note > svg {
-  width: 15px;
-  height: 15px;
-  margin-left: auto;
-}
-.wf-product-figure figcaption {
-  text-align: center;
-  line-height: 1.6;
-  margin-top: 18px;
 }
 .wf-value-strip {
   display: grid;
@@ -736,20 +500,21 @@
 }
 .wf-phone-business strong {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
 }
 .wf-phone-business small {
   display: block;
-  font-size: 6px;
-  color: #7f9289;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #52695d;
   margin-top: 4px;
 }
 .wf-phone-eyebrow {
   display: block;
   letter-spacing: 0.9px;
-  font-size: 6px;
+  font-size: 9px;
   font-weight: 700;
-  color: #488b74;
+  color: #2f715c;
   margin-bottom: 8px;
 }
 .wf-phone-content h3 {
@@ -759,8 +524,8 @@
   margin-bottom: 10px;
 }
 .wf-phone-content > p {
-  color: #7d9087;
-  font-size: 8px;
+  color: #52695d;
+  font-size: 11px;
   line-height: 1.7;
   margin-bottom: 16px;
 }
@@ -777,12 +542,12 @@
 }
 .wf-phone-service strong {
   display: block;
-  font-size: 8px;
+  font-size: 11px;
 }
 .wf-phone-service small {
   display: block;
-  font-size: 7px;
-  color: #738d7c;
+  font-size: 10px;
+  color: #52695d;
   margin-top: 5px;
 }
 .wf-phone-selected {
@@ -803,12 +568,12 @@
   padding: 12px 10px;
   border: 1px solid #dce7df;
   border-radius: 7px;
-  font-size: 7px;
+  font-size: 10px;
   background: #fff;
   margin-bottom: 19px;
 }
 .wf-phone-label {
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
 }
 .wf-phone-times {
@@ -823,7 +588,7 @@
   padding: 8px 4px;
   text-align: center;
   border-radius: 5px;
-  font-size: 8px;
+  font-size: 10px;
   background: #fff;
 }
 .wf-phone-times > span:nth-child(3) {
@@ -839,7 +604,7 @@
   color: #fff;
   background: #377f67;
   border-radius: 7px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   padding: 12px 8px;
 }
@@ -849,9 +614,10 @@
 }
 .wf-phone-footnote {
   display: block;
-  font-size: 6px;
+  font-size: 10px;
+  line-height: 1.5;
   text-align: center;
-  color: #83968b;
+  color: #52695d;
   margin-top: 13px;
 }
 .wf-phone-figure figcaption {
@@ -987,6 +753,15 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   padding-top: 17px;
+}
+.wf-plans-grid > p[role="status"] {
+  grid-column: 1 / -1;
+  padding: 24px;
+  border: 1px solid var(--wf-line);
+  border-radius: 12px;
+  background: var(--wf-surface);
+  line-height: 1.8;
+  text-align: center;
 }
 .wf-plan {
   padding: 29px 25px 22px;
@@ -1178,15 +953,6 @@
   .wf-nav-links {
     gap: 21px;
   }
-  .wf-product-figure {
-    margin-top: 0;
-  }
-  .wf-window-top > span:nth-child(2) {
-    display: none;
-  }
-  .wf-calendar-preview {
-    padding: 16px 11px 11px;
-  }
   .wf-hero-actions .wf-button {
     font-size: 14px;
     padding: 13px 14px;
@@ -1220,8 +986,53 @@
   .wf-nav-links {
     display: none;
   }
-  .wf-login {
+  .wf-mobile-nav {
+    display: block;
+    position: static;
     margin-left: auto;
+    z-index: 5;
+  }
+  .wf-mobile-nav summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 44px;
+    min-height: 44px;
+    color: #b6c3ce;
+    font-size: 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .wf-mobile-nav summary::-webkit-details-marker {
+    display: none;
+  }
+  .wf-mobile-nav > div {
+    position: absolute;
+    right: 20px;
+    top: 100%;
+    z-index: 10;
+    width: min(280px, calc(100vw - 40px));
+    padding: 10px;
+    border: 1px solid #39434e;
+    border-radius: 12px;
+    background: #1c222a;
+    box-shadow: 0 14px 35px #0005;
+  }
+  .wf-mobile-nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    color: #c7d5db;
+    font-size: 13px;
+  }
+  .wf-mobile-nav a:hover {
+    background: #263630;
+  }
+  .wf-login {
+    margin-left: 0;
   }
   .wf-hero-copy {
     max-width: 640px;
@@ -1232,12 +1043,6 @@
   .wf-hero-actions .wf-button {
     font-size: 14px;
     padding: 13px 18px;
-  }
-  .wf-product-figure {
-    margin: 16px auto 0;
-  }
-  .wf-calendar-preview {
-    padding: 19px;
   }
   .wf-value-strip {
     padding-top: 24px;
@@ -1364,6 +1169,13 @@
   }
 }
 @media (max-width: 540px) {
+  .wf-navigation {
+    gap: 10px;
+  }
+  .wf-mobile-nav summary > span,
+  .wf-login > svg {
+    display: none;
+  }
   .wf-container {
     padding-left: 20px;
     padding-right: 20px;
@@ -1398,80 +1210,6 @@
   .wf-trial-facts {
     gap: 14px;
     justify-content: center;
-  }
-  .wf-product-body {
-    grid-template-columns: 34px minmax(0, 1fr);
-    min-height: 300px;
-  }
-  .wf-product-sidebar {
-    gap: 17px;
-    padding-top: 13px;
-  }
-  .wf-sidebar-active {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
-  }
-  .wf-product-sidebar svg {
-    width: 15px;
-    height: 15px;
-  }
-  .wf-mini-mark {
-    font-size: 20px;
-    margin-bottom: 5px;
-  }
-  .wf-calendar-preview {
-    padding: 14px 10px 10px;
-  }
-  .wf-calendar-title strong {
-    font-size: 15px;
-  }
-  .wf-calendar-title > div > span {
-    font-size: 6px;
-  }
-  .wf-calendar-toolbar {
-    font-size: 8px;
-  }
-  .wf-calendar-toolbar > span:first-child {
-    gap: 7px;
-  }
-  .wf-grid-heading,
-  .wf-grid-row {
-    grid-template-columns: 29px 1fr 1fr;
-  }
-  .wf-grid-heading {
-    font-size: 7px;
-  }
-  .wf-grid-row {
-    min-height: 62px;
-  }
-  .wf-appointment {
-    padding: 6px 4px;
-  }
-  .wf-appointment strong {
-    font-size: 6.5px;
-    line-height: 1.5;
-  }
-  .wf-appointment > span {
-    font-size: 6px;
-  }
-  .wf-appointment small {
-    font-size: 5.5px;
-  }
-  .wf-product-note {
-    width: 230px;
-    margin-right: 8px;
-    padding: 12px;
-  }
-  .wf-product-note strong {
-    font-size: 10px;
-  }
-  .wf-product-note div > span {
-    font-size: 8px;
-  }
-  .wf-product-figure figcaption {
-    max-width: 280px;
-    margin: 15px auto 0;
   }
   .wf-value-strip {
     grid-template-columns: 1fr;
@@ -1746,150 +1484,6 @@
   font-size: 10px;
   color: #828e9b;
 }
-.wf-product-glow {
-  background: radial-gradient(ellipse, #5eead407, transparent 68%);
-}
-.wf-product-window {
-  transform: none;
-  background: #181c23;
-  color: #d8dfe7;
-  border-color: #363e48;
-  box-shadow:
-    0 24px 60px #00000026,
-    0 0 0 6px #ffffff02;
-}
-.wf-window-top {
-  background: #1c222a;
-  border-color: #303943;
-  color: #8493a4;
-}
-.wf-window-dots i {
-  background: #465361;
-}
-.wf-demo-label {
-  color: #a0bcb0;
-  background: #283a32;
-  border: 1px solid #3c5144;
-  border-radius: 4px;
-}
-.wf-product-sidebar {
-  background: #151b21;
-  border-color: #2e3842;
-}
-.wf-product-sidebar > span {
-  color: #6f8191;
-}
-.wf-product-sidebar .wf-mini-mark {
-  color: #5eead4;
-}
-.wf-product-sidebar .wf-sidebar-active {
-  background: #5eead410;
-  color: #5eead4;
-}
-.wf-calendar-title div > span {
-  color: #7f91a1;
-}
-.wf-calendar-title strong {
-  color: #e0e7ee;
-  font-weight: 500;
-}
-.wf-demo-avatar {
-  color: #a4c7b7;
-  background: #2b4136;
-  border: 1px solid #46624f;
-}
-.wf-calendar-toolbar {
-  color: #a2afbd;
-}
-.wf-calendar-toolbar > span:first-child {
-  border-color: #384651;
-  background: #1c2830;
-}
-.wf-view-switch {
-  background: #1b242d;
-  border-color: #364451;
-  color: #8294a4;
-}
-.wf-view-switch b {
-  color: #d6e2eb;
-  background: #35444f;
-  box-shadow: none;
-}
-.wf-calendar-grid {
-  border-color: #303d48;
-}
-.wf-grid-heading {
-  background: #1c2831;
-  color: #92a5b5;
-  border-color: #303d48;
-}
-.wf-grid-heading > span,
-.wf-grid-row,
-.wf-grid-row > div {
-  border-color: #303d48;
-}
-.wf-grid-row {
-  background: #181c23;
-}
-.wf-grid-hour {
-  color: #6f8496;
-}
-.wf-appointment-cyan {
-  background: #233e35;
-  color: #bedacb;
-  border-color: #577d66;
-}
-.wf-appointment-violet {
-  background: #303047;
-  color: #cac6df;
-  border-color: #777097;
-}
-.wf-appointment small {
-  color: #89aa98;
-}
-.wf-appointment-violet small {
-  color: #a49cbd;
-}
-.wf-appointment-muted {
-  color: #819a90;
-  background: #202d2a;
-  border-color: #3c5348;
-}
-.wf-appointment-muted small {
-  color: #739280;
-}
-.wf-calendar-bottom {
-  color: #6c8998;
-  border-color: #303d48;
-}
-.wf-calendar-bottom > span > span {
-  background: #6c9a7d;
-}
-.wf-product-note {
-  color: #c3ddce;
-  background: #23362b;
-  border-color: #47624f;
-  box-shadow: 0 12px 25px #00000029;
-  transform: none;
-}
-.wf-product-note strong {
-  color: #d8e9df;
-  font-weight: 550;
-}
-.wf-product-note div > span {
-  color: #95ad9f;
-}
-.wf-note-icon {
-  color: #a3d0b6;
-  background: #a3d0b610;
-}
-.wf-product-note > svg {
-  color: #9abea8;
-}
-.wf-product-figure figcaption {
-  color: #75818e;
-  font-size: 10px;
-}
 .wf-value-strip {
   border-color: #2b343d;
 }
@@ -1951,7 +1545,7 @@
   color: #c7bea5;
 }
 .wf-feature-number {
-  color: #5e7280;
+  color: #8a9baa;
 }
 .wf-feature-card h3 {
   font-weight: 500;
@@ -2024,7 +1618,7 @@
   --bg: #f7faf7;
   --panel: #fff;
   --line: #dce7df;
-  --muted: #7d9087;
+  --muted: #52695d;
   --text: #24453a;
   --cyan: #377f67;
   color-scheme: light;
@@ -2312,11 +1906,6 @@
   .wf-hero-copy > p {
     max-width: 470px;
   }
-  .wf-product-figure {
-    width: 100%;
-    max-width: 520px;
-    justify-self: center;
-  }
   .wf-section {
     padding-top: 75px;
     padding-bottom: 75px;
@@ -2366,9 +1955,6 @@
   }
   .wf-trial-facts {
     font-size: 10px;
-  }
-  .wf-product-figure figcaption {
-    font-size: 9px;
   }
   .wf-section {
     padding-top: 60px;

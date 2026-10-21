@@ -77,7 +77,37 @@ function metadata(html: string, name: string) {
   return matches[0].content;
 }
 
-async function get(path: string) {
+function links(html: string): Array<Record<string, string>> {
+  return [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].map((match) => ({
+    ...attributes(match[1]),
+    text: readableText(match[2]),
+  }));
+}
+
+function assertPng(png: Buffer, width: number, height: number) {
+  assert(png.length >= 33, "A imagem deve conter um cabeçalho PNG completo.");
+  assert.deepEqual(
+    png.subarray(0, 8),
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+  );
+  assert.equal(png.readUInt32BE(8), 13, "Chunk IHDR deve ter tamanho válido.");
+  assert.equal(png.subarray(12, 16).toString("ascii"), "IHDR");
+  assert.equal(png.readUInt32BE(16), width, "Largura da imagem entregue.");
+  assert.equal(png.readUInt32BE(20), height, "Altura da imagem entregue.");
+}
+
+function localAssetPath(href: string) {
+  const asset = new URL(href, base);
+  assert(
+    [base.origin, expectedSite.url.origin].includes(asset.origin),
+    "Imagens da marca devem pertencer ao aplicativo.",
+  );
+  assert(!asset.username && !asset.password);
+  // The metadata may name a production origin; the test still requests only localhost.
+  return `${asset.pathname}${asset.search}`;
+}
+
+async function get(path: string, expectedStatus = 200) {
   const url = new URL(path, base);
   assert.equal(
     url.origin,
@@ -89,7 +119,11 @@ async function get(path: string) {
     redirect: "manual",
     signal: AbortSignal.timeout(20_000),
   });
-  assert.equal(response.status, 200, `GET ${url.pathname} deve responder 200.`);
+  assert.equal(
+    response.status,
+    expectedStatus,
+    `GET ${url.pathname} deve responder ${expectedStatus}.`,
+  );
   return response;
 }
 
@@ -104,9 +138,11 @@ const responses = await Promise.all([
   get("/robots.txt"),
   get("/sitemap.xml"),
   get("/entrar"),
+  get("/planos"),
+  get("/__qa_page_not_found__", 404),
 ]);
 assert.match(responses[0].headers.get("content-type") || "", /^text\/html\b/i);
-const [home, robots, sitemap, login] = await Promise.all(
+const [home, robots, sitemap, login, plans, missing] = await Promise.all(
   responses.map((response) => response.text()),
 );
 
@@ -117,9 +153,7 @@ assert.equal(
   "Sua agenda organizada. Seu cliente mais perto.",
   "O H1 deve comunicar a proposta principal da página.",
 );
-const anchors: Array<Record<string, string>> = [
-  ...home.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi),
-].map((match) => ({ ...attributes(match[1]), text: readableText(match[2]) }));
+const anchors = links(home);
 const trialLinks = anchors.filter(
   (anchor) => anchor.text === "Testar grátis por 7 dias",
 );
@@ -197,6 +231,239 @@ for (const section of ["como-funciona", "recursos", "planos", "duvidas"]) {
   );
 }
 pass("Navegação e atalhos apontam para seções existentes");
+
+const tour = [...home.matchAll(/<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi)].find(
+  (match) => /<input\b[^>]*type="radio"/i.test(match[2]),
+);
+assert(
+  tour,
+  "A demonstração deve oferecer escolha entre as visões do produto.",
+);
+// React may stream a figure's panels/caption after the initial shell and insert
+// them through its placeholders. Follow their semantic IDs in the full response.
+const captionId = attributes(tour[1])["aria-labelledby"];
+assert(captionId, "A demonstração precisa identificar sua legenda.");
+const caption = [
+  ...home.matchAll(/<figcaption\b([^>]*)>([\s\S]*?)<\/figcaption>/gi),
+].find((match) => attributes(match[1]).id === captionId);
+assert(
+  caption,
+  "Legenda deve ser entregue no HTML, inclusive quando streamed.",
+);
+const captionText = readableText(caption[2]);
+assert.match(captionText, /demonstração ilustrativa/i);
+assert.match(captionText, /dados fictícios/i);
+assert.match(captionText, /nenhuma reserva é criada aqui/i);
+assert.match(
+  tour[2],
+  /<fieldset\b/i,
+  "Opções do tour devem formar um grupo nativo.",
+);
+assert.match(
+  tour[2],
+  /<legend\b[^>]*>[^<]+<\/legend>/i,
+  "O grupo precisa de nome acessível.",
+);
+const tourInputs = [...tour[2].matchAll(/<input\b[^>]*>/gi)].map(([tag]) =>
+  attributes(tag),
+);
+assert.equal(
+  tourInputs.length,
+  3,
+  "Tour deve oferecer agenda, clientes e página pública.",
+);
+assert(tourInputs.every((input) => input.type === "radio"));
+assert.equal(new Set(tourInputs.map((input) => input.name)).size, 1);
+assert(tourInputs[0].name, "As opções precisam pertencer ao mesmo grupo.");
+assert.equal(new Set(tourInputs.map((input) => input.id)).size, 3);
+assert.equal(
+  tourInputs.filter((input) => Object.hasOwn(input, "checked")).length,
+  1,
+  "Uma visão deve estar selecionada no HTML inicial.",
+);
+const tourLabels: Array<Record<string, string>> = [
+  ...tour[2].matchAll(/<label\b([^>]*)>([\s\S]*?)<\/label>/gi),
+].map((match) => ({
+  ...attributes(match[1]),
+  text: readableText(match[2]),
+}));
+assert.deepEqual(
+  tourLabels.map((label) => label.text).sort(),
+  ["Agenda", "Clientes", "Seu link"].sort(),
+);
+const sections = [...home.matchAll(/<section\b([^>]*)>/gi)];
+const panelContents: string[] = [];
+for (const input of tourInputs) {
+  assert.equal(
+    tourLabels.filter((label) => label.for === input.id).length,
+    1,
+    "Cada opção deve ter um rótulo associado.",
+  );
+  assert(input["aria-controls"], "A opção deve identificar seu painel.");
+  const panel = sections.find(
+    (match) => attributes(match[1]).id === input["aria-controls"],
+  );
+  assert(panel, "Toda opção precisa apontar para conteúdo entregue no HTML.");
+  assert(
+    attributes(panel[1])["aria-label"],
+    "Cada painel deve ter um nome acessível.",
+  );
+  const start = panel.index + panel[0].length;
+  const end = home.indexOf("</section>", start);
+  assert(end > start, "Painel deve ter conteúdo entregue no HTML.");
+  const content = home.slice(start, end);
+  assert(
+    readableText(content).length > 80,
+    "O painel deve explicar o recurso.",
+  );
+  panelContents.push(content);
+}
+assert.doesNotMatch(
+  [tour[2], ...panelContents].join(""),
+  /<(form|button)\b/i,
+  "A ilustração não pode simular um formulário de envio ou confirmação de reserva.",
+);
+assert.equal(
+  links([tour[2], ...panelContents].join("")).length,
+  0,
+  "O tour não deve iniciar uma reserva real.",
+);
+pass(
+  "Tour tem três opções nativas identificadas, painéis e dados fictícios explícitos, sem envio de reserva",
+);
+
+const mobileMenu = [
+  ...home.matchAll(/<details\b[^>]*>([\s\S]*?)<\/details>/gi),
+].find((match) =>
+  /<summary\b[^>]*aria-label="Menu de navegação"/i.test(match[1]),
+);
+assert(mobileMenu, "Menu móvel precisa de controle nativo com nome acessível.");
+const mobileLinks = links(mobileMenu[1]);
+for (const section of [
+  "recursos",
+  "demonstracao",
+  "como-funciona",
+  "planos",
+  "duvidas",
+]) {
+  const link = mobileLinks.find(
+    (candidate) => candidate.href === `#${section}`,
+  );
+  assert(
+    link?.text,
+    "Menu móvel deve oferecer os principais destinos com texto.",
+  );
+  assert(ids.has(section), "Destino do menu deve existir na página.");
+}
+pass(
+  "Menu móvel oferece navegação nativa com nome acessível e destinos existentes",
+);
+
+assert.match(responses[4].headers.get("content-type") || "", /^text\/html\b/i);
+assert.equal([...plans.matchAll(/<h1\b[^>]*>/gi)].length, 1);
+assert.match(plans, /<section\b[^>]*aria-label="Comparação de planos"/i);
+const plansText = readableText(plans);
+for (const condition of [
+  /7 dias no Essencial/i,
+  /1 profissional/i,
+  /sem cartão/i,
+  /sem cobrança automática/i,
+  /começa quando você cria a empresa/i,
+  /proprietário também conta quando atende/i,
+  /convite para acessar o painel é diferente/i,
+  /cobrança online ainda não está disponível/i,
+  /não ativa uma assinatura nem altera o plano/i,
+])
+  assert.match(plansText, condition);
+const planLinks = links(plans);
+const planTrials = planLinks.filter((link) =>
+  /Testar grátis por 7 dias/.test(link.text),
+);
+assert(
+  planTrials.length > 0,
+  "Página de planos deve oferecer teste mesmo quando os preços estiverem indisponíveis.",
+);
+for (const link of planTrials) {
+  const url = new URL(link.href, base);
+  assert.equal(url.origin, base.origin);
+  assert.equal(url.pathname, "/cadastro");
+  assert.equal(
+    url.search,
+    "",
+    "Teste não deve fingir selecionar ou contratar um plano pago.",
+  );
+}
+const planContact = planLinks.filter(
+  (link) => new URL(link.href, base).hostname === "wa.me",
+);
+assert(
+  planContact.length > 0,
+  "Contato precisa continuar disponível na comparação.",
+);
+for (const link of planContact) {
+  const url = new URL(link.href);
+  assert.equal(url.protocol, "https:");
+  assert.equal(url.pathname, "/5518997695445");
+}
+assert.doesNotMatch(
+  plans,
+  /<(form|button)\b/i,
+  "Planos públicos não devem simular checkout ou ativação.",
+);
+for (const link of planLinks) {
+  const url = new URL(link.href, base);
+  assert(
+    [base.origin, "https://wa.me"].includes(url.origin),
+    "Nenhum checkout externo deve ser anunciado enquanto indisponível.",
+  );
+  assert.doesNotMatch(
+    url.pathname,
+    /checkout|\/api\/|assinatura/i,
+    "A comparação deve encaminhar ao cadastro ou contato, sem ativação simulada.",
+  );
+}
+function displayedPlans(html: string) {
+  return [...html.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)]
+    .flatMap((match) => {
+      const text = readableText(match[1]);
+      const price = text.match(/R\$\s*[\d.]+,\d{2}/)?.[0];
+      if (!price) return [];
+      const name = match[1].match(/<h[23]\b[^>]*>([\s\S]*?)<\/h[23]>/i);
+      const limit = text.match(/Até (\d+) profissiona(?:l|is) na agenda/i);
+      assert(
+        name && limit,
+        "Cada preço deve identificar plano e limite de profissionais.",
+      );
+      assert.match(text, /\/mês/, "A periodicidade precisa estar clara.");
+      return [{ name: readableText(name[1]), price, limit: Number(limit[1]) }];
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+const publicPlans = displayedPlans(plans);
+const homePlans = displayedPlans(home);
+assert(
+  planTrials.length >= publicPlans.length + 1,
+  "A comparação deve entregar um CTA de teste por plano, além do convite inicial, inclusive em fragmentos streamed.",
+);
+if (publicPlans.length && homePlans.length) {
+  assert.deepEqual(
+    publicPlans,
+    homePlans,
+    "Landing e comparação devem publicar os mesmos preços e limites.",
+  );
+} else {
+  if (!publicPlans.length)
+    assert.match(
+      plansText,
+      /não foi possível consultar os planos/i,
+      "Falha de consulta precisa ser explícita, sem preços fictícios.",
+    );
+  if (!homePlans.length)
+    assert.match(readableText(home), /preços estão indisponíveis/i);
+}
+pass(
+  "Planos explicam trial, capacidade e contratação real, sem checkout; valores publicados são consistentes",
+);
 
 const title = [...home.matchAll(/<title\b[^>]*>([\s\S]*?)<\/title>/gi)];
 assert.equal(title.length, 1, "A landing deve publicar um título único.");
@@ -276,28 +543,38 @@ assert.equal(
 const imageResponse = await get(`${ogImage.pathname}${ogImage.search}`);
 assert.match(imageResponse.headers.get("content-type") || "", /^image\/png\b/i);
 const png = Buffer.from(await imageResponse.arrayBuffer());
-assert(png.length >= 33, "Imagem OG deve conter um cabeçalho PNG completo.");
-assert.deepEqual(
-  png.subarray(0, 8),
-  Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-);
-assert.equal(
-  png.readUInt32BE(8),
-  13,
-  "O primeiro chunk PNG deve conter IHDR válido.",
-);
-assert.equal(png.subarray(12, 16).toString("ascii"), "IHDR");
-assert.equal(
-  png.readUInt32BE(16),
-  1200,
-  "A imagem OG entregue deve ter 1200px de largura.",
-);
-assert.equal(
-  png.readUInt32BE(20),
-  630,
-  "A imagem OG entregue deve ter 630px de altura.",
-);
+assertPng(png, 1200, 630);
 pass("Imagem OG e Twitter responde PNG real de 1200 × 630");
+
+const headLinks = [...home.matchAll(/<link\b[^>]*>/gi)].map(([tag]) =>
+  attributes(tag),
+);
+const svgIcon = headLinks.find(
+  (link) => link.rel === "icon" && link.type === "image/svg+xml",
+);
+const appleIcon = headLinks.find((link) => link.rel === "apple-touch-icon");
+assert(svgIcon?.href, "Metadata deve anunciar o ícone SVG da marca.");
+assert(appleIcon?.href, "Metadata deve anunciar o ícone para tela inicial.");
+assert.equal(appleIcon.sizes, "180x180");
+assert.equal(appleIcon.type, "image/png");
+const [svgResponse, appleResponse] = await Promise.all([
+  get(localAssetPath(svgIcon.href)),
+  get(localAssetPath(appleIcon.href)),
+]);
+assert.match(
+  svgResponse.headers.get("content-type") || "",
+  /^image\/svg\+xml\b/i,
+);
+const svg = await svgResponse.text();
+assert.match(svg, /<svg\b[^>]*xmlns="http:\/\/www\.w3\.org\/2000\/svg"/i);
+assert.match(
+  svg,
+  /viewBox="[\d.\s]+"/i,
+  "SVG precisa de área de desenho válida.",
+);
+assert.match(appleResponse.headers.get("content-type") || "", /^image\/png\b/i);
+assertPng(Buffer.from(await appleResponse.arrayBuffer()), 180, 180);
+pass("Ícones anunciados respondem SVG e PNG real de 180 × 180");
 
 const directives = robots
   .split(/\r?\n/)
@@ -365,6 +642,31 @@ assert(
   "Login deve continuar fora dos índices de busca.",
 );
 pass("Página de login responde com noindex");
+
+assert.match(responses[5].headers.get("content-type") || "", /^text\/html\b/i);
+assert.match(readableText(missing), /Página não encontrada/i);
+const missingLinks = links(missing);
+assert(
+  missingLinks.some((link) => link["aria-label"] === "Web Fidelize — início"),
+  "A página 404 deve manter a identidade da plataforma.",
+);
+for (const path of ["/", "/entrar"]) {
+  assert(
+    missingLinks.some((link) => new URL(link.href, base).pathname === path),
+    "A página 404 deve oferecer saída para início e acesso à conta.",
+  );
+}
+assert(
+  [...missing.matchAll(/<meta\b[^>]*>/gi)].some(([tag]) => {
+    const meta = attributes(tag);
+    return (
+      meta.name === "robots" &&
+      meta.content?.split(/\s*,\s*/).includes("noindex")
+    );
+  }),
+  "A resposta 404 não deve ser indexável.",
+);
+pass("URL inexistente responde 404 com marca, noindex e caminhos de retorno");
 
 console.log(
   `${passed} grupos HTTP da landing aprovados; apenas leituras locais, sem cadastros ou mensagens.`,

@@ -1,0 +1,381 @@
+.wf-tour {
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+}
+.wf-tour-window {
+  overflow: hidden;
+  border: 1px solid #39434e;
+  border-radius: 18px;
+  background: #f6f8fa;
+  color: #202d38;
+  box-shadow:
+    0 28px 70px #0004,
+    0 0 0 7px #ffffff03;
+  color-scheme: light;
+}
+.wf-tour-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 58px;
+  padding: 12px 20px;
+  color: #c3ccd6;
+  background: #1d232c;
+  font-size: 11px;
+}
+.wf-tour-top > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.wf-tour-mark {
+  color: #5eead4;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+.wf-tour-demo {
+  border: 1px solid #4b615c;
+  border-radius: 5px;
+  padding: 4px 7px;
+  color: #b8d9cf;
+  font-size: 10px;
+}
+.wf-tour-selector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0 20px 20px;
+  border: 0;
+  gap: 0 5px;
+}
+.wf-tour-selector legend {
+  padding: 18px 0 10px;
+  color: #637180;
+  font-size: 11px;
+}
+.wf-tour-selector > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.wf-tour-selector > label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #596775;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    color 150ms;
+}
+.wf-tour-selector > input:checked + label {
+  color: #0b6e64;
+  background: #fff;
+  border-color: #dce6e4;
+  box-shadow: 0 2px 4px #20332c08;
+}
+.wf-tour-selector > label:hover {
+  background: #e6eeec;
+}
+.wf-tour-selector > input:focus-visible + label {
+  outline: 3px solid #0d8078;
+  outline-offset: 2px;
+}
+.wf-tour-panels {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: 22px;
+}
+.wf-tour-panel {
+  display: none;
+  min-height: 356px;
+}
+#tour-agenda:checked ~ .wf-tour-panels .wf-tour-agenda,
+#tour-clientes:checked ~ .wf-tour-panels .wf-tour-customers,
+#tour-link:checked ~ .wf-tour-panels .wf-tour-booking {
+  display: block;
+}
+.wf-tour-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.wf-tour-heading div > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #5f6d7a;
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.wf-tour-heading h2 {
+  margin: 0;
+  color: #202d38;
+  font-size: 18px;
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+  font-weight: 600;
+}
+.wf-tour-heading > svg {
+  flex-shrink: 0;
+  color: #7b8c99;
+}
+.wf-tour-context {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  padding-bottom: 12px;
+  color: #5f6d7a;
+  font-size: 10px;
+}
+.wf-tour-timeline > div {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid #e0e7ed;
+}
+.wf-tour-timeline time {
+  padding-top: 10px;
+  color: #5f6d7a;
+  font-size: 10px;
+}
+.wf-tour-event {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 6px;
+  padding: 10px 12px;
+  background: #e2f2ec;
+  border-left: 3px solid #3e9f87;
+  border-radius: 5px;
+  color: #245e51;
+}
+.wf-tour-event > span {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #ffffff9c;
+  font-size: 9px;
+}
+.wf-tour-event strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+.wf-tour-event small {
+  grid-column: 1;
+  font-size: 10px;
+}
+.wf-tour-event-violet {
+  background: #efebfa;
+  color: #65508b;
+  border-color: #9b84bf;
+}
+.wf-tour-break {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed #cbd5de;
+  border-radius: 5px;
+  color: #5f6d7a;
+  font-size: 11px;
+}
+.wf-site .wf-tour-insight {
+  display: flex;
+  align-items: start;
+  gap: 7px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #dfe7ec;
+  color: #536b63;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.wf-tour-insight svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #278574;
+}
+.wf-tour-customer,
+.wf-tour-booking-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+}
+.wf-tour-customer > span,
+.wf-tour-booking-brand > span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #dcefe9;
+  color: #2b7664;
+  font-size: 12px;
+  font-weight: 600;
+}
+.wf-tour-customer strong,
+.wf-tour-booking-brand strong {
+  display: block;
+  font-size: 14px;
+}
+.wf-tour-customer small,
+.wf-tour-booking-brand small {
+  display: block;
+  margin-top: 5px;
+  color: #5f6d7a;
+  font-size: 10px;
+}
+.wf-site .wf-tour-subheading {
+  margin: 15px 0 8px;
+  color: #5f6d7a;
+  font-size: 10px;
+  font-weight: 500;
+}
+.wf-tour-history {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e0e7ed;
+}
+.wf-tour-history > svg {
+  color: #7d8f9a;
+  flex-shrink: 0;
+}
+.wf-tour-history strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+}
+.wf-tour-history div > span {
+  display: block;
+  color: #5f6d7a;
+  font-size: 10px;
+  margin-top: 5px;
+}
+.wf-tour-history > span {
+  margin-left: auto;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: #e3f0e9;
+  color: #39735a;
+  font-size: 9px;
+}
+.wf-tour-history > .wf-tour-status-canceled {
+  color: #725865;
+  background: #f1e8ee;
+}
+.wf-tour-booking-service {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #87baae;
+  border-radius: 9px;
+}
+.wf-tour-booking-service strong {
+  display: block;
+  font-size: 12px;
+}
+.wf-tour-booking-service small {
+  display: block;
+  margin-top: 5px;
+  color: #5f6d7a;
+  font-size: 10px;
+}
+.wf-tour-booking-service > svg {
+  flex-shrink: 0;
+  color: #298471;
+}
+.wf-tour-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.wf-tour-slots span {
+  padding: 10px;
+  border: 1px solid #d4e0dc;
+  border-radius: 6px;
+  background: #fff;
+  color: #3a6659;
+  font-size: 11px;
+  text-align: center;
+}
+.wf-tour figcaption {
+  max-width: 390px;
+  margin: 16px auto 0;
+  color: #97a4b0;
+  font-size: 11px;
+  line-height: 1.7;
+  text-align: center;
+}
+@media (max-width: 800px) {
+  .wf-tour {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 540px) {
+  .wf-tour-top {
+    padding: 12px 14px;
+    font-size: 10px;
+  }
+  .wf-tour-selector {
+    padding: 0 14px 16px;
+  }
+  .wf-tour-selector label {
+    font-size: 11px;
+    gap: 5px;
+  }
+  .wf-tour-heading h2 {
+    font-size: 17px;
+  }
+  .wf-tour-heading > svg {
+    display: none;
+  }
+  .wf-tour-event {
+    grid-template-columns: 1fr;
+  }
+  .wf-tour-event > span {
+    display: none;
+  }
+  .wf-tour-history {
+    gap: 6px;
+  }
+  .wf-tour-history > svg {
+    display: none;
+  }
+  .wf-tour-panel {
+    min-height: 365px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wf-tour-selector label {
+    transition: none;
+  }
+}

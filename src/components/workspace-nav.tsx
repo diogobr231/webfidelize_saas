@@ -27,6 +27,56 @@ export function WorkspaceNav({
   const [open, setOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const base = `/painel/${companyId}`;
+  const navigation: { path: string; label: string; icon: IconName }[] = [
+    ...(canManage(role)
+      ? [
+          {
+            path: "/configuracao",
+            label: "Primeiros passos",
+            icon: "check" as const,
+          },
+        ]
+      : []),
+    ...entries.map((entry) => ({
+      ...entry,
+      label:
+        role === "EMPLOYEE" && entry.path === "/disponibilidade"
+          ? "Meus horários"
+          : entry.label,
+    })),
+    ...(role === "OWNER"
+      ? [
+          {
+            path: "/equipe",
+            label: "Equipe e acessos",
+            icon: "shield" as const,
+          },
+          {
+            path: "/personalizacao",
+            label: "Personalização",
+            icon: "settings" as const,
+          },
+        ]
+      : []),
+    ...(canManage(role)
+      ? [
+          {
+            path: "/assinatura",
+            label: "Planos e assinatura",
+            icon: "briefcase" as const,
+          },
+        ]
+      : []),
+  ];
+  function currentLocation(href: string) {
+    if (pathname === href || pathname === `${href}/`) return "page" as const;
+    if (href !== base && pathname.startsWith(`${href}/`))
+      return "location" as const;
+    return undefined;
+  }
+  const currentEntry = navigation.find((entry) =>
+    currentLocation(`${base}${entry.path}`),
+  );
   return (
     <>
       <aside
@@ -57,86 +107,36 @@ export function WorkspaceNav({
           className="workspace-mobile-menu"
           aria-expanded={open}
           aria-controls="workspace-navigation"
-          onClick={() => setOpen(!open)}
+          aria-label={`${open ? "Fechar" : "Abrir"} menu da empresa${currentEntry ? `. Seção atual: ${currentEntry.label}` : ""}`}
+          onClick={() => setOpen((value) => !value)}
         >
-          <Icon name="menu" size={18} />
-          <span>Menu da empresa</span>
+          <Icon name={currentEntry?.icon ?? "menu"} size={18} />
+          <span className="workspace-mobile-context">
+            <small>Seu espaço de trabalho</small>
+            <strong>{currentEntry?.label ?? "Menu da empresa"}</strong>
+          </span>
+          <span className="workspace-mobile-menu-label">Menu</span>
           <Icon name="chevron-down" size={16} />
         </button>
         <div id="workspace-navigation" className="workspace-nav-body">
           <p className="workspace-nav-caption">Seu espaço de trabalho</p>
           <nav aria-label="Menu da empresa" className="workspace-nav">
-            {canManage(role) && (
-              <Link
-                href={`${base}/configuracao`}
-                onClick={() => setOpen(false)}
-                aria-current={
-                  pathname === `${base}/configuracao` ? "page" : undefined
-                }
-              >
-                <span className="workspace-nav-icon" aria-hidden="true">
-                  <Icon name="check" size={18} />
-                </span>
-                Primeiros passos
-              </Link>
-            )}
-            {entries.map((entry) => {
+            {navigation.map((entry) => {
               const href = `${base}${entry.path}`;
-              const active = pathname === href || pathname === `${href}/`;
               return (
                 <Link
                   key={entry.path}
                   href={href}
                   onClick={() => setOpen(false)}
-                  aria-current={active ? "page" : undefined}
+                  aria-current={currentLocation(href)}
                 >
                   <span className="workspace-nav-icon" aria-hidden="true">
                     <Icon name={entry.icon} size={18} />
                   </span>
-                  {role === "EMPLOYEE" && entry.path === "/disponibilidade"
-                    ? "Meus horários"
-                    : entry.label}
+                  {entry.label}
                 </Link>
               );
             })}
-            {role === "OWNER" && (
-              <Link
-                href={`${base}/equipe`}
-                onClick={() => setOpen(false)}
-                aria-current={
-                  pathname === `${base}/equipe` ? "page" : undefined
-                }
-              >
-                <span className="workspace-nav-icon" aria-hidden="true">
-                  <Icon name="shield" size={18} />
-                </span>
-                Equipe e acessos
-              </Link>
-            )}
-            {role === "OWNER" && (
-              <Link
-                href={`${base}/personalizacao`}
-                onClick={() => setOpen(false)}
-                aria-current={
-                  pathname === `${base}/personalizacao` ? "page" : undefined
-                }
-              >
-                <Icon name="settings" size={18} />
-                Personalização
-              </Link>
-            )}
-            {canManage(role) && (
-              <Link
-                href={`${base}/assinatura`}
-                onClick={() => setOpen(false)}
-                aria-current={
-                  pathname === `${base}/assinatura` ? "page" : undefined
-                }
-              >
-                <Icon name="briefcase" size={18} />
-                Planos e assinatura
-              </Link>
-            )}
           </nav>
           <div className="workspace-nav-footer">
             <Link href="/painel?empresas=1" onClick={() => setOpen(false)}>
@@ -183,7 +183,7 @@ export function WorkspaceNav({
             key={item.href}
             href={item.href}
             onClick={() => setOpen(false)}
-            aria-current={pathname === item.href ? "page" : undefined}
+            aria-current={currentLocation(item.href)}
           >
             <Icon name={item.icon} size={20} />
             <span>{item.label}</span>

@@ -19,6 +19,9 @@ export function AuthShell({
 }) {
   return (
     <main className="auth-shell">
+      <a className="auth-skip-link" href="#auth-content">
+        Ir para o formulário
+      </a>
       <aside className="auth-brand-panel" aria-label="Web Fidelize">
         <Brand href="/" className="auth-brand" />
         <div className="auth-brand-content">
@@ -67,9 +70,12 @@ export function AuthShell({
         <Link className="auth-back" href="/">
           Voltar ao site <Icon name="arrow-up-right" size={15} />
         </Link>
-        <div className="auth-content">
+        <div id="auth-content" className="auth-content" tabIndex={-1}>
           <header className="auth-heading">
-            <span className="auth-eyebrow">{eyebrow}</span>
+            <span className="auth-eyebrow">
+              <span className="auth-eyebrow-mark" aria-hidden="true" />
+              {eyebrow}
+            </span>
             <h1 id="auth-title">{title}</h1>
             {description ? (
               <div className="auth-description">{description}</div>

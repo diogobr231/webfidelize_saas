@@ -4,6 +4,7 @@ import { commercialPlans } from "@/lib/commercial";
 import { landingStructuredData } from "@/lib/seo";
 import { Icon } from "@/components/ui/icon";
 import { Brand } from "@/components/ui/brand";
+import { ProductTour } from "@/components/landing/product-tour";
 import "./landing.css";
 
 export { landingMetadata as metadata } from "@/lib/seo";
@@ -43,7 +44,7 @@ const questions = [
   {
     question: "O proprietário conta no limite do plano?",
     answer:
-      "Sim, se estiver cadastrado como profissional que recebe agendamentos. Os limites de 1, 3 e 10 profissionais se referem às pessoas cadastradas na agenda. O preço exibido é mensal; fale conosco para conhecer as condições dos planos.",
+      "Sim, se estiver cadastrado como profissional ativo que recebe agendamentos. O limite exibido em cada plano considera essas pessoas, e não os convites para acessar o painel. O preço exibido é mensal; fale conosco para conhecer as condições dos planos.",
   },
   {
     question: "Posso compartilhar minha agenda no WhatsApp?",
@@ -95,6 +96,19 @@ export default async function Home() {
             <a href="#planos">Planos</a>
             <a href="#duvidas">Dúvidas</a>
           </div>
+          <details className="wf-mobile-nav">
+            <summary aria-label="Menu de navegação">
+              <Icon name="menu" size={18} />
+              <span>Menu</span>
+            </summary>
+            <div>
+              <a href="#recursos">Recursos disponíveis</a>
+              <a href="#demonstracao">Como seu cliente agenda</a>
+              <a href="#como-funciona">Primeiros passos</a>
+              <a href="#planos">Planos e condições</a>
+              <a href="#duvidas">Perguntas frequentes</a>
+            </div>
+          </details>
           <Link className="wf-login" href="/entrar">
             Entrar
             <Icon name="arrow-right" />
@@ -109,7 +123,7 @@ export default async function Home() {
         <div className="wf-hero-copy">
           <span className="wf-eyebrow wf-hero-pill">
             <span />
-            SIMPLES PARA VOCÊ. FÁCIL PARA SEU CLIENTE.
+            PARA QUEM ATENDE COM HORA MARCADA
           </span>
           <h1 id="hero-title">
             Sua agenda
@@ -122,9 +136,9 @@ export default async function Home() {
             </em>
           </h1>
           <p>
-            Agenda online, clientes e profissionais no mesmo lugar. Compartilhe
-            seu link e deixe seu cliente escolher o melhor horário para ser
-            atendido.
+            Organize os atendimentos e a equipe em uma agenda online.
+            Compartilhe seu link e deixe o cliente escolher entre os horários
+            disponíveis, direto pelo celular.
           </p>
           <div className="wf-hero-actions">
             <TrialLink />
@@ -148,113 +162,11 @@ export default async function Home() {
               Acesso pelo navegador
             </span>
           </div>
+          <a className="wf-tour-link" href="#demonstracao">
+            Veja como seu cliente agenda <Icon name="arrow-right" size={15} />
+          </a>
         </div>
-        <figure className="wf-product-figure" aria-labelledby="product-caption">
-          <div className="wf-product-glow" />
-          <div className="wf-product-window">
-            <div className="wf-window-top">
-              <span className="wf-window-dots" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-              <span>Seu espaço de trabalho</span>
-              <span className="wf-demo-label">Demonstração visual</span>
-            </div>
-            <div className="wf-product-body">
-              <div className="wf-product-sidebar" aria-hidden="true">
-                <span className="wf-mini-mark">w.</span>
-                <span className="wf-sidebar-active">
-                  <Icon name="calendar" />
-                </span>
-                <span>
-                  <Icon name="users" />
-                </span>
-                <span>
-                  <Icon name="settings" />
-                </span>
-              </div>
-              <div className="wf-calendar-preview">
-                <div className="wf-calendar-title">
-                  <div>
-                    <span>SEU NEGÓCIO, EM ORDEM</span>
-                    <strong>Minha agenda</strong>
-                  </div>
-                  <span className="wf-demo-avatar">EF</span>
-                </div>
-                <div className="wf-calendar-toolbar">
-                  <span>
-                    Dia de exemplo <span aria-hidden="true">⌄</span>
-                  </span>
-                  <span className="wf-view-switch">
-                    <b>Dia</b>
-                    <span>Semana</span>
-                  </span>
-                </div>
-                <div className="wf-calendar-grid">
-                  <div className="wf-grid-heading">
-                    <span />
-                    <span>Profissional A</span>
-                    <span>Profissional B</span>
-                  </div>
-                  <div className="wf-grid-row">
-                    <span className="wf-grid-hour">09:00</span>
-                    <div>
-                      <div className="wf-appointment wf-appointment-cyan">
-                        <strong>Serviço de exemplo</strong>
-                        <span>Cliente fictício A</span>
-                        <small>09:00 – 09:30</small>
-                      </div>
-                    </div>
-                    <div />
-                  </div>
-                  <div className="wf-grid-row">
-                    <span className="wf-grid-hour">10:00</span>
-                    <div />
-                    <div>
-                      <div className="wf-appointment wf-appointment-violet">
-                        <strong>Serviço de exemplo</strong>
-                        <span>Cliente fictício B</span>
-                        <small>10:00 – 10:45</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="wf-grid-row">
-                    <span className="wf-grid-hour">11:00</span>
-                    <div>
-                      <div className="wf-appointment wf-appointment-muted">
-                        <strong>Horário disponível</strong>
-                        <small>Um espaço para o próximo cliente</small>
-                      </div>
-                    </div>
-                    <div />
-                  </div>
-                </div>
-                <div className="wf-calendar-bottom">
-                  <span>
-                    <span />
-                    Tudo em um só lugar
-                  </span>
-                  <Icon name="calendar" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="wf-product-note">
-            <span className="wf-note-icon">
-              <Icon name="link" />
-            </span>
-            <div>
-              <strong>Seu link. Sua agenda.</strong>
-              <span>Uma conexão com seu cliente.</span>
-            </div>
-            <Icon name="arrow-right" />
-          </div>
-          <figcaption id="product-caption">
-            Representação ilustrativa com dados fictícios. Não exibe uma agenda
-            real.
-          </figcaption>
-        </figure>
+        <ProductTour />
       </section>
       <section
         className="wf-container wf-value-strip"
@@ -356,8 +268,8 @@ export default async function Home() {
               que você precisa.
             </h3>
             <p>
-              Cadastre contatos, serviços, preços, duração e profissionais.
-              Mantenha as informações da operação em um único lugar.
+              Encontre clientes pelo nome, consulte o histórico de atendimentos
+              e mantenha contatos, serviços e profissionais organizados.
             </p>
             <div className="wf-feature-tags">
               <span>Clientes</span>
@@ -374,7 +286,10 @@ export default async function Home() {
             <Icon name="clock" />
             <div>
               <h3>Disponibilidade do seu jeito</h3>
-              <p>Defina dias, turnos e intervalos semanais por profissional.</p>
+              <p>
+                Defina turnos semanais e bloqueie períodos para pausas ou
+                ausências.
+              </p>
             </div>
           </article>
           <article>
@@ -382,7 +297,8 @@ export default async function Home() {
             <div>
               <h3>Uma página com a sua identidade</h3>
               <p>
-                Escolha entre 4 cores e adicione descrição, endereço e WhatsApp.
+                Adicione seu logotipo, escolha entre 4 cores e exiba endereço e
+                WhatsApp.
               </p>
             </div>
           </article>
@@ -390,7 +306,10 @@ export default async function Home() {
             <Icon name="settings" />
             <div>
               <h3>Configuração guiada</h3>
-              <p>Acompanhe os passos para preparar e publicar sua agenda.</p>
+              <p>
+                Prepare a empresa por etapas e retome de onde parou quando
+                precisar.
+              </p>
             </div>
           </article>
         </div>
@@ -403,7 +322,7 @@ export default async function Home() {
         <div className="wf-container wf-demo-layout">
           <div className="wf-demo-copy">
             <span className="wf-eyebrow">
-              EXPERIMENTE O LADO DO SEU CLIENTE
+              UMA RESERVA SIMPLES PARA SEU CLIENTE
             </span>
             <h2 id="demo-title">
               Do seu link
@@ -620,18 +539,18 @@ export default async function Home() {
               WhatsApp para consultar os planos.
             </p>
           )}
-          {(plans || []).map((plan, index) => (
+          {(plans || []).map((plan) => (
             <article
-              className={`wf-plan ${index === 1 ? "wf-plan-featured" : ""}`}
+              className={`wf-plan ${plan.id === "profissional" ? "wf-plan-featured" : ""}`}
               key={plan.id}
             >
-              {index === 1 ? (
+              {plan.id === "profissional" ? (
                 <span className="wf-recommended">RECOMENDADO PARA EQUIPES</span>
               ) : null}
               <span className="wf-plan-kicker">
-                {index === 0
+                {plan.staff === 1
                   ? "PARA QUEM ATENDE SOZINHO"
-                  : index === 1
+                  : plan.staff <= 3
                     ? "PARA UMA EQUIPE PEQUENA"
                     : "PARA MAIS PROFISSIONAIS"}
               </span>
@@ -654,7 +573,7 @@ export default async function Home() {
                   "Cadastro de clientes e serviços",
                   "Disponibilidade por profissional",
                   "Página pública de agendamento",
-                  "Personalização com 4 opções de cor",
+                  "Seu logotipo e 4 opções de cor",
                 ].map((feature) => (
                   <li key={feature}>
                     <Icon name="check" />
@@ -662,7 +581,7 @@ export default async function Home() {
                   </li>
                 ))}
               </ul>
-              <TrialLink secondary={index !== 1} />
+              <TrialLink secondary={plan.id !== "profissional"} />
               <span className="wf-plan-trial-note">
                 Teste de 7 dias no plano Essencial.
               </span>

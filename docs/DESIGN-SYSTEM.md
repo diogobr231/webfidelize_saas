@@ -64,17 +64,31 @@ Os componentes estão em `src/components/ui` e usam SVG local e CSS do projeto, 
 
 Prefira esses componentes ao repetir símbolos, cabeçalhos e estados vazios. A ação exibida deve existir e respeitar as permissões já calculadas no servidor. Estados vazios mostram ausência de registros; não devem receber dados fictícios para preencher a tela.
 
+## Ícones do site
+
+O símbolo da marca também aparece em [src/app/icon.svg](../src/app/icon.svg), para identificação do site no navegador, e em [src/app/apple-icon.tsx](../src/app/apple-icon.tsx), que gera um PNG de 180 × 180 com `ImageResponse` de `next/og`. São arquivos locais, sem imagens ou fontes externas. O Next.js inclui os metadados de ícone conforme suas [convenções nativas de app icons](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons).
+
+Esses arquivos identificam visualmente o site. Eles não implementam instalação de aplicativo, suporte offline, notificações ou sincronização em segundo plano. A geração do PNG e as tags resultantes devem ser verificadas no build e nas respostas HTTP; revisão somente do código não comprova a renderização nos dispositivos.
+
 ## Responsividade e interação
 
 Grids usam colunas com `minmax(0, 1fr)` e os filhos devem permitir redução com `min-width: 0`. Textos variáveis, como nome da empresa e serviço, precisam quebrar sem ampliar a página. Tabelas e a agenda podem ter rolagem dentro de seu próprio contêiner.
 
 Os pontos de quebra acompanham a densidade da experiência. A base global reduz grids a duas colunas em 850px e uma em 560px. A configuração guiada empilha o resumo lateral em 920px e ajusta os formulários em 580px. A reserva pública empilha sua lateral em 850px e simplifica o layout em 580px. A navegação do painel possui tratamento próprio no celular, preservando o acesso às rotas.
 
-Ao acrescentar controles, planeje área de toque de pelo menos 44px para ações principais no celular. Os botões globais chegam a essa altura no breakpoint móvel; agendamento e configuração guiada já usam esse mínimo também em seus controles principais. Teste textos longos e estados de erro, além do estado vazio e do preenchido.
+Ao acrescentar controles, planeje área de toque de pelo menos 44px para ações principais. Os botões globais usam esse mínimo; agendamento e configuração guiada também o preservam em seus controles principais. Teste textos longos e estados de erro, além do estado vazio e do preenchido.
 
 O foco por teclado usa `:focus-visible`, contorno de destaque e afastamento do elemento. Seletores em cartões preservam o `input` nativo e mostram o foco no cartão correspondente. Campos mantêm rótulos; erros devem preservar `aria-invalid`, relações de descrição e mensagens visíveis. Ícones e cores complementam o texto, sem substituí-lo.
 
 Transições são curtas e discretas, em geral de 160ms. `prefers-reduced-motion: reduce` desliga animações e transições e retira a rolagem suave. Estados de carregamento precisam continuar informativos por texto e atributos como `aria-busy` ou `role="status"`, mesmo sem animação.
+
+## Acesso e orientação no celular
+
+O `AuthShell` mantém a apresentação grafite da marca e a área clara de formulário. O símbolo existente é preservado; os detalhes visuais usam apenas CSS e SVG local. O link de pular conteúdo aparece ao receber foco e leva diretamente ao formulário. No celular, os campos usam 16px e os links auxiliares têm área de toque mínima de 44px. As notas e os placeholders usam cores de leitura, sem depender de cinza muito claro. Os recuos consideram a área segura do dispositivo.
+
+O botão do menu móvel mostra a seção atual e mantém o nome acessível de abrir ou fechar o menu. A página exata usa `aria-current="page"`; uma ficha dentro da seção usa `aria-current="location"`, com o mesmo destaque visual na navegação lateral e nos atalhos inferiores. A lista continua sendo montada conforme o papel recebido do servidor. Isso orienta o usuário sem criar novas permissões ou rotas.
+
+Cabeçalhos e ações compartilhados permitem quebra de linha para nomes longos. Estados vazios acomodam mais de uma ação sem comprimir os botões. Controles desabilitados mostram impedimento; botões com `aria-busy="true"` mantêm o indicador de espera. Esses ajustes não substituem a validação de autorização no servidor.
 
 ## Manutenção
 
