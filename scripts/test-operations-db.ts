@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
@@ -20,6 +21,7 @@ for (const file of (await readdir("supabase/migrations"))
   .sort()) {
   await db.exec(await readFile(`supabase/migrations/${file}`, "utf8"));
 }
+await installLegacyTrialFixtures(db);
 async function scalar(sql: string, args: unknown[] = []) {
   const { rows } = await db.query<Record<string, unknown>>(sql, args);
   return Object.values(rows[0])[0];

@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
@@ -12,6 +13,7 @@ const migrations = await readdir("supabase/migrations").catch(() => []);
 await db.exec(storageFixture);
 for (const name of migrations.filter((n) => n.endsWith(".sql")).sort())
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
+await installLegacyTrialFixtures(db);
 if (!migrations.length) throw new Error("Versioned migrations missing");
 
 const a = "00000000-0000-4000-8000-000000000001",

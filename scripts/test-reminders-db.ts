@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
@@ -16,6 +17,7 @@ await db.exec(storageFixture);
 for (const name of (await readdir("supabase/migrations")).filter((name) => name.endsWith(".sql")).sort()) {
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
 }
+await installLegacyTrialFixtures(db);
 const ids = { owner: randomUUID(), other: randomUUID(), manager: randomUUID(), employee: randomUUID(), admin: randomUUID() };
 const sql = (query: string, args: unknown[] = []) => db.query<Record<string, unknown>>(query, args);
 async function value<T = unknown>(query: string, args: unknown[] = []): Promise<T> { return Object.values((await db.query<Record<string, T>>(query, args)).rows[0])[0]; }

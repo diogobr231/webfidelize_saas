@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
@@ -28,6 +29,7 @@ const migrations = (await readdir("supabase/migrations"))
   .sort();
 for (const name of migrations)
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
+await installLegacyTrialFixtures(db);
 const migrated = await db.query(
   "select 1 from information_schema.columns where table_schema='public' and table_name='companies' and column_name='logo_path'",
 );

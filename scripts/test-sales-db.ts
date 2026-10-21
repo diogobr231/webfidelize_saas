@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
@@ -21,6 +22,7 @@ for (const name of (await readdir("supabase/migrations"))
   .filter((name) => name.endsWith(".sql"))
   .sort())
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
+await installLegacyTrialFixtures(db);
 
 const ownerA = randomUUID(),
   ownerB = randomUUID(),
