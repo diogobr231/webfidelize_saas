@@ -305,9 +305,11 @@ async function main() {
     const professionalsBefore = await rows(
       owner.db,
       "professionals",
-      "id,company_id,name,user_id",
+      "id,company_id,name,user_id,archived_at",
     );
-    const free = professionalsBefore.find((person) => person.user_id === null);
+    const free = professionalsBefore.find(
+      (person) => person.user_id === null && person.archived_at === null,
+    );
     check(free, "No existing unlinked synthetic professional is available.");
     professionalId = String(free.id);
     const appointmentsBefore = await rows(
@@ -323,15 +325,24 @@ async function main() {
     );
     const invitationsBefore = await owner.db
       .from("invitations")
-      .select("id,expires_at,accepted_at")
+      .select("id,expires_at,accepted_at,canceled_at,last_issued_at")
       .eq("company_id", companyId)
       .eq("email", employeeEmail);
     check(
       !invitationsBefore.error &&
         !invitationsBefore.data?.some(
-          (i) => !i.accepted_at && Date.parse(i.expires_at) > Date.now(),
+          (i) =>
+            !i.accepted_at &&
+            !i.canceled_at &&
+            Date.parse(i.expires_at) > Date.now(),
         ),
       "Refusing to interfere with a pending invitation for this demo identity.",
+    );
+    check(
+      !invitationsBefore.data?.some(
+        (i) => Date.parse(i.last_issued_at) > Date.now() - 60000,
+      ),
+      "A demo invitation was issued recently. Wait for the 60-second cooldown before rerunning.",
     );
     const previousInvitationIds = new Set(
       (invitationsBefore.data || []).map((i) => i.id),
@@ -347,19 +358,25 @@ async function main() {
         source.includes("Vincular contas à agenda"),
       "Owner email directory and assignment interface were not rendered.",
     );
+    // Inspect the running server's safe capability flag, not just this test's
+    // environment: SMTP might otherwise be configured only in its parent process.
+    check(
+      source.includes('data-invitation-email-enabled="false"') &&
+        !source.includes('data-invitation-email-enabled="true"'),
+      "Refusing invitation submission while server email delivery is enabled or its disabled state cannot be verified.",
+    );
     const invite = actionForm(source, (inputs) =>
       inputs.some((i) => i.name === "email"),
     );
     invite.set("email", employeeEmail);
     invite.set("role", "EMPLOYEE");
-    const invited = await destination(
-      await request(owner, teamRoute(), invite),
-    );
-    const token = invited.searchParams.get("convite");
     check(
-      invited.pathname === teamRoute() && token && /^[a-f0-9]{64}$/.test(token),
-      "Invitation was not confirmed by the server.",
+      !invite.has("send_email"),
+      "Synthetic integration tests must never request email delivery.",
     );
+    const invited = await request(owner, teamRoute(), invite);
+    // Record only a uniquely attributable new invitation before parsing the HTML
+    // so a rendering/assertion failure still cancels this run's unused grant.
     const invitationsAfter = await owner.db
       .from("invitations")
       .select("id")
@@ -377,6 +394,46 @@ async function main() {
       "Expected exactly one invitation created by this run.",
     );
     invitationId = createdInvitations[0].id;
+    check(
+      invited.status === 200 && !invited.headers.get("location"),
+      "Invitation must return its result in the private POST body, not a token-bearing redirect.",
+    );
+    const invitationResult = await invited.text();
+    check(
+      invitationResult.includes('data-invitation-delivery="not_requested"'),
+      "The invitation result must confirm that email delivery was not requested.",
+    );
+    const links = [...invitationResult.matchAll(/<a\b[^>]*>/g)]
+      .map((match) => attributes(match[0]).href)
+      .filter((href): href is string => Boolean(href))
+      .map((href) => {
+        try {
+          return new URL(href, base);
+        } catch {
+          return null;
+        }
+      })
+      .filter((url) => url && /^\/convite\/[a-f0-9]{64}$/.test(url.pathname));
+    const tokens = new Set(
+      links.map((url) => url!.pathname.slice("/convite/".length)),
+    );
+    const invitationOrigin = new URL(process.env.APP_URL || base.origin).origin;
+    check(
+      links.every((url) => url?.origin === invitationOrigin),
+      "Invitation links must use the configured application origin.",
+    );
+    const token = [...tokens][0];
+    check(
+      tokens.size === 1 &&
+        token &&
+        /^[a-f0-9]{64}$/.test(token) &&
+        !invitationResult.includes("?convite="),
+      "Invitation was not confirmed by the server.",
+    );
+    check(
+      !(await html(owner)).includes(token),
+      "Invitation token leaked into a subsequent ordinary team page GET.",
+    );
     pass(
       "owner creates a genuine invitation through the Server Action without sending email",
     );
@@ -384,9 +441,20 @@ async function main() {
     phase = "accept invitation with existing confirmed demo identity";
     acceptanceAttempted = true;
     const accepted = await employee.db.rpc("accept_invitation", { token });
+    const acceptedInvitation = await owner.db
+      .from("invitations")
+      .select("accepted_at,canceled_at,email,role")
+      .eq("company_id", companyId)
+      .eq("id", invitationId)
+      .single();
     check(
       !accepted.error &&
         accepted.data === companyId &&
+        !acceptedInvitation.error &&
+        acceptedInvitation.data?.accepted_at &&
+        !acceptedInvitation.data.canceled_at &&
+        acceptedInvitation.data.email === employeeEmail &&
+        acceptedInvitation.data.role === "EMPLOYEE" &&
         (await member())?.role === "EMPLOYEE",
       "Invitation acceptance did not create the scoped employee membership.",
     );
@@ -611,7 +679,11 @@ async function main() {
       items.slice().sort((x, y) => String(x.id).localeCompare(String(y.id)));
     assert.deepEqual(
       sorted(
-        await rows(owner.db, "professionals", "id,company_id,name,user_id"),
+        await rows(
+          owner.db,
+          "professionals",
+          "id,company_id,name,user_id,archived_at",
+        ),
       ),
       sorted(professionalsBefore),
     );
@@ -652,21 +724,23 @@ async function main() {
     );
   } finally {
     try {
-      if (acceptanceAttempted && invitationId && companyId && employeeId) {
+      if (invitationId && companyId && employeeId) {
         const invitation = await owner.db
           .from("invitations")
-          .select("accepted_at")
+          .select("accepted_at,canceled_at,email")
           .eq("company_id", companyId)
           .eq("id", invitationId)
           .maybeSingle();
         check(
-          !invitation.error,
+          !invitation.error && invitation.data?.email === employeeEmail,
           "Could not inspect this run's invitation during cleanup.",
         );
         const current = await member();
         if (current) {
           check(
-            invitation.data?.accepted_at && current.role === "EMPLOYEE",
+            acceptanceAttempted &&
+              invitation.data?.accepted_at &&
+              current.role === "EMPLOYEE",
             "Unexpected membership state; cleanup refuses to remove access it cannot attribute to this test.",
           );
           const cleanup = await owner.db.rpc("revoke_company_member", {
@@ -677,6 +751,19 @@ async function main() {
           check(
             !cleanup.error,
             "Could not clean up the temporary synthetic membership.",
+          );
+        } else if (
+          !invitation.data?.accepted_at &&
+          !invitation.data?.canceled_at
+        ) {
+          const cleanup = await owner.db.rpc("cancel_team_invitation", {
+            p_company: companyId,
+            p_invitation: invitationId,
+            p_confirmed: true,
+          });
+          check(
+            !cleanup.error,
+            "Could not cancel this run's unused synthetic invitation.",
           );
         }
       }

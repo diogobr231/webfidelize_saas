@@ -5,8 +5,20 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { PendingButton } from "@/components/pending-button";
 import { ConfirmSubmit } from "@/components/confirm-submit";
-import { teamRoleLabels } from "@/lib/team";
-import { assignProfessionalMember, invite, revokeMember } from "./actions";
+import {
+  INVITATION_PAGE_SIZE,
+  invitationErrorMessages,
+  invitationPage,
+  invitationStatus,
+  teamRoleLabels,
+} from "@/lib/team";
+import {
+  assignProfessionalMember,
+  cancelInvitation,
+  revokeMember,
+} from "./actions";
+import { InvitationForm, InvitationRenewal } from "./invitation-form";
+import { invitationEmailEnabled } from "@/lib/team-mail";
 import "../../operations.css";
 import "./equipe.css";
 type TeamMember = { user_id: string; role: string; email?: string | null };
@@ -16,7 +28,18 @@ type TeamProfessional = {
   user_id: string | null;
   archived_at: string | null;
 };
+type TeamInvitation = {
+  id: string;
+  email: string;
+  role: string;
+  expires_at: string;
+  accepted_at: string | null;
+  canceled_at: string | null;
+  last_issued_at: string;
+  created_at: string;
+};
 const errors: Record<string, string> = {
+  ...invitationErrorMessages,
   convite:
     "Não foi possível criar o convite. Confira sua assinatura e permissões.",
   vinculo:
@@ -34,29 +57,83 @@ export default async function Team({
   searchParams,
 }: {
   params: Promise<{ companyId: string }>;
-  searchParams: Promise<{ convite?: string; erro?: string; salvo?: string }>;
+  searchParams: Promise<{
+    erro?: string;
+    salvo?: string;
+    pagina?: string;
+    convites?: string;
+  }>;
 }) {
   const { companyId } = await params;
-  const { db, role } = await requireCompany(companyId);
+  const { db, role, company } = await requireCompany(companyId);
+  const deliveryEnabled = role === "OWNER" && invitationEmailEnabled();
   const p = await searchParams;
-  const [membersResult, professionalsResult] = await Promise.all([
-    role === "OWNER"
-      ? db.rpc("company_team_directory", { c: companyId })
-      : db
-          .from("memberships")
-          .select("user_id,role")
-          .eq("company_id", companyId),
-    role === "OWNER"
-      ? db
-          .from("professionals")
-          .select("id,name,user_id,archived_at")
-          .eq("company_id", companyId)
-          .order("name")
-      : Promise.resolve({ data: [], error: null }),
-  ]);
+  const allInvitations = p.convites === "todos";
+  const requestedPage = invitationPage(p.pagina);
+  const invitationsQuery = (page: number) => {
+    let query = db
+      .from("invitations")
+      .select(
+        "id,email,role,expires_at,accepted_at,canceled_at,last_issued_at,created_at",
+        { count: "exact" },
+      )
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+    if (!allInvitations)
+      query = query.is("accepted_at", null).is("canceled_at", null);
+    return query.range(
+      (page - 1) * INVITATION_PAGE_SIZE,
+      page * INVITATION_PAGE_SIZE - 1,
+    );
+  };
+  const [membersResult, professionalsResult, firstInvitations, planResult] =
+    await Promise.all([
+      role === "OWNER"
+        ? db.rpc("company_team_directory", { c: companyId })
+        : db
+            .from("memberships")
+            .select("user_id,role")
+            .eq("company_id", companyId),
+      role === "OWNER"
+        ? db
+            .from("professionals")
+            .select("id,name,user_id,archived_at")
+            .eq("company_id", companyId)
+            .order("name")
+        : Promise.resolve({ data: [], error: null }),
+      role === "OWNER"
+        ? invitationsQuery(requestedPage)
+        : Promise.resolve({ data: [], error: null, count: 0 }),
+      role === "OWNER"
+        ? db
+            .from("plans")
+            .select("staff_limit")
+            .eq("id", company.plan_id)
+            .single()
+        : Promise.resolve({ data: null, error: null }),
+    ]);
   const members = (membersResult.data || []) as TeamMember[];
   const professionals = (professionalsResult.data || []) as TeamProfessional[];
   const error = membersResult.error || professionalsResult.error;
+  const pages = Math.max(
+    1,
+    Math.ceil((firstInvitations.count || 0) / INVITATION_PAGE_SIZE),
+  );
+  const currentPage = Math.min(requestedPage, pages);
+  const invitationsResult =
+    role === "OWNER" && !firstInvitations.error && currentPage !== requestedPage
+      ? await invitationsQuery(currentPage)
+      : firstInvitations;
+  const invitations = (invitationsResult.data || []) as TeamInvitation[];
+  const invitationUrl = (page: number, all = allInvitations) =>
+    `/painel/${companyId}/equipe?convites=${all ? "todos" : "abertos"}&pagina=${page}#convites`;
+  const dateLabel = (value: string) =>
+    new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "America/Sao_Paulo",
+    }).format(new Date(value));
   return (
     <>
       <PageHeader
@@ -81,30 +158,19 @@ export default async function Team({
           {errors[p.erro] || errors.vinculo}
         </p>
       )}
-      {["vinculo", "desvinculado", "revogado"].includes(p.salvo || "") ? (
+      {["vinculo", "desvinculado", "revogado", "convite-cancelado"].includes(
+        p.salvo || "",
+      ) ? (
         <p className="notice" role="status">
           {p.salvo === "vinculo"
             ? "Vínculo salvo. A conta já pode consultar a agenda atribuída a esse profissional."
             : p.salvo === "desvinculado"
               ? "Conta desvinculada. A agenda e o histórico do profissional foram preservados."
-              : "Acesso revogado. O profissional, os clientes e os agendamentos foram preservados."}
+              : p.salvo === "convite-cancelado"
+                ? "Convite cancelado. O link não permite mais entrar na empresa."
+                : "Acesso revogado. O profissional, os clientes e os agendamentos foram preservados."}
         </p>
       ) : null}
-      {p.convite && /^[a-f0-9]{64}$/.test(p.convite) && role === "OWNER" && (
-        <div className="notice team-invite-result" role="status">
-          <Icon name="link" size={20} />
-          <div>
-            <strong>
-              Convite gerado. Compartilhe somente com o destinatário.
-            </strong>
-            <p className="team-invite-url">
-              {process.env.APP_URL}/convite/{p.convite}
-            </p>
-            Válido por 48 horas. O destinatário precisa confirmar o e-mail e
-            entrar na conta antes de aceitar.
-          </div>
-        </div>
-      )}
       <div className={`records-layout${role === "OWNER" ? " has-editor" : ""}`}>
         <section className="panel records-list">
           <div className="records-list-heading">
@@ -201,37 +267,135 @@ export default async function Team({
               Gere um link individual e compartilhe com quem vai participar da
               sua equipe.
             </p>
-            <form action={invite} className="operations-form">
-              <input name="company_id" type="hidden" value={companyId} />
-              <label htmlFor="email">E-mail do colaborador</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="nome@empresa.com"
-                autoComplete="email"
-                required
-              />
-              <label htmlFor="role">Permissão</label>
-              <select id="role" name="role">
-                <option value="EMPLOYEE">
-                  Colaborador: agenda atribuída e clientes relacionados
-                </option>
-                <option value="MANAGER">
-                  Gerente: cadastros e agenda da empresa
-                </option>
-              </select>
+            {planResult.data && !membersResult.error ? (
               <p className="operations-field-note">
-                <Icon name="shield" size={14} /> O convite permite um único
-                aceite e expira em 48 horas.
+                {members.filter((member) => member.role !== "OWNER").length} de{" "}
+                {planResult.data.staff_limit} acessos de colaboradores
+                utilizados. O acesso do proprietário não entra nessa contagem.
               </p>
-              <PendingButton>
-                Gerar convite de uso único <Icon name="arrow-right" size={16} />
-              </PendingButton>
-            </form>
+            ) : null}
+            <InvitationForm
+              companyId={companyId}
+              deliveryEnabled={deliveryEnabled}
+            />
           </section>
         )}
       </div>
+      {role === "OWNER" ? (
+        <section
+          className="panel team-invitations-panel"
+          id="convites"
+          aria-labelledby="team-invitations-title"
+        >
+          <div className="team-assignment-heading">
+            <Icon name="mail" size={20} />
+            <div>
+              <h2 id="team-invitations-title">Convites da equipe</h2>
+              <p>
+                Renove um link expirado ou cancele um convite enviado por
+                engano. Um novo link mantém o destinatário e a permissão, e
+                invalida o anterior.
+              </p>
+            </div>
+          </div>
+          <nav
+            className="team-invitation-filters"
+            aria-label="Filtrar convites"
+          >
+            <Link
+              href={invitationUrl(1, false)}
+              aria-current={!allInvitations ? "page" : undefined}
+            >
+              Em aberto e expirados
+            </Link>
+            <Link
+              href={invitationUrl(1, true)}
+              aria-current={allInvitations ? "page" : undefined}
+            >
+              Todos os convites
+            </Link>
+          </nav>
+          {invitationsResult.error ? (
+            <p className="notice error" role="alert">
+              Não foi possível carregar os convites. Atualize a página para
+              tentar novamente.
+            </p>
+          ) : !invitations.length ? (
+            <EmptyState
+              icon="mail"
+              title="Nenhum convite nesta lista"
+              description="Convites gerados para a sua empresa aparecerão aqui com sua validade e situação."
+            />
+          ) : (
+            <ul className="team-invitations">
+              {invitations.map((invitation) => (
+                <li key={invitation.id}>
+                  <div className="team-invitation-info">
+                    <strong>{invitation.email}</strong>
+                    <span>
+                      {teamRoleLabels[invitation.role]} ·{" "}
+                      {invitationStatus(invitation)}
+                    </span>
+                    <span>
+                      Validade: {dateLabel(invitation.expires_at)} · Brasília
+                    </span>
+                  </div>
+                  {!invitation.accepted_at && !invitation.canceled_at ? (
+                    <div className="team-invitation-controls">
+                      <InvitationRenewal
+                        companyId={companyId}
+                        invitationId={invitation.id}
+                        deliveryEnabled={deliveryEnabled}
+                      />
+                      <form action={cancelInvitation}>
+                        <input
+                          type="hidden"
+                          name="company_id"
+                          value={companyId}
+                        />
+                        <input
+                          type="hidden"
+                          name="invitation_id"
+                          value={invitation.id}
+                        />
+                        <ConfirmSubmit
+                          label="Cancelar convite"
+                          description={`O link enviado para ${invitation.email} deixará de permitir o aceite. Isso não altera acessos já concedidos.`}
+                        />
+                      </form>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+          {!invitationsResult.error && pages > 1 ? (
+            <nav
+              className="team-invitation-pagination"
+              aria-label="Páginas de convites"
+            >
+              {currentPage > 1 ? (
+                <Link href={invitationUrl(currentPage - 1)}>← Anterior</Link>
+              ) : (
+                <span />
+              )}
+              <span>
+                Página {currentPage} de {pages}
+              </span>
+              {currentPage < pages ? (
+                <Link href={invitationUrl(currentPage + 1)}>Próxima →</Link>
+              ) : (
+                <span />
+              )}
+            </nav>
+          ) : null}
+          <p className="operations-field-note">
+            Aguarde 60 segundos entre emissões para o mesmo e-mail. O limite é
+            de 25 emissões nas últimas 24 horas, incluindo renovações. O aceite
+            depende das vagas e da assinatura no momento da confirmação.
+          </p>
+        </section>
+      ) : null}
       {role === "OWNER" ? (
         <section
           className="panel team-assignment-panel"
