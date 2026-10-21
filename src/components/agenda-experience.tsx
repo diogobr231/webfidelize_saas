@@ -24,7 +24,7 @@ export type CalendarAppointment = {
   service_name: string;
   professional_name: string;
 };
-type Option = { id: string; name: string };
+type Option = { id: string; name: string; archived_at?: string | null };
 type Props = {
   companyId: string;
   day: string;
@@ -32,6 +32,7 @@ type Props = {
   view: "day" | "week";
   appointments: CalendarAppointment[];
   professionals: Option[];
+  bookingProfessionals: Option[];
   customers: Option[];
   services: (Option & { duration_minutes: number; price_cents: number })[];
   shifts: {
@@ -207,6 +208,7 @@ export function AgendaExperience(props: Props) {
     view,
     appointments,
     professionals,
+    bookingProfessionals,
     customers,
     services,
     managed,
@@ -217,8 +219,13 @@ export function AgendaExperience(props: Props) {
   const [formDay, setFormDay] = useState(day);
   const [formTime, setFormTime] = useState("09:00");
   const [formProfessional, setFormProfessional] = useState(
-    selectedProfessional ||
-      (professionals.length === 1 ? professionals[0].id : ""),
+    bookingProfessionals.some(
+      (professional) => professional.id === selectedProfessional,
+    )
+      ? selectedProfessional
+      : bookingProfessionals.length === 1
+        ? bookingProfessionals[0].id
+        : "",
   );
   const dateInput = useRef<HTMLInputElement>(null);
   const live = appointments.filter((a) => a.status !== "canceled");
@@ -256,14 +263,20 @@ export function AgendaExperience(props: Props) {
       : (selectedProfessional
           ? professionals.filter((p) => p.id === selectedProfessional)
           : professionals
-        ).map((p) => ({ key: p.id, day, professional: p.id, title: p.name }));
+        ).map((p) => ({
+          key: p.id,
+          day,
+          professional: p.id,
+          title: `${p.name}${p.archived_at ? " (arquivado)" : ""}`,
+        }));
   const ready = Boolean(
-    customers.length && services.length && professionals.length,
+    customers.length && services.length && bookingProfessionals.length,
   );
   const openSlot = (targetDay: string, hour: number, professional: string) => {
     setFormDay(targetDay);
     setFormTime(`${String(hour).padStart(2, "0")}:00`);
-    if (professional) setFormProfessional(professional);
+    if (bookingProfessionals.some((item) => item.id === professional))
+      setFormProfessional(professional);
     dateInput.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     dateInput.current?.focus({ preventScroll: true });
   };
@@ -375,7 +388,13 @@ export function AgendaExperience(props: Props) {
                     );
                   })}
                   {hours.map((h) =>
-                    managed && ready ? (
+                    managed &&
+                    ready &&
+                    (!column.professional ||
+                      bookingProfessionals.some(
+                        (professional) =>
+                          professional.id === column.professional,
+                      )) ? (
                       <button
                         key={h}
                         className="calendar-slot"
@@ -524,7 +543,7 @@ export function AgendaExperience(props: Props) {
               {!services.length && (
                 <Link href={`/painel/${companyId}/services`}>um serviço </Link>
               )}
-              {!professionals.length && (
+              {!bookingProfessionals.length && (
                 <Link href={`/painel/${companyId}/professionals`}>
                   um profissional
                 </Link>
@@ -567,7 +586,7 @@ export function AgendaExperience(props: Props) {
                     onChange={(e) => setFormProfessional(e.target.value)}
                   >
                     <option value="">Selecione o profissional</option>
-                    {professionals.map((p) => (
+                    {bookingProfessionals.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name}
                       </option>

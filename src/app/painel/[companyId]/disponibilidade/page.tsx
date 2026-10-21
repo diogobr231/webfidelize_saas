@@ -1,4 +1,6 @@
 import type { CSSProperties } from "react";
+import { randomUUID } from "node:crypto";
+import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { canManage, hasAccess } from "@/lib/permissions";
@@ -7,7 +9,18 @@ import { ShareBooking } from "@/components/share-booking";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
-import { addShift, removeShift, configure, configureProfile } from "./actions";
+import { addDays, agendaRange, saoPauloDay, validDay } from "@/lib/scheduling";
+import { BLOCKS_PAGE_SIZE, blockPage } from "@/lib/schedule-blocks";
+import { ScheduleBlockForm } from "@/components/scheduling-blocks/block-form";
+import { ScheduleBlockList } from "@/components/scheduling-blocks/block-list";
+import {
+  addShift,
+  removeShift,
+  configure,
+  configureProfile,
+  createScheduleBlock,
+  removeScheduleBlock,
+} from "./actions";
 import "../../operations.css";
 
 const days = [
@@ -34,12 +47,22 @@ export default async function Availability({
   searchParams,
 }: {
   params: Promise<{ companyId: string }>;
-  searchParams: Promise<{ erro?: string; salvo?: string }>;
+  searchParams: Promise<{
+    erro?: string;
+    salvo?: string;
+    bloqueios_de?: string;
+    bloqueios_pagina?: string;
+  }>;
 }) {
   const { companyId } = await params;
   const { db, role, company } = await requireCompany(companyId);
   const q = await searchParams;
-  const [shifts, professionals] = await Promise.all([
+  const blockDay = validDay(q.bloqueios_de) ? q.bloqueios_de : saoPauloDay();
+  const blockLastDay = addDays(blockDay, 29);
+  const page = blockPage(q.bloqueios_pagina);
+  const blockHref = (target: string, page = 1) =>
+    `/painel/${companyId}/disponibilidade?${new URLSearchParams({ bloqueios_de: target, bloqueios_pagina: String(page) })}#bloqueios`;
+  const [shifts, professionals, blocks] = await Promise.all([
     db
       .from("availability")
       .select("id,professional_id,weekday,start_minute,end_minute")
@@ -48,10 +71,22 @@ export default async function Availability({
       .order("start_minute"),
     db
       .from("professionals")
-      .select("id,name")
+      .select("id,name,archived_at")
       .eq("company_id", companyId)
       .order("name"),
+    db
+      .from("schedule_blocks")
+      .select("id,professional_id,starts_at,ends_at,reason", { count: "exact" })
+      .eq("company_id", companyId)
+      .lt("starts_at", agendaRange(blockLastDay, "day").end)
+      .gt("ends_at", agendaRange(blockDay, "day").start)
+      .order("starts_at")
+      .order("id")
+      .range((page - 1) * BLOCKS_PAGE_SIZE, page * BLOCKS_PAGE_SIZE - 1),
   ]);
+  const activeProfessionals =
+    professionals.data?.filter((professional) => !professional.archived_at) ??
+    [];
   const writable = hasAccess(company.status, company.trial_ends_at);
   const managed = canManage(role);
   const enabled = company.booking_enabled && company.booking_slug;
@@ -63,6 +98,9 @@ export default async function Availability({
     : "";
   const messages: Record<string, string> = {
     confirmacao: "Confirme a remoção do turno antes de continuar.",
+    "confirmar-bloqueio": "Confirme a remoção do bloqueio antes de continuar.",
+    "remover-bloqueio":
+      "Não foi possível remover o bloqueio. Atualize a página e tente novamente.",
     turno:
       "Não foi possível adicionar o turno. Confira se o fim é depois do início e se já existe outro turno nesse horário.",
     remover:
@@ -112,6 +150,10 @@ export default async function Availability({
               "Turno removido. Os agendamentos existentes foram preservados.",
             pagina: "Configuração da página salva.",
             perfil: "Apresentação da sua empresa salva.",
+            bloqueio:
+              "Bloqueio criado. O intervalo está indisponível para novas reservas.",
+            "remover-bloqueio":
+              "Bloqueio removido. Os turnos regulares voltaram a valer.",
           }[q.salvo] || "Configuração salva."}
         </p>
       )}
@@ -165,6 +207,7 @@ export default async function Availability({
                     {professional.name.slice(0, 2).toLocaleUpperCase("pt-BR")}
                   </span>
                   {professional.name}
+                  {professional.archived_at && <small> (arquivado)</small>}
                 </h3>
                 <ul className="availability-week">
                   {days.slice(1).map((day, index) => {
@@ -244,7 +287,7 @@ export default async function Availability({
               defaultValue=""
             >
               <option value="">Selecione um profissional</option>
-              {professionals.data?.map((professional) => (
+              {activeProfessionals.map((professional) => (
                 <option key={professional.id} value={professional.id}>
                   {professional.name}
                 </option>
@@ -289,6 +332,95 @@ export default async function Availability({
           </form>
         )}
       </div>
+      <section
+        className="panel schedule-block-panel"
+        id="bloqueios"
+        aria-labelledby="schedule-block-heading"
+      >
+        <div className="schedule-block-heading">
+          <div>
+            <h2 id="schedule-block-heading">Bloqueios de agenda</h2>
+            <p>
+              {managed
+                ? "Reserve folgas, feriados ou períodos sem atendimento para um profissional ou toda a empresa."
+                : "Confira os períodos sem atendimento da empresa e do seu perfil."}{" "}
+              Horários no fuso de São Paulo.
+            </p>
+          </div>
+          <Link
+            className="button secondary"
+            href={`/painel/${companyId}/agenda`}
+          >
+            Abrir agenda
+          </Link>
+        </div>
+        <form
+          className="schedule-block-window"
+          action={`/painel/${companyId}/disponibilidade#bloqueios`}
+        >
+          <label htmlFor="block-window-day">
+            Consultar 30 dias a partir de
+            <input
+              id="block-window-day"
+              type="date"
+              name="bloqueios_de"
+              min="1900-01-01"
+              max="2099-12-31"
+              defaultValue={blockDay}
+              required
+            />
+          </label>
+          <button className="secondary">Consultar bloqueios</button>
+          <span>
+            Até {blockLastDay.split("-").reverse().join("/")}, inclusive
+          </span>
+          {validDay(addDays(blockDay, -30)) && (
+            <Link
+              className="button secondary"
+              href={blockHref(addDays(blockDay, -30))}
+            >
+              30 dias anteriores
+            </Link>
+          )}
+          {validDay(addDays(blockDay, 30)) && (
+            <Link
+              className="button secondary"
+              href={blockHref(addDays(blockDay, 30))}
+            >
+              Próximos 30 dias
+            </Link>
+          )}
+        </form>
+        {blocks.error || professionals.error ? (
+          <p className="notice error" role="alert">
+            Não foi possível carregar os bloqueios. Atualize a página para
+            tentar novamente.
+          </p>
+        ) : (
+          <ScheduleBlockList
+            blocks={blocks.data ?? []}
+            professionals={professionals.data ?? []}
+            page={page}
+            total={blocks.count ?? 0}
+            pageHref={(target) => blockHref(blockDay, target)}
+            removeAction={
+              managed && writable
+                ? removeScheduleBlock.bind(null, companyId)
+                : undefined
+            }
+            windowDay={blockDay}
+          />
+        )}
+        {managed && writable && !professionals.error && (
+          <ScheduleBlockForm
+            action={createScheduleBlock.bind(null, companyId)}
+            requestId={randomUUID()}
+            day={saoPauloDay()}
+            companyId={companyId}
+            professionals={activeProfessionals}
+          />
+        )}
+      </section>
       {role === "OWNER" && (
         <>
           <section className="panel booking-settings" id="pagina-publica">

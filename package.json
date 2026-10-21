@@ -13,6 +13,8 @@
     "test:help:db": "tsx scripts/test-help-db.ts",
     "test:team:db": "tsx scripts/test-team-db.ts",
     "test:team": "tsx scripts/test-team-live.ts",
+    "test:operations:db": "tsx scripts/test-operations-db.ts",
+    "test:operations": "tsx scripts/test-operations-live.ts",
     "test:records": "tsx scripts/test-record-list-live.ts",
     "test:audit": "tsx scripts/test-audit-live.ts",
     "test:personalization:db": "tsx scripts/test-personalization-db.ts",

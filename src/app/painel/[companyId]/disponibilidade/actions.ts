@@ -1,8 +1,75 @@
 "use server";
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireCompany } from "@/lib/auth";
+import {
+  blockValues,
+  parseBlockRemoval,
+  parseScheduleBlock,
+  scheduleBlockError,
+  type ScheduleBlockState,
+} from "@/lib/schedule-blocks";
+import { saoPauloDay, validDay } from "@/lib/scheduling";
+
+export async function createScheduleBlock(
+  companyId: string,
+  _previous: ScheduleBlockState,
+  form: FormData,
+): Promise<ScheduleBlockState> {
+  if (!z.uuid().safeParse(companyId).success)
+    redirect("/painel?erro=validacao");
+  const { db, company } = await requireCompany(companyId, true, true);
+  const values = blockValues(form);
+  const input = parseScheduleBlock(values);
+  if (!input.success)
+    return { error: input.error, values, feedbackKey: randomUUID() };
+  const { error } = await db.rpc("create_schedule_block", {
+    p_company: companyId,
+    p_id: input.data.id,
+    p_professional: input.data.professional,
+    p_start: input.data.start,
+    p_end: input.data.end,
+    p_reason: input.data.reason,
+  });
+  if (error)
+    return {
+      error: scheduleBlockError(error.message),
+      values,
+      feedbackKey: randomUUID(),
+    };
+  revalidatePath(`/painel/${companyId}`, "layout");
+  if (company.booking_slug) revalidatePath(`/agendar/${company.booking_slug}`);
+  redirect(
+    `/painel/${companyId}/disponibilidade?${new URLSearchParams({ salvo: "bloqueio", bloqueios_de: values.start_day })}#bloqueios`,
+  );
+}
+
+export async function removeScheduleBlock(companyId: string, form: FormData) {
+  if (!z.uuid().safeParse(companyId).success)
+    redirect("/painel?erro=validacao");
+  const { db, company } = await requireCompany(companyId, true, true);
+  const input = parseBlockRemoval(form);
+  const day = form.get("window_day");
+  const query = new URLSearchParams({
+    bloqueios_de: validDay(day) ? day : saoPauloDay(),
+  });
+  if (!input.success) {
+    query.set("erro", input.error);
+    redirect(`/painel/${companyId}/disponibilidade?${query}#bloqueios`);
+  }
+  const { error } = await db.rpc("remove_schedule_block", {
+    p_company: companyId,
+    p_block: input.id,
+  });
+  query.set(error ? "erro" : "salvo", "remover-bloqueio");
+  revalidatePath(`/painel/${companyId}`, "layout");
+  if (!error && company.booking_slug)
+    revalidatePath(`/agendar/${company.booking_slug}`);
+  redirect(`/painel/${companyId}/disponibilidade?${query}#bloqueios`);
+}
+
 export async function addShift(form: FormData) {
   const input = z
     .object({
@@ -15,6 +82,15 @@ export async function addShift(form: FormData) {
     .safeParse(Object.fromEntries(form));
   if (!input.success) redirect("/painel");
   const { db } = await requireCompany(input.data.company_id, true, true);
+  const professional = await db
+    .from("professionals")
+    .select("id")
+    .eq("company_id", input.data.company_id)
+    .eq("id", input.data.professional_id)
+    .is("archived_at", null)
+    .maybeSingle();
+  if (professional.error || !professional.data)
+    redirect(`/painel/${input.data.company_id}/disponibilidade?erro=turno`);
   const minutes = (s: string) =>
     Number(s.slice(0, 2)) * 60 + Number(s.slice(3));
   if (minutes(input.data.end) <= minutes(input.data.start))

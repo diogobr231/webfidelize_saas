@@ -1,0 +1,154 @@
+.schedule-block-panel {
+  margin-top: 24px;
+  scroll-margin-top: 90px;
+}
+.schedule-block-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.schedule-block-heading h2 {
+  margin: 0 0 8px;
+}
+.schedule-block-heading p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 70ch;
+}
+.schedule-block-window {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 20px 0;
+}
+.schedule-block-window label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+.schedule-block-window > span {
+  align-self: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.schedule-block-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: grid;
+  gap: 12px;
+}
+.schedule-block-list > li {
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-subtle);
+  align-items: center;
+}
+.schedule-block-list > li > div {
+  min-width: 0;
+}
+.schedule-block-list p {
+  margin: 6px 0 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.schedule-block-interval {
+  font-size: 13px;
+  color: var(--muted);
+}
+.schedule-block-reason {
+  font-size: 14px;
+}
+.schedule-block-list > li > form {
+  flex-shrink: 0;
+}
+.schedule-block-pagination {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+}
+.schedule-block-pagination > span {
+  margin-right: auto;
+  color: var(--muted);
+}
+.schedule-block-form {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 24px;
+  max-width: 740px;
+}
+.schedule-block-form h3,
+.schedule-block-form p {
+  margin: 0;
+}
+.schedule-block-form p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.schedule-block-form .notice.error {
+  color: var(--danger);
+}
+.schedule-block-form label {
+  margin: 6px 0 0;
+}
+.schedule-block-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 8px 0;
+}
+.schedule-block-dates fieldset {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+.schedule-block-dates legend {
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.schedule-block-form > button {
+  justify-self: start;
+  margin-top: 8px;
+}
+@media (max-width: 640px) {
+  .schedule-block-list > li {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+  .schedule-block-list > li > form,
+  .schedule-block-list > li > form > button {
+    width: 100%;
+  }
+  .schedule-block-dates {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .schedule-block-window label {
+    flex: 1;
+    min-width: 150px;
+  }
+  .schedule-block-window > span,
+  .schedule-block-pagination > span {
+    width: 100%;
+  }
+  .schedule-block-form > button {
+    width: 100%;
+  }
+}

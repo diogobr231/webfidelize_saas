@@ -26,6 +26,7 @@ jobs:
       - run: pnpm test:help:db
       - run: pnpm test:team:db
       - run: pnpm test:personalization:db
+      - run: pnpm test:operations:db
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"

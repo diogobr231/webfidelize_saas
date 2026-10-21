@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
 import { canManage, hasAccess } from "@/lib/permissions";
 import { addDays, agendaRange, saoPauloDay, validDay } from "@/lib/scheduling";
+import { BLOCKS_PAGE_SIZE, blockPage } from "@/lib/schedule-blocks";
+import { ScheduleBlockList } from "@/components/scheduling-blocks/block-list";
 import {
   AgendaExperience,
   type CalendarAppointment,
@@ -25,6 +27,7 @@ export default async function Agenda({
     professional?: string;
     erro?: string;
     notice?: string;
+    bloqueios_pagina?: string;
   }>;
 }) {
   const { companyId } = await params;
@@ -42,7 +45,7 @@ export default async function Agenda({
     canManage(role) && hasAccess(company.status, company.trial_ends_at);
   const professionals = await db
     .from("professionals")
-    .select("id,name")
+    .select("id,name,archived_at")
     .eq("company_id", companyId)
     .order("name");
   const selectedProfessional = professionals.data?.some(
@@ -63,13 +66,38 @@ export default async function Agenda({
     .limit(500);
   if (selectedProfessional)
     query = query.eq("professional_id", selectedProfessional);
-  const [appointments, customers, services, shifts] = await Promise.all([
+  const blocksPage = blockPage(q.bloqueios_pagina);
+  let blocksQuery = db
+    .from("schedule_blocks")
+    .select("id,professional_id,starts_at,ends_at,reason", { count: "exact" })
+    .eq("company_id", companyId)
+    .lt("starts_at", range.end)
+    .gt("ends_at", range.start)
+    .order("starts_at")
+    .order("id")
+    .range(
+      (blocksPage - 1) * BLOCKS_PAGE_SIZE,
+      blocksPage * BLOCKS_PAGE_SIZE - 1,
+    );
+  if (selectedProfessional)
+    blocksQuery = blocksQuery.or(
+      `professional_id.is.null,professional_id.eq.${selectedProfessional}`,
+    );
+  const [
+    appointments,
+    customers,
+    services,
+    shifts,
+    bookingProfessionals,
+    blocks,
+  ] = await Promise.all([
     query,
     managed
       ? db
           .from("customers")
           .select("id,name")
           .eq("company_id", companyId)
+          .is("archived_at", null)
           .order("name")
           .limit(1000)
       : Promise.resolve({ data: [], error: null }),
@@ -78,6 +106,7 @@ export default async function Agenda({
           .from("services")
           .select("id,name,duration_minutes,price_cents")
           .eq("company_id", companyId)
+          .is("archived_at", null)
           .order("name")
           .limit(1000)
       : Promise.resolve({ data: [], error: null }),
@@ -85,12 +114,22 @@ export default async function Agenda({
       .from("availability")
       .select("professional_id,weekday,start_minute,end_minute")
       .eq("company_id", companyId),
+    managed
+      ? db
+          .from("professionals")
+          .select("id,name")
+          .eq("company_id", companyId)
+          .is("archived_at", null)
+          .order("name")
+      : Promise.resolve({ data: [], error: null }),
+    blocksQuery,
   ]);
   const failed = Boolean(
     appointments.error ||
       professionals.error ||
       customers.error ||
       services.error ||
+      bookingProfessionals.error ||
       shifts.error,
   );
   const relatedName = (value: unknown) => {
@@ -183,6 +222,7 @@ export default async function Agenda({
               {professionals.data?.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
+                  {p.archived_at ? " (arquivado)" : ""}
                 </option>
               ))}
             </select>
@@ -225,6 +265,7 @@ export default async function Agenda({
             view={view}
             appointments={items}
             professionals={professionals.data || []}
+            bookingProfessionals={bookingProfessionals.data || []}
             customers={customers.data || []}
             services={services.data || []}
             shifts={shifts.data || []}
@@ -233,6 +274,48 @@ export default async function Agenda({
           />
         </>
       )}
+      <section
+        className="panel schedule-block-panel"
+        id="bloqueios"
+        aria-labelledby="agenda-block-heading"
+      >
+        <div className="schedule-block-heading">
+          <div>
+            <h2 id="agenda-block-heading">Bloqueios neste período</h2>
+            <p>
+              De {range.first.split("-").reverse().join("/")} a{" "}
+              {range.days.at(-1)!.split("-").reverse().join("/")}.{" "}
+              {selectedProfessional
+                ? "Inclui o profissional selecionado e bloqueios de toda a empresa."
+                : "Períodos sem atendimento que você tem permissão para consultar."}
+            </p>
+          </div>
+          {managed && (
+            <Link
+              className="button secondary"
+              href={`/painel/${companyId}/disponibilidade?bloqueios_de=${range.first}#bloqueios`}
+            >
+              Gerenciar bloqueios
+            </Link>
+          )}
+        </div>
+        {blocks.error || professionals.error ? (
+          <p className="notice error" role="alert">
+            Não foi possível carregar os bloqueios. Atualize a página antes de
+            escolher um novo horário.
+          </p>
+        ) : (
+          <ScheduleBlockList
+            blocks={blocks.data ?? []}
+            professionals={professionals.data ?? []}
+            page={blocksPage}
+            total={blocks.count ?? 0}
+            pageHref={(page) =>
+              `${href(day)}&bloqueios_pagina=${page}#bloqueios`
+            }
+          />
+        )}
+      </section>
     </section>
   );
 }
