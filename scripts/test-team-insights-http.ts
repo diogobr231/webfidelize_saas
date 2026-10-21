@@ -92,6 +92,9 @@ async function main() {
     companyStatus: "active",
     linked: true,
     appointmentStatus: "scheduled",
+    futureAppointment: false,
+    hasAppointments: true,
+    mismatchedReportPeriod: false,
     failed: false,
     deniedAppointment: false,
   };
@@ -180,7 +183,10 @@ async function main() {
           booked_minutes: 30,
         };
         return send(200, {
-          period: { from: body.p_from, to: body.p_to },
+          period: {
+            from: state.mismatchedReportPeriod ? "2000-01-01" : body.p_from,
+            to: body.p_to,
+          },
           timezone: "America/Sao_Paulo",
           max_days: state.plan === "empresarial" ? 90 : 31,
           professionals: [
@@ -265,20 +271,26 @@ async function main() {
     if (url.pathname === "/rest/v1/appointments")
       return send(
         200,
-        [
-          {
-            id: appointmentId,
-            starts_at: new Date(Date.now() - 90 * 60_000).toISOString(),
-            ends_at: new Date(Date.now() - 60 * 60_000).toISOString(),
-            status: state.appointmentStatus,
-            attendance_confirmed_at: new Date(
-              Date.now() - 120 * 60_000,
-            ).toISOString(),
-            customers: { name: "Cliente QA sintético" },
-            services: { name: "Serviço QA sintético" },
-          },
-        ],
-        1,
+        state.hasAppointments
+          ? [
+              {
+                id: appointmentId,
+                starts_at: new Date(
+                  Date.now() + (state.futureAppointment ? 60 : -90) * 60_000,
+                ).toISOString(),
+                ends_at: new Date(
+                  Date.now() + (state.futureAppointment ? 90 : -60) * 60_000,
+                ).toISOString(),
+                status: state.appointmentStatus,
+                attendance_confirmed_at: new Date(
+                  Date.now() - 120 * 60_000,
+                ).toISOString(),
+                customers: { name: "Cliente QA sintético" },
+                services: { name: "Serviço QA sintético" },
+              },
+            ]
+          : [],
+        state.hasAppointments ? 1 : 0,
       );
     unexpected.push(url.pathname);
     send(404, { message: "Unknown isolated request" });
@@ -344,7 +356,12 @@ async function main() {
     (await localAuth.auth.setSession(fakeAuth.session("password"))).error,
     null,
   );
-  async function request(path: string, body?: FormData, authenticated = true) {
+  async function request(
+    path: string,
+    body?: FormData,
+    authenticated = true,
+    origin = base,
+  ) {
     const target = new URL(path, base);
     assert.equal(
       target.origin,
@@ -365,7 +382,7 @@ async function main() {
                 .join("; "),
             }
           : {}),
-        ...(body ? { Origin: base, Referer: target.toString() } : {}),
+        ...(body ? { Origin: origin, Referer: target.toString() } : {}),
       },
     });
   }
@@ -548,6 +565,128 @@ async function main() {
     assert.deepEqual(unexpected, []);
     pass(
       "report errors render accessible feedback without stale or fabricated staff metrics",
+    );
+
+    phase = "three-plan owner manager employee matrix";
+    state.failed = false;
+    state.linked = true;
+    for (const plan of ["essencial", "profissional", "empresarial"]) {
+      state.plan = plan;
+      for (const role of ["OWNER", "MANAGER"]) {
+        state.role = role;
+        const beforeReport = callCount("company_team_insights");
+        const view = await request(`${reporting}?from=${today}&to=${today}`);
+        assert.equal(view.status, 200);
+        assert.match(view.headers.get("cache-control") || "", /no-store/);
+        const content = await view.text();
+        assert.equal(
+          callCount("company_team_insights"),
+          beforeReport + (plan === "essencial" ? 0 : 1),
+        );
+        assert.equal(content.includes(staffName), plan !== "essencial");
+        const downloaded = await request(exporting);
+        assert.equal(downloaded.status, plan === "empresarial" ? 200 : 403);
+        assert.match(downloaded.headers.get("cache-control") || "", /no-store/);
+        if (plan === "empresarial")
+          assert.match(await downloaded.text(), /'\+Profissional QA/);
+        else assert.doesNotMatch(await downloaded.text(), /\+Profissional QA/);
+      }
+      state.role = "EMPLOYEE";
+      state.appointmentStatus = "scheduled";
+      const beforeReport = callCount("company_team_insights");
+      assert.equal((await location(await request(reporting))).pathname, prefix);
+      assert.equal((await request(exporting)).status, 403);
+      assert.equal(callCount("company_team_insights"), beforeReport);
+      const myDay = await request(personal);
+      assert.equal(myDay.status, 200);
+      assert.match(myDay.headers.get("cache-control") || "", /no-store/);
+      const form = completionForm(await myDay.text());
+      const beforeComplete = callCount("complete_my_appointment");
+      assert.equal(
+        (await location(await request(personal, form))).searchParams.get(
+          "salvo",
+        ),
+        "concluido",
+      );
+      assert.equal(callCount("complete_my_appointment"), beforeComplete + 1);
+      const updated = await (await request(personal)).text();
+      assert.ok(updated.includes("Concluído"));
+      assert.ok(!updated.includes('name="appointment_id"'));
+      pass(
+        `${plan}: owner/manager report and export gates; employee private day and persisted completion`,
+      );
+    }
+
+    phase = "cross-origin completion attempt";
+    state.role = "EMPLOYEE";
+    state.appointmentStatus = "scheduled";
+    const protectedForm = completionForm(
+      await (await request(personal)).text(),
+    );
+    const beforeCsrf = callCount("complete_my_appointment");
+    const crossOrigin = await request(
+      personal,
+      protectedForm,
+      true,
+      "https://attacker.example.invalid",
+    );
+    assert.ok([400, 403, 500].includes(crossOrigin.status));
+    assert.equal(callCount("complete_my_appointment"), beforeCsrf);
+    assert.equal(state.appointmentStatus, "scheduled");
+    pass(
+      "cross-origin server action is rejected before any completion request",
+    );
+
+    phase = "empty and non-actionable appointments";
+    state.futureAppointment = true;
+    const futureHtml = await (await request(personal)).text();
+    assert.ok(futureHtml.includes("Cliente QA sintético"));
+    assert.ok(!futureHtml.includes('name="appointment_id"'));
+    state.futureAppointment = false;
+    state.appointmentStatus = "canceled";
+    const canceledHtml = await (await request(personal)).text();
+    assert.ok(canceledHtml.includes("Cancelado"));
+    assert.ok(!canceledHtml.includes('name="appointment_id"'));
+    state.hasAppointments = false;
+    const emptyHtml = await (await request(personal)).text();
+    assert.ok(emptyHtml.includes("Um dia sem atendimentos cadastrados"));
+    assert.ok(!emptyHtml.includes("Cliente QA sintético"));
+    state.hasAppointments = true;
+    pass(
+      "future and canceled appointments have no completion action; an empty day has clear feedback",
+    );
+
+    phase = "CSV date validation and backend response validation";
+    state.role = "MANAGER";
+    state.plan = "empresarial";
+    const beforeInvalid = callCount("company_team_export");
+    for (const suffix of [
+      "",
+      `?from=${today}`,
+      `?from=${today}&from=${today}&to=${today}`,
+      "?from=2026-02-30&to=2026-03-01",
+      "?from=2026-01-11&to=2026-01-10",
+      "?from=2026-01-01&to=2026-04-01",
+    ]) {
+      const invalid = await request(`${reporting}/exportar${suffix}`);
+      assert.equal(invalid.status, 400);
+      assert.match(invalid.headers.get("cache-control") || "", /no-store/);
+    }
+    assert.equal(callCount("company_team_export"), beforeInvalid);
+    state.mismatchedReportPeriod = true;
+    const mismatch = await request(exporting);
+    assert.equal(mismatch.status, 502);
+    assert.doesNotMatch(await mismatch.text(), /\+Profissional QA/);
+    state.mismatchedReportPeriod = false;
+    state.plan = "profissional";
+    const beforeOverlong = callCount("company_team_insights");
+    const overlong = await (
+      await request(`${reporting}?from=2026-01-01&to=2026-02-01`)
+    ).text();
+    assert.match(overlong, /role="alert"/);
+    assert.equal(callCount("company_team_insights"), beforeOverlong);
+    pass(
+      "CSV rejects invalid or duplicated dates and mismatched backend periods; Pro rejects overlong reports",
     );
 
     phase = "public landing and plans regression";

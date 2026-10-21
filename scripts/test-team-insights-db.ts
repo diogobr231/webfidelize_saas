@@ -695,6 +695,267 @@ await check(
   },
 );
 
+// Each plan gets its own realistic company, owner and invited employee. In the
+// Essencial fixture the owner manages the business without occupying an agenda.
+// No test upgrades the plan while retaining an over-capacity roster.
+for (const [plan, capacity, maxDays] of [
+  ["essencial", 1, 0],
+  ["profissional", 3, 31],
+  ["empresarial", 10, 90],
+] as const) {
+  const owner = randomUUID();
+  const employee = randomUUID();
+  await postgres();
+  await db.query(
+    "insert into auth.users(id,email,email_confirmed_at) values($1,$2,now()),($3,$4,now())",
+    [
+      owner,
+      `${owner}@example.invalid`,
+      employee,
+      `${employee}@example.invalid`,
+    ],
+  );
+  await as(owner);
+  const target = await scalar<string>(
+    "select public.create_company($1,'salao')",
+    [`Matrix synthetic ${plan}`],
+  );
+  await postgres();
+  await db.query("update public.companies set plan_id=$2 where id=$1", [
+    target,
+    plan,
+  ]);
+  await db.query(
+    "insert into public.memberships(company_id,user_id,role) values($1,$2,'EMPLOYEE')",
+    [target, employee],
+  );
+  const records = await fixture(target, owner);
+  const visibleCustomer = records.customer;
+  const unassignedCustomer = await scalar<string>(
+    "insert into public.customers(company_id,name) values($1,'Unassigned private customer') returning id",
+    [target],
+  );
+  const assigned = await professional(
+    `Assigned ${plan}`,
+    employee,
+    target,
+    owner,
+  );
+  await postgres();
+  await db.exec(
+    "alter table public.appointments disable trigger validate_appointment",
+  );
+  const employeeAppointment = await appointment(
+    assigned,
+    "2026-01-10T12:00:00Z",
+    30,
+    "scheduled",
+    false,
+    records,
+  );
+  const managerAppointment = await appointment(
+    assigned,
+    "2026-01-10T13:00:00Z",
+    30,
+    "scheduled",
+    true,
+    records,
+  );
+  await db.exec(
+    "alter table public.appointments enable trigger validate_appointment",
+  );
+
+  await check(
+    `${plan}: owner keeps CRM, future booking and actual staff capacity`,
+    async () => {
+      await as(owner);
+      assert.equal(
+        Number(
+          await scalar(
+            "select count(*) from public.customers where company_id=$1",
+            [target],
+          ),
+        ),
+        2,
+      );
+      const upcomingMonday = await scalar<string>(
+        `select (((now() at time zone 'America/Sao_Paulo')::date + 7 - (extract(isodow from now() at time zone 'America/Sao_Paulo')::int - 1))::timestamp + interval '10 hours') at time zone 'America/Sao_Paulo'`,
+      );
+      assert.ok(
+        await scalar("select public.book_appointment($1,$2,$3,$4,$5)", [
+          target,
+          visibleCustomer,
+          records.service,
+          assigned,
+          upcomingMonday,
+        ]),
+      );
+      for (let i = 1; i < capacity; i++)
+        await scalar(
+          "insert into public.professionals(company_id,name) values($1,$2) returning id",
+          [target, `Extra synthetic ${i}`],
+        );
+      await assert.rejects(
+        () =>
+          scalar(
+            "insert into public.professionals(company_id,name) values($1,'Over capacity') returning id",
+            [target],
+          ),
+        /professional limit reached/,
+      );
+      assert.equal(
+        Number(
+          await scalar(
+            "select count(*) from public.professionals where company_id=$1 and archived_at is null",
+            [target],
+          ),
+        ),
+        capacity,
+      );
+      if (maxDays === 0) {
+        await assert.rejects(
+          () => report("2026-01-10", "2026-01-10", target),
+          /plan feature unavailable/,
+        );
+      } else {
+        const result = await report("2026-01-10", "2026-01-10", target);
+        assert.equal(result.max_days, maxDays);
+        assert.deepEqual(result.totals, {
+          total: 2,
+          scheduled: 2,
+          completed: 0,
+          canceled: 0,
+          confirmed: 1,
+          booked_minutes: 60,
+        });
+      }
+      if (plan === "empresarial")
+        assert.equal(
+          (await report("2026-01-10", "2026-01-10", target, true)).totals.total,
+          2,
+        );
+      else
+        await assert.rejects(
+          () => report("2026-01-10", "2026-01-10", target, true),
+          /plan feature unavailable/,
+        );
+    },
+  );
+
+  await check(
+    `${plan}: employee only sees assigned customer data and cannot access management or reports`,
+    async () => {
+      await as(employee);
+      assert.equal(
+        Number(
+          await scalar(
+            "select count(*) from public.appointments where company_id=$1",
+            [target],
+          ),
+        ),
+        3,
+      );
+      assert.equal(
+        Number(
+          await scalar("select count(*) from public.customers where id=$1", [
+            visibleCustomer,
+          ]),
+        ),
+        1,
+      );
+      assert.equal(
+        Number(
+          await scalar("select count(*) from public.customers where id=$1", [
+            unassignedCustomer,
+          ]),
+        ),
+        0,
+      );
+      assert.equal(
+        Number(
+          await scalar(
+            "select count(*) from public.appointments where company_id=$1",
+            [company],
+          ),
+        ),
+        0,
+      );
+      await assert.rejects(
+        () =>
+          scalar(
+            "insert into public.customers(company_id,name) values($1,'Unauthorized') returning id",
+            [target],
+          ),
+        /row-level security/,
+      );
+      await assert.rejects(
+        () =>
+          scalar("select public.manage_appointment($1,$2,'complete')", [
+            target,
+            employeeAppointment,
+          ]),
+        /not authorized/,
+      );
+      await assert.rejects(
+        () => report("2026-01-10", "2026-01-10", target),
+        /not authorized/,
+      );
+      await assert.rejects(
+        () => report("2026-01-10", "2026-01-10", target, true),
+        /not authorized/,
+      );
+    },
+  );
+
+  await check(
+    `${plan}: employee completion and owner completion both persist without losing other fields`,
+    async () => {
+      await as(employee);
+      const snapshot = await scalar<Record<string, unknown>>(
+        "select to_jsonb(a) from public.appointments a where id=$1",
+        [employeeAppointment],
+      );
+      assert.equal(
+        await complete(employeeAppointment, target),
+        employeeAppointment,
+      );
+      assert.equal(
+        await complete(employeeAppointment, target),
+        employeeAppointment,
+      );
+      assert.deepEqual(
+        await scalar(
+          "select to_jsonb(a) from public.appointments a where id=$1",
+          [employeeAppointment],
+        ),
+        { ...snapshot, status: "completed" },
+      );
+      await as(owner);
+      assert.equal(
+        await scalar("select public.manage_appointment($1,$2,'complete')", [
+          target,
+          managerAppointment,
+        ]),
+        managerAppointment,
+      );
+      if (maxDays)
+        assert.equal(
+          (await report("2026-01-10", "2026-01-10", target)).totals.completed,
+          2,
+        );
+      assert.equal(
+        Number(
+          await scalar(
+            "select count(*) from public.appointments where company_id=$1 and status='completed'",
+            [target],
+          ),
+        ),
+        2,
+      );
+    },
+  );
+}
+
 await db.close();
 console.log(
   `${passed} team benefits database groups passed; no remote writes.`,
