@@ -6,6 +6,10 @@ Auditoria atual, correções, evidências de testes e prioridades para o lançam
 
 Incremento operacional posterior: [edição, arquivamento e bloqueios de agenda](docs/STATUS-OPERACOES.md), com migração aplicada, testes de regressão e evidências dos fluxos DEMO.
 
+Preparação de acesso por e-mail: [configuração, testes e pendências de produção](docs/EMAIL-PRODUCAO.md). O domínio desejado ainda não foi comprado; SMTP e recebimento de e-mails reais continuam pendentes. Pagamentos permanecem para a última etapa.
+
+Situação consolidada mais recente: [revisão para o primeiro piloto](docs/STATUS-PILOTO.md), de 21/10/2026, incluindo testes por segmento, perfis e limites comerciais.
+
 O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a identidade grafite e menta, a área de trabalho clara, os tokens, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
 
 ## Executar
@@ -33,6 +37,7 @@ pnpm test:team:db
 pnpm test:operations:db
 pnpm test:personalization:db
 pnpm build
+pnpm test:auth:isolated
 ```
 
 As suítes `*:db` usam PostgreSQL descartável via PGlite e não alteram empresas reais. `test:db` verifica as migrações e o isolamento com os papéis authenticated/anon; as suítes específicas cobrem agregações do dashboard, ajuda e chamados, vínculos/revogação de acessos, edição/arquivamento/bloqueios operacionais e personalização. As fixtures locais do Storage verificam políticas SQL, mas não substituem o serviço HTTP real. `scripts/remote-isolation.sql` verifica parte das garantias no Supabase real, dentro de transação com ROLLBACK. Auth, SMTP, Storage e pagamentos exigem também homologação própria.
@@ -49,6 +54,8 @@ Os testes HTTP abaixo requerem um build local atualizado em execução. A senha 
 | `pnpm test:personalization` | `TEST_PERSONALIZATION_LIVE=1` e `SEED_PASSWORD`; valida upload, isolamento, publicação e despublicação em empresa DEMO. Recusa substituir um logotipo preexistente e remove somente o arquivo fictício criado pelo teste.                                                                                                                                                     |
 | `pnpm test:experience`      | Usa conta DEMO e cria uma reserva fictícia, mantida cancelada ao terminar; veja o roteiro abaixo.                                                                                                                                                                                                                                                                             |
 | `pnpm test:onboarding`      | `TEST_ONBOARDING_LIVE=1` e `SEED_PASSWORD`; cadastra serviços/profissionais fictícios em empresa DEMO, com pausa, retomada e reenvio.                                                                                                                                                                                                                                         |
+
+Além dessas suítes, `pnpm test:niches` usa `TEST_NICHES_LIVE=1` e `SEED_PASSWORD` para validar os oito logins e páginas com leitura de dados DEMO. `pnpm test:manager` usa `TEST_MANAGER_LIVE=1` e `SEED_PASSWORD`: cria uma associação temporária de gerente entre DEMOs, exerce edição de cliente fictício e revoga a associação ao terminar. Não envia mensagens nem altera planos. `pnpm test:auth:isolated` inicia sua própria aplicação local e Auth sintético depois do build; não exige conta DEMO ou SMTP e não comprova entrega real.
 
 As suítes autenticadas usam sessões isoladas em memória, sem ler cookies do navegador. `TEST_BASE_URL` deve apontar para a aplicação local; `DEMO_EMAIL` seleciona uma conta sintética `@example.invalid`. Consulte as validações de cada script antes de executá-lo: autenticação, trial, banco e segredos necessários devem estar configurados. Não use empresas reais como fixtures.
 
@@ -101,7 +108,7 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Logotipos PNG/JPEG/WebP de até 750 KB no bucket privado `company-logos`, caminhos por `company_id`, validação no servidor, RLS e URLs assinadas curtas. Publicação na página de agendamento exige opção explícita; outros arquivos privados não se tornam públicos. Compartilhamento da página por cópia de link ou abertura do WhatsApp, sem envio automático.
 - Comprovante público sem nome ou telefone do cliente, com estado atual consultado no banco. O mesmo link acompanha remarcação/cancelamento; download de calendário `.ics` com assinatura verificada.
 - EMPLOYEE acessa apenas agenda atribuída e clientes relacionados; MANAGER gerencia o operacional; OWNER emite convites.
-- Convites por link: hash SHA-256 no banco, validade 48h, uso único e e-mail confirmado obrigatório.
+- Convites por link: hash SHA-256 no banco, validade 48h, uso único e e-mail confirmado obrigatório. Lista paginada, cancelamento confirmado, renovação que invalida o link anterior, limite de 25 emissões/24h e intervalo de 60s por destinatário. SMTP opcional no servidor, acionado explicitamente; aceite pelo SMTP não é confirmação de entrega.
 - Gestão de vínculos entre contas e profissionais, identificação da equipe por e-mail para o OWNER, desvinculação e revogação de acesso com confirmação, preservando os cadastros e a agenda. Migração aplicada e fluxo validado com contas DEMO no Supabase real; veja [equipe e acessos](docs/EQUIPE-ACESSOS.md).
 - Central de ajuda por assunto/módulo, busca, FAQs, tutoriais, orientações de primeiro acesso, solicitações e WhatsApp. Chamados são isolados por empresa; colaboradores consultam seus próprios pedidos. SUPER_ADMIN edita/publica conteúdos e responde às solicitações. Suporte permanece acessível após o fim do trial.
 - Página de assinatura por empresa com plano, utilização, prazo e estado consultados no backend. O contato comercial não altera o plano nem concede acesso pago. Checkout e webhook do Mercado Pago ainda não estão implementados.
@@ -114,7 +121,7 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Turnos que atravessam a meia-noite e proteção adicional anti-bot conforme volume. Cancelamento e remarcação pelo próprio cliente ainda dependem de contato com a empresa; os responsáveis já podem fazê-los no painel.
 - Seleção pesquisável de clientes/serviços na criação de agendamentos para bases maiores. A listagem já possui busca e paginação; o formulário da agenda ainda carrega até 1.000 clientes e serviços ativos.
 - SUPER_ADMIN: editor de preços/limites do catálogo, gerenciamento de módulos, métricas financeiras e trilha de auditoria administrativa. Conteúdo de ajuda e chamados já possuem gerenciamento.
-- Homologação completa de confirmação de e-mail, recuperação, login, convite e criação da primeira empresa.
+- Homologação de entrega real de confirmação, recuperação e convites, após domínio, SMTP e implantação. A validação isolada de Auth e a integração de equipe com contas DEMO não comprovam recebimento em caixas reais.
 - SMTP de produção, termos e privacidade, rotina de backup e teste de restauração.
 
 Restaurante/comandas, pets/tutores, tarefas, rotas, chatbot, site adicional, IA e créditos são expansão futura. As entradas por nicho não significam que seus módulos específicos já existem.
@@ -123,7 +130,7 @@ Restaurante/comandas, pets/tutores, tarefas, rotas, chatbot, site adicional, IA 
 
 Arquivos SQL em `supabase/migrations`, em ordem. O projeto desta aplicação é o separado `devmjeiblhrgjyaiaukm`, na região São Paulo; não executar contra o outro projeto do proprietário. A instalação inicial utilizou o conector Supabase e preservou as versões retornadas. O CLI oficial está disponível e as migrações recentes foram geradas com ele. Antes de aplicar novas versões, compare o histórico local com o do projeto correto.
 
-Migrações aplicadas até `20261021013325_business_operations.sql`, com versão conferida no histórico remoto. Evidências e limites da validação em [STATUS-OPERACOES](docs/STATUS-OPERACOES.md). A revogação de acessos permanece disponível ao OWNER mesmo após o bloqueio comercial; novos convites e vínculos continuam sujeitos ao estado da assinatura.
+Migrações aplicadas até `20261021023033_team_invitation_lifecycle.sql`, com versão conferida no histórico remoto. Evidências e limites da validação em [STATUS-OPERACOES](docs/STATUS-OPERACOES.md) e [EMAIL-PRODUCAO](docs/EMAIL-PRODUCAO.md). A revogação de acessos e o cancelamento de convites permanecem disponíveis ao OWNER mesmo após o bloqueio comercial; novos convites e vínculos continuam sujeitos ao estado da assinatura.
 
 Em um novo ambiente, use o Supabase CLI oficial: consulte `supabase --help`, inicialize/vincule ao projeto correto e aplique as migrações. Antes de uma mudança, gere arquivo com `supabase migration new nome`, revise, execute testes e verifique advisors. Não edite migrações já aplicadas: crie nova migração.
 
@@ -133,8 +140,8 @@ O primeiro SUPER_ADMIN usa um bootstrap de instalação de uso único: o e-mail 
 
 1. Importe `diogobr231/webfidelize_saas` no projeto Vercel correto, framework Next.js, Node.js 24, diretório raiz.
 2. Instale com `pnpm install --frozen-lockfile`; build `pnpm build`.
-3. Configure NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY e APP_URL com a URL definitiva HTTPS. Nunca envie a chave secret/service_role ao navegador.
-4. No Supabase Auth, defina Site URL e Redirect URLs exatas: `https://SEU-DOMINIO/auth/callback` e `https://SEU-DOMINIO/auth/callback?next=/nova-senha`. Para desenvolvimento, inclua os equivalentes localhost. Evite curingas em produção.
+3. Configure NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY e APP_URL com a URL definitiva HTTPS. Configure AUTH_FLOW_SECRET privado e aleatório para a recuperação de senha. Nunca envie a chave secret/service_role ao navegador.
+4. No Supabase Auth, defina Site URL e os callbacks de cadastro/recuperação/convites conforme o [guia de e-mails](docs/EMAIL-PRODUCAO.md). Instale os templates junto com a versão compatível da aplicação. Restrinja os redirects à origem e à rota de callback necessárias; não libere `/**`.
 5. Mantenha confirmação de e-mail; configure SMTP, política de senha e proteção contra abuso no Auth antes de abrir ao público.
 6. Teste cadastro, confirmação, login, recuperação e convites em homologação, com dois tenants. Teste também tentativa de acessar `/admin` como cliente.
 7. Só publicar comercialmente após homologar pagamentos, reserva pública e a lista de pendências acima.

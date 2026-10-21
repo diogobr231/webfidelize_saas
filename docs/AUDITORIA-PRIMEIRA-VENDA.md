@@ -1,5 +1,7 @@
 # Auditoria para a primeira venda — Web Fidelize
 
+> Registro histórico de 19/10/2026. A situação mais recente está em [STATUS-PILOTO](STATUS-PILOTO.md), com os incrementos posteriores de operações, e-mails e apresentação. Os resultados visuais abaixo correspondem à versão daquela data.
+
 Concluída em **19/10/2026**. Escopo: código atual, build de produção executado localmente, banco Supabase do projeto Web Fidelize, fluxos com contas DEMO e revisão visual no navegador. Os relatórios `STATUS-*` documentam etapas anteriores; este relatório consolida a situação atual.
 
 ## Parecer
