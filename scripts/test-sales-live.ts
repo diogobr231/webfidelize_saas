@@ -2,12 +2,18 @@ import assert from "node:assert/strict";
 import { randomUUID, createHash } from "node:crypto";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import { resolveSalesTestOrigin } from "./sales-test-origin";
 
 // Explicit opt-in. Synthetic commercial records only; never sends messages or
 // charges. Cleanup IDs are printed, without contact details or session tokens.
 const enabled = process.env.TEST_SALES_LIVE === "1";
 const password = process.env.SEED_PASSWORD;
 const adminEmail = process.env.SALES_ADMIN_EMAIL;
+// Only explicit process values authorize sending sessions to a remote origin.
+// Set TEST_BASE_URL and TEST_SALES_ORIGIN to the same HTTPS origin, plus
+// TEST_SALES_REMOTE=1. Never authorize all *.vercel.app deployments.
+const remoteEnabled = process.env.TEST_SALES_REMOTE === "1";
+const allowedOrigin = process.env.TEST_SALES_ORIGIN;
 process.loadEnvFile(".env.local");
 let phase = "configuration",
   checks = 0;
@@ -58,12 +64,10 @@ async function main() {
     enabled && password && adminEmail,
     "Provide explicit opt-in and existing admin credentials through the process.",
   );
-  const base = new URL(process.env.TEST_BASE_URL || "http://localhost:3000");
-  assert.ok(
-    ["localhost", "127.0.0.1"].includes(base.hostname) &&
-      !base.username &&
-      !base.password,
-  );
+  const base = resolveSalesTestOrigin(process.env.TEST_BASE_URL, {
+    remoteEnabled,
+    allowedOrigin,
+  });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
   assert.ok(url && key);

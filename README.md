@@ -140,11 +140,11 @@ O primeiro SUPER_ADMIN usa um bootstrap de instalação de uso único: o e-mail 
 
 1. Importe `diogobr231/webfidelize_saas` no projeto Vercel correto, framework Next.js, Node.js 24, diretório raiz.
 2. Instale com `pnpm install --frozen-lockfile`; build `pnpm build`.
-3. Configure NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY e APP_URL com a URL definitiva HTTPS. Configure AUTH_FLOW_SECRET privado e aleatório para a recuperação de senha. Nunca envie a chave secret/service_role ao navegador.
+3. Configure `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_WHATSAPP` e `APP_URL` com a origem HTTPS estável do projeto antes do build. Cadastre `AUTH_FLOW_SECRET`, `BOOKING_GATEWAY_SECRET` e `SALES_GATEWAY_SECRET` como segredos exclusivos do ambiente Production. Preserve os valores dos gateways já configurados: seus hashes correspondentes estão no banco. Não copie credenciais de produção para previews nem envie secret/service_role ao navegador. Não sobrescreva `.env.local` ao sincronizar configurações da Vercel.
 4. No Supabase Auth, defina Site URL e os callbacks de cadastro/recuperação/convites conforme o [guia de e-mails](docs/EMAIL-PRODUCAO.md). Instale os templates junto com a versão compatível da aplicação. Restrinja os redirects à origem e à rota de callback necessárias; não libere `/**`.
 5. Mantenha confirmação de e-mail; configure SMTP, política de senha e proteção contra abuso no Auth antes de abrir ao público.
 6. Teste cadastro, confirmação, login, recuperação e convites em homologação, com dois tenants. Teste também tentativa de acessar `/admin` como cliente.
-7. Só publicar comercialmente após homologar pagamentos, reserva pública e a lista de pendências acima.
+7. Nesta fase, publique o site, a captação comercial e os painéis com pagamentos ainda desabilitados. Valide o funil completo na URL online e remova somente os registros sintéticos criados pela validação. Cadastro/recuperação por e-mail dependem da homologação de SMTP; contratação automática depende da futura integração de pagamentos. Publicação do site não comprova essas integrações.
 
 O Storage já possui o bucket privado `company-logos`, criado pela migração de personalização. Em outro ambiente, aplique essa migração antes de liberar uploads e confirme a disponibilidade de `storage.allow_only_operation(text)`. Valide upload autenticado, isolamento entre empresas e publicação somente do logotipo escolhido. Não torne o bucket público. Detalhes de tipos, tamanho, expiração, concorrência e limpeza estão em [docs/PERSONALIZACAO.md](docs/PERSONALIZACAO.md).
 
@@ -183,6 +183,8 @@ Entrega, testes e limitações: [docs/STATUS-PRIMEIRO-ACESSO.md](docs/STATUS-PRI
 Aplique a migração `sales_funnel`, configure `SALES_GATEWAY_SECRET` privado (32 bytes aleatórios) no servidor e grave apenas seu SHA-256 em `private.sales_gateway_config.secret_hash`, na linha `singleton = true`. Sem essa configuração a captação permanece fechada. O segredo é independente do gateway de reservas. Não coloque o valor em SQL versionado, logs ou variáveis `NEXT_PUBLIC_`.
 
 Testes: `pnpm test`, `pnpm test:sales:db` e, com servidor local, `pnpm test:sales` mediante `TEST_SALES_LIVE=1`, `SALES_ADMIN_EMAIL` e `SEED_PASSWORD` somente no processo. O teste live gera cadastros claramente identificados como QA e informa IDs para limpeza administrativa específica. Não envia mensagens ou cobranças. Não execute esse roteiro com contatos de clientes reais.
+
+Para homologar o deploy, defina também `TEST_SALES_REMOTE=1`, `TEST_BASE_URL` e `TEST_SALES_ORIGIN` no processo. As duas URLs devem ser a mesma origem HTTPS exata, sem caminho, credenciais, query ou fragmento; não use curingas de domínio. O teste mantém redirects manuais para não encaminhar a sessão a outro endereço. Execute somente depois de verificar que a URL pertence ao projeto publicado. A configuração remota não substitui a execução e conferência dos resultados.
 
 Um deploy e um banco para todas as empresas, com company_id e RLS. Sem serviços de IA, filas ou automações pagas no primeiro incremento. O plano de infraestrutura deve permitir uso comercial e ter orçamento definido antes do lançamento. Receita de assinatura só será reconhecida após conciliação do provedor. O trial não depende de cron: cada escrita valida o prazo no banco.
 
