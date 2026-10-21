@@ -152,7 +152,7 @@ O Storage já possui o bucket privado `company-logos`, criado pela migração de
 
 A página inicial apresenta agenda, clientes, profissionais e reservas públicas. As ilustrações do sistema usam dados identificados como fictícios. Landing, `/planos` e assinatura consultam os preços e limites do catálogo do banco e mostram erro quando a consulta falha. Novos testes começam no Essencial; a cobrança online pelo Mercado Pago ainda não foi implementada. Não há retorno de checkout capaz de simular uma assinatura ativa.
 
-Título, descrição, canonical, Open Graph, imagem de compartilhamento e dados estruturados de WebSite/Organization ficam em `src/lib/seo.ts` e nas convenções de metadados do App Router. Não há avaliações, depoimentos ou números de clientes inventados. O sitemap inclui apenas a página comercial. Rotas de conta, painel e demonstração permanecem fora da indexação.
+Título, descrição, canonical, Open Graph, imagem de compartilhamento e dados estruturados de WebSite/Organization ficam em `src/lib/seo.ts` e nas convenções de metadados do App Router. Não há avaliações, depoimentos ou números de clientes inventados. O sitemap inclui a página inicial e a página de diagnóstico comercial. Rotas de conta, painel e demonstração permanecem fora da indexação.
 
 Defina `APP_URL` com a origem HTTPS definitiva antes do build de produção. Localhost, URL ausente/inválida e ambientes Vercel Preview/Development ficam com `noindex` e robots bloqueando indexação. Não é preciso inventar um domínio para rodar localmente. Alterar a origem exige novo build. Robots não substitui autenticação e RLS.
 
@@ -175,6 +175,14 @@ O fluxo inicial reutiliza as tabelas e regras existentes. Serviços e profission
 Entrega, testes e limitações: [docs/STATUS-PRIMEIRO-ACESSO.md](docs/STATUS-PRIMEIRO-ACESSO.md). A criação da primeira empresa com conta recém-cadastrada e a entrega/confirmação de um novo e-mail ainda precisam de homologação ponta a ponta neste fluxo.
 
 ## Custos e operação
+
+### Funil comercial
+
+`/diagnostico` recebe solicitações de implantação com qualificação e autorização de contato. `/admin/comercial` é exclusivo do SUPER_ADMIN: ofertas, contatos, etapas, próximos retornos, valores propostos e histórico. Valores fechados são registros comerciais manuais; não representam recebimentos nem ativam assinaturas. Novas ofertas começam como rascunho; publicar exige marcar a oferta como ativa e publicada.
+
+Aplique a migração `sales_funnel`, configure `SALES_GATEWAY_SECRET` privado (32 bytes aleatórios) no servidor e grave apenas seu SHA-256 em `private.sales_gateway_config.secret_hash`, na linha `singleton = true`. Sem essa configuração a captação permanece fechada. O segredo é independente do gateway de reservas. Não coloque o valor em SQL versionado, logs ou variáveis `NEXT_PUBLIC_`.
+
+Testes: `pnpm test`, `pnpm test:sales:db` e, com servidor local, `pnpm test:sales` mediante `TEST_SALES_LIVE=1`, `SALES_ADMIN_EMAIL` e `SEED_PASSWORD` somente no processo. O teste live gera cadastros claramente identificados como QA e informa IDs para limpeza administrativa específica. Não envia mensagens ou cobranças. Não execute esse roteiro com contatos de clientes reais.
 
 Um deploy e um banco para todas as empresas, com company_id e RLS. Sem serviços de IA, filas ou automações pagas no primeiro incremento. O plano de infraestrutura deve permitir uso comercial e ter orçamento definido antes do lançamento. Receita de assinatura só será reconhecida após conciliação do provedor. O trial não depende de cron: cada escrita valida o prazo no banco.
 

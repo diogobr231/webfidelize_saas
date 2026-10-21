@@ -29,6 +29,9 @@ export default async function Admin({
       <nav className="admin-topbar" aria-label="Administração da plataforma">
         <Brand href="/painel" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/comercial">
+            Central comercial
+          </Link>
           <Link className="button secondary" href="/admin/ajuda">
             Ajuda e solicitações
           </Link>
