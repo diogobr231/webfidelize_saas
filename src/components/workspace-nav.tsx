@@ -8,6 +8,7 @@ import { Icon, type IconName } from "@/components/ui/icon";
 
 const entries = [
   { path: "", label: "Visão geral", icon: "layout" },
+  { path: "/meu-dia", label: "Meu dia", icon: "user" },
   { path: "/agenda", label: "Agenda", icon: "calendar" },
   { path: "/customers", label: "Clientes", icon: "users" },
   { path: "/services", label: "Serviços", icon: "briefcase" },
@@ -61,6 +62,11 @@ export function WorkspaceNav({
     ...(canManage(role)
       ? [
           {
+            path: "/equipe/indicadores",
+            label: "Indicadores da equipe",
+            icon: "users" as const,
+          },
+          {
             path: "/lembretes",
             label: "Lembretes WhatsApp",
             icon: "phone" as const,
@@ -79,9 +85,9 @@ export function WorkspaceNav({
       return "location" as const;
     return undefined;
   }
-  const currentEntry = navigation.find((entry) =>
-    currentLocation(`${base}${entry.path}`),
-  );
+  const currentEntry = navigation
+    .toSorted((a, b) => b.path.length - a.path.length)
+    .find((entry) => currentLocation(`${base}${entry.path}`));
   return (
     <>
       <aside
@@ -168,7 +174,7 @@ export function WorkspaceNav({
       <nav className="workspace-bottom-nav" aria-label="Atalhos no celular">
         {[
           {
-            href: base,
+            href: role === "EMPLOYEE" ? `${base}/meu-dia` : base,
             label: role === "EMPLOYEE" ? "Meu dia" : "Visão geral",
             icon: "layout" as const,
           },

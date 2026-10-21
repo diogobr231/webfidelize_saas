@@ -1,0 +1,6 @@
+import { PageSkeleton } from "@/components/ui/skeleton";
+export default function Loading() {
+  return (
+    <PageSkeleton label="Calculando os indicadores autorizados da equipe…" />
+  );
+}
