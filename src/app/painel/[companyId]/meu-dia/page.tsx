@@ -126,7 +126,7 @@ export default async function MyDay({
   return (
     <>
       {header}
-      <form className="panel team-filters" method="get">
+      <form key={day} className="panel team-filters" method="get">
         <label htmlFor="my-day">
           Dia de atendimento
           <input
