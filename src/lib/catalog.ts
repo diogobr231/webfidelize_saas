@@ -57,8 +57,8 @@ export const niches = [
   },
 ] as const;
 export const plans = [
-  { id: "essencial", name: "Essencial", cents: 6990, staff: 1 },
-  { id: "profissional", name: "Profissional", cents: 11990, staff: 3 },
+  { id: "essencial", name: "Essencial", cents: 4990, staff: 1 },
+  { id: "profissional", name: "Profissional", cents: 8990, staff: 3 },
   { id: "empresarial", name: "Empresarial", cents: 19990, staff: 10 },
 ] as const;
 export const money = (cents: number) =>
