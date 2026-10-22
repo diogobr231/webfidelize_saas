@@ -5,6 +5,11 @@ import {
   logoPathBelongsToCompany,
   personalizationSchema,
   validateLogoBytes,
+  COVER_MAX_BYTES,
+  COVER_SOURCE_MAX_BYTES,
+  coverPathBelongsToCompany,
+  rasterDimensions,
+  validateCoverBytes,
 } from "../src/lib/company-personalization";
 
 test("personalization validates presets and commercial details", () => {
@@ -32,6 +37,83 @@ test("personalization validates presets and commercial details", () => {
       false,
     );
   }
+});
+
+function coverPng(width: number, height: number, length = 32) {
+  const bytes = new Uint8Array(length);
+  bytes.set([137, 80, 78, 71, 13, 10, 26, 10]);
+  bytes.set([73, 72, 68, 82], 12);
+  const view = new DataView(bytes.buffer);
+  view.setUint32(16, width);
+  view.setUint32(20, height);
+  return bytes;
+}
+
+test("cover validates signatures, stored size, pixel budget and dimensions", () => {
+  assert.deepEqual(validateCoverBytes(coverPng(1600, 900), "image/png"), {
+    mime: "image/png",
+    extension: "png",
+    width: 1600,
+    height: 900,
+  });
+  for (const bytes of [
+    coverPng(0, 1),
+    coverPng(2561, 1),
+    coverPng(900, 1600, COVER_MAX_BYTES + 1),
+    new TextEncoder().encode("<svg></svg>"),
+  ])
+    assert.ok("error" in validateCoverBytes(bytes, "image/png"));
+  assert.ok("error" in validateCoverBytes(coverPng(1600, 900), "image/jpeg"));
+  assert.ok(
+    "error" in
+      validateCoverBytes(
+        new Uint8Array(COVER_SOURCE_MAX_BYTES + 1),
+        "image/png",
+        true,
+      ),
+  );
+  assert.ok(
+    "error" in validateCoverBytes(coverPng(10000, 10000), "image/png", true),
+  );
+  assert.equal(
+    "error" in validateCoverBytes(coverPng(6000, 4000), "image/png", true),
+    false,
+  );
+});
+
+test("cover reads JPEG and WebP dimensions and rejects truncated headers", () => {
+  const jpeg = new Uint8Array([
+    255, 216, 255, 192, 0, 17, 8, 3, 132, 6, 64, 3, 1, 0, 0, 2, 0, 0, 3, 0, 0,
+    255, 217,
+  ]);
+  assert.deepEqual(rasterDimensions(jpeg, "image/jpeg"), {
+    width: 1600,
+    height: 900,
+  });
+  assert.equal("error" in validateCoverBytes(jpeg, "image/jpeg"), false);
+  assert.equal(rasterDimensions(jpeg.slice(0, 9), "image/jpeg"), null);
+  const webp = new Uint8Array(30);
+  webp.set([82, 73, 70, 70]);
+  webp.set([87, 69, 66, 80, 86, 80, 56, 88], 8);
+  webp.set([63, 6, 0], 24);
+  webp.set([131, 3, 0], 27);
+  assert.deepEqual(rasterDimensions(webp, "image/webp"), {
+    width: 1600,
+    height: 900,
+  });
+  assert.equal("error" in validateCoverBytes(webp, "image/webp"), false);
+});
+
+test("cover cleanup refuses foreign folders, URLs and traversal", () => {
+  const company = "00000000-0000-4000-8000-000000000001";
+  const file = "00000000-0000-4000-8000-000000000002.jpg";
+  assert.equal(coverPathBelongsToCompany(`${company}/${file}`, company), true);
+  for (const name of [
+    `https://external.test/${file}`,
+    `${company}/../${file}`,
+    `00000000-0000-4000-8000-000000000003/${file}`,
+  ])
+    assert.equal(coverPathBelongsToCompany(name, company), false);
 });
 
 test("logo validation rejects SVG, MIME spoofing, empty and oversized input", () => {

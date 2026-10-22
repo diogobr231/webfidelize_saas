@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import { publicDatabase } from "@/lib/supabase/public";
 import { signedPublicLogo } from "@/lib/company-logo";
+import { signedPublicCover } from "@/lib/company-cover";
+import { BookingCover } from "@/components/booking/booking-cover";
 import { money } from "@/lib/catalog";
 import {
   bookingReceiptSchema,
@@ -26,6 +28,7 @@ type Catalog = {
   phone?: string;
   theme?: string;
   logo_path?: string | null;
+  cover_path?: string | null;
   services: {
     id: string;
     name: string;
@@ -59,7 +62,10 @@ export default async function Booking({
   if (error) throw new Error("Catálogo temporariamente indisponível");
   if (!data) notFound();
   const catalog = data as Catalog;
-  const logo = await signedPublicLogo(db, catalog.logo_path);
+  const [logo, cover] = await Promise.all([
+    signedPublicLogo(db, catalog.logo_path),
+    signedPublicCover(db, catalog.cover_path),
+  ]);
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
@@ -195,26 +201,28 @@ export default async function Booking({
               ) : null}
             </div>
           </div>
-          <div className="booking-hero-art" aria-hidden="true">
-            <div className="booking-art-orbit" />
-            <div className="booking-art-card">
-              <Icon name="calendar" size={30} />
-              <span>
-                Mais facilidade
-                <br />
-                <strong>para o seu dia.</strong>
-              </span>
-              <div className="booking-art-lines">
-                <i />
-                <i />
-                <i />
+          <BookingCover src={cover} companyName={catalog.name}>
+            <div className="booking-hero-art" aria-hidden="true">
+              <div className="booking-art-orbit" />
+              <div className="booking-art-card">
+                <Icon name="calendar" size={30} />
+                <span>
+                  Mais facilidade
+                  <br />
+                  <strong>para o seu dia.</strong>
+                </span>
+                <div className="booking-art-lines">
+                  <i />
+                  <i />
+                  <i />
+                </div>
               </div>
+              <span className="booking-art-badge">
+                <Icon name="clock" size={14} />
+                No seu tempo.
+              </span>
             </div>
-            <span className="booking-art-badge">
-              <Icon name="clock" size={14} />
-              No seu tempo.
-            </span>
-          </div>
+          </BookingCover>
         </header>
         {catalog.is_demo ? (
           <div className="booking-notice booking-demo">

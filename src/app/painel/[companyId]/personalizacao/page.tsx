@@ -2,10 +2,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireCompany } from "@/lib/auth";
 import { signedCompanyLogo } from "@/lib/company-logo";
+import { signedCompanyCover } from "@/lib/company-cover";
 import { PageHeader } from "@/components/ui/page-header";
 import { Icon } from "@/components/ui/icon";
 import { LogoForm, PersonalizationForm } from "./forms";
-import { saveCompanyLogo, savePersonalization } from "./actions";
+import { CoverForm } from "./cover-form";
+import {
+  saveCompanyLogo,
+  saveCompanyCover,
+  savePersonalization,
+} from "./actions";
 import "./personalizacao.css";
 
 export default async function Personalization({
@@ -16,7 +22,10 @@ export default async function Personalization({
   const { companyId } = await params;
   const { db, company, role } = await requireCompany(companyId);
   if (role !== "OWNER") redirect(`/painel/${companyId}?erro=permissao`);
-  const logo = await signedCompanyLogo(db, companyId, company.logo_path);
+  const [logo, cover] = await Promise.all([
+    signedCompanyLogo(db, companyId, company.logo_path),
+    signedCompanyCover(db, companyId, company.cover_path),
+  ]);
   const base = `/painel/${companyId}`;
   const permalink = `${base}/personalizacao`;
   const initials = company.name
@@ -60,6 +69,25 @@ export default async function Personalization({
           permalink={permalink}
         />
         <aside className="personalization-sidebar">
+          <section className="panel personalization-cover-panel">
+            <div className="personalization-section-heading">
+              <span className="tag">Sua página, com a sua cara</span>
+              <h2>Foto do espaço</h2>
+              <p>
+                Apresente seu ambiente na capa da página de agendamento. Seu
+                logotipo e suas cores continuam presentes.
+              </p>
+            </div>
+            <CoverForm
+              saveAction={saveCompanyCover.bind(null, companyId)}
+              permalink={permalink}
+              cover={cover}
+              hasCover={Boolean(company.cover_path)}
+              published={Boolean(company.cover_published)}
+              enabled={Boolean(company.booking_enabled)}
+              companyName={company.name}
+            />
+          </section>
           <section className="panel">
             <div className="personalization-section-heading">
               <h2>Logotipo</h2>
@@ -109,8 +137,9 @@ export default async function Personalization({
             <Icon name="shield" size={23} />
             <h2>Sua marca, com segurança</h2>
             <p>
-              Somente o proprietário altera estas opções. Publicar o logotipo é
-              opcional; a identidade principal da Web Fidelize é preservada.
+              Somente o proprietário altera estas opções. Publicar o logotipo e
+              a foto é opcional; a identidade principal da Web Fidelize é
+              preservada.
             </p>
             <Link href={`${base}/configuracao`}>Revisar primeiros passos</Link>
           </section>
