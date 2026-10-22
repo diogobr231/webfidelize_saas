@@ -165,7 +165,7 @@ async function main() {
     const source = await response.text();
     check(
       !source.includes('id="__next-page-redirect"') &&
-        !source.includes('data-dgst="NEXT_HTTP_ERROR_FALLBACK;404"') &&
+        !source.includes("NEXT_HTTP_ERROR_FALLBACK;404") &&
         !visible(source).includes("Algo deu errado"),
       "Authorized page redirected or rendered an error.",
     );
@@ -212,8 +212,8 @@ async function main() {
     const source = await response.text();
     check(
       response.status === 404 ||
-        source.includes('data-dgst="NEXT_HTTP_ERROR_FALLBACK;404"'),
-      "Non-admin reached the platform administration page.",
+        source.includes("NEXT_HTTP_ERROR_FALLBACK;404"),
+      `Non-admin admin denial was not recognized (HTTP ${response.status}; not-found marker ${source.includes("404")}; private heading ${visible(source).includes("Empresas da plataforma")}).`,
     );
     check(
       !visible(source).includes("Empresas da plataforma"),
