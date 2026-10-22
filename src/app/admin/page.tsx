@@ -93,7 +93,7 @@ export default async function Admin({
             </div>
             {companies?.length ? (
               <div className="table-wrap">
-                <table>
+                <table className="admin-companies-table">
                   <caption className="sr-only">
                     Empresas cadastradas, situação de acesso e data final do
                     teste
@@ -109,7 +109,7 @@ export default async function Admin({
                   <tbody>
                     {companies?.map((c) => (
                       <tr key={c.id}>
-                        <td>
+                        <td data-label="Empresa">
                           <div className="admin-company-name">
                             <span
                               className="admin-company-avatar"
@@ -204,11 +204,11 @@ export default async function Admin({
                             </form>
                           </details>
                         </td>
-                        <td>
+                        <td data-label="Segmento">
                           {niches.find((niche) => niche.slug === c.niche)
                             ?.name || c.niche}
                         </td>
-                        <td>
+                        <td data-label="Situação">
                           <span
                             className={`admin-status admin-status-${c.status}`}
                           >
@@ -224,7 +224,7 @@ export default async function Admin({
                             )[c.status] || c.status}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Fim do teste">
                           {c.trial_ends_at
                             ? new Date(c.trial_ends_at).toLocaleDateString(
                                 "pt-BR",

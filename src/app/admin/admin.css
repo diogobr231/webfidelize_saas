@@ -4,7 +4,9 @@
   max-width: none;
   padding: 0;
   color: var(--text);
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 780px 480px at 100% 0, #00cee60c, transparent 75%),
+    var(--bg);
 }
 .admin-topbar {
   min-height: 80px;
@@ -13,8 +15,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  background: var(--panel);
+  background: linear-gradient(110deg, #ffffff, #f7fcff);
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 3px 16px #082b4604;
+}
+.admin-topbar > .brand {
+  flex-shrink: 0;
+}
+.admin-topbar .button {
+  min-height: 44px;
+  white-space: normal;
 }
 .admin-topbar-actions {
   display: flex;
@@ -28,22 +38,35 @@
   font-size: 11px;
   letter-spacing: 0.08em;
   font-weight: 700;
-  color: var(--muted);
+  color: #226077;
+  padding: 7px 9px;
+  border: 1px solid #d4eaf1;
+  border-radius: 8px;
+  background: #f0faff;
 }
 .admin-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 24px 64px;
+  min-width: 0;
+}
+.admin-content .ui-page-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.admin-content .panel {
+  min-width: 0;
+  box-shadow: 0 4px 22px #082b4605;
 }
 .admin-billing-note {
   display: flex;
   gap: 14px;
   padding: 20px;
-  background: #f0f6fa;
-  border: 1px solid #dce8f0;
+  background: linear-gradient(110deg, #edfaff, #f6f9fc);
+  border: 1px solid #d1e8f0;
   border-radius: var(--radius-md);
   margin: 28px 0;
-  color: #33566d;
+  color: #24566e;
 }
 .admin-billing-note > svg {
   flex-shrink: 0;
@@ -53,7 +76,7 @@
   font-size: 14px;
 }
 .admin-billing-note p {
-  color: #4d6678;
+  color: #52677a;
   font-size: 13px;
   line-height: 1.6;
   margin: 6px 0 0;
@@ -70,6 +93,7 @@
   gap: 16px;
   padding: 24px;
   border-bottom: 1px solid var(--line);
+  background: linear-gradient(110deg, #ffffff, #f7fcff);
 }
 .admin-section-heading h2 {
   font-size: 18px;
@@ -78,12 +102,13 @@
 .admin-section-heading p {
   margin: 0;
   font-size: 13px;
+  color: var(--muted);
 }
 .admin-count {
   padding: 6px 10px;
   background: var(--surface-subtle);
   color: var(--muted);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   white-space: nowrap;
 }
@@ -92,6 +117,7 @@
 }
 .admin-companies th {
   background: var(--surface-subtle);
+  color: #52677a;
 }
 .admin-companies th,
 .admin-companies td {
@@ -99,6 +125,10 @@
 }
 .admin-companies td {
   vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.admin-companies tbody tr:hover {
+  background: #f8fcff;
 }
 .admin-company-name {
   display: flex;
@@ -108,6 +138,7 @@
 }
 .admin-company-name strong {
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .admin-company-avatar {
   width: 34px;
@@ -116,8 +147,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #eaf5f3;
-  color: var(--cyan);
+  background: #e9f8fc;
+  border: 1px solid #d1edf4;
+  color: #007c94;
   flex-shrink: 0;
 }
 .admin-company-controls {
@@ -131,6 +163,8 @@
   align-items: center;
   gap: 6px;
   width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
 }
 .admin-company-controls summary:hover {
   text-decoration: underline;
@@ -142,8 +176,13 @@
   border: 1px solid var(--line);
   background: var(--surface-subtle);
   border-radius: 10px;
+  max-width: 100%;
 }
 .admin-manage-form label {
+  font-size: 12px;
+}
+.admin-manage-form .muted {
+  line-height: 1.65;
   font-size: 12px;
 }
 .admin-manage-form input,
@@ -170,8 +209,12 @@
   border-radius: 50%;
 }
 .admin-status-trialing {
-  color: #3b63a0;
-  background: #eef3fd;
+  color: #25627d;
+  background: #eaf7fc;
+}
+.admin-status-pending_card {
+  color: #745b25;
+  background: #fff6e1;
 }
 .admin-status-active {
   color: #147057;
@@ -199,7 +242,7 @@
     font-size: 12px;
   }
   .admin-access {
-    font-size: 9px;
+    font-size: 10px;
   }
   .admin-content {
     padding: 28px 16px 40px;
@@ -207,12 +250,78 @@
   .admin-section-heading {
     padding: 20px 16px;
     align-items: flex-start;
+    flex-wrap: wrap;
   }
   .admin-companies th,
   .admin-companies td {
     padding: 16px;
   }
-  .admin-companies table {
-    min-width: 650px;
+  .admin-companies-table,
+  .admin-companies-table tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .admin-companies-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .admin-companies-table tbody tr {
+    display: block;
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-companies-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .admin-companies-table td[data-label] {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    width: 100%;
+    border: 0;
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .admin-companies-table td[data-label]::before {
+    content: attr(data-label);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .admin-companies-table td[data-label="Empresa"] {
+    display: block;
+    padding: 0 0 8px;
+  }
+  .admin-companies-table td[data-label="Empresa"]::before {
+    display: none;
+  }
+  .admin-company-controls {
+    margin: 4px 0 0;
+  }
+  .admin-manage-form {
+    min-width: 0;
+    width: 100%;
+    padding: 14px;
+  }
+  .admin-manage-form input,
+  .admin-manage-form select {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .admin-companies-table .admin-status {
+    width: fit-content;
+    max-width: 100%;
+    white-space: normal;
+  }
+  .admin-companies-table .admin-status::before {
+    flex-shrink: 0;
   }
 }

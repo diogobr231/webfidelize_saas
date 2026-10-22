@@ -31,22 +31,33 @@
 }
 .workspace-shell,
 .admin-shell,
-.onb-entry {
+.onb-entry,
+.ui-state-page {
   color-scheme: light;
-  --bg: #f6f7f9;
+  --bg: #f7fafc;
   --panel: #ffffff;
-  --surface-subtle: #f0f3f6;
-  --line: #e1e6ed;
-  --muted: #657182;
-  --text: #17212b;
-  --cyan: #0d8078;
+  --surface-subtle: #edf6fa;
+  --line: #dce7ef;
+  --muted: #52677a;
+  --text: #082b46;
+  --cyan: #007c94;
   --on-accent: #ffffff;
-  --accent-soft: #e6f4f0;
+  --accent-soft: #e5f8fc;
   --danger: #a92d3b;
   --danger-bg: #fff1f2;
   --danger-line: #f1c4cb;
   color: var(--text);
   background: var(--bg);
+}
+body:has(
+  .auth-shell,
+  .workspace-shell,
+  .admin-shell,
+  .onb-entry,
+  .ui-state-page
+) {
+  color-scheme: light;
+  background: #f7fafc;
 }
 * {
   box-sizing: border-box;
@@ -661,22 +672,22 @@ tbody tr:hover {
   padding: 8px 10px;
   font-size: 12px;
   line-height: 1.4;
-  color: #345d50;
+  color: var(--cyan);
   border: 1px solid transparent;
   background: transparent;
 }
 .workspace-shell .availability-shift .confirm-trigger:hover {
-  background: #e5f2e9;
-  border-color: #bbd6c7;
+  background: var(--accent-soft);
+  border-color: var(--line);
 }
 .workspace-bottom-nav {
   display: none;
 }
 .workspace-shell .workspace-nav a[aria-current="location"] {
-  color: #b1f5e5;
-  background: #203b38;
-  border-color: #31534e;
-  font-weight: 550;
+  color: var(--cyan);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--cyan) 20%, var(--line));
+  font-weight: 650;
 }
 .workspace-shell .workspace-nav a[aria-current="location"]::after {
   content: "";
@@ -685,12 +696,12 @@ tbody tr:hover {
   height: 4px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #68dcc1;
+  background: var(--cyan);
 }
 .workspace-shell .workspace-nav a:focus-visible,
 .workspace-shell .workspace-nav-footer a:focus-visible,
 .workspace-shell .workspace-mobile-menu:focus-visible {
-  outline-color: #5eead4;
+  outline-color: var(--cyan);
   outline-offset: 2px;
 }
 .workspace-content :is(a, button, input, select, textarea, summary) {
@@ -820,7 +831,7 @@ tbody tr:hover {
     min-width: 0;
   }
   .workspace-mobile-context small {
-    color: #aab5c6;
+    color: var(--muted);
     font-size: 10px;
     font-weight: 400;
   }
@@ -834,9 +845,9 @@ tbody tr:hover {
   .workspace-mobile-menu-label {
     margin-left: auto;
     padding: 3px 7px;
-    border: 1px solid #414e60;
+    border: 1px solid var(--line);
     border-radius: 5px;
-    color: #c7d2df;
+    color: var(--muted);
     font-size: 10px;
     font-weight: 500;
   }

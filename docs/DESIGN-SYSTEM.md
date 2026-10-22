@@ -1,26 +1,26 @@
 # Sistema visual da Web Fidelize
 
-O sistema visual usa superfícies claras, texto azul-marinho e detalhes em ciano na landing. A área de trabalho permanece clara, com navegação grafite. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
+O sistema visual usa superfícies claras, texto azul-marinho e detalhes em ciano na landing, no acesso, no painel das empresas e no admin. Cabeçalhos, navegação e formulários usam a mesma identidade clara. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
 
 Este documento descreve os padrões e os pontos de manutenção do código. Resultados de build, testes e revisão visual são registrados nos relatórios de cada incremento, separadamente.
 
 ## Superfícies e cores
 
-Os tokens comuns ficam em [globals.css](../src/app/globals.css). O tema padrão é grafite. `.workspace-shell`, `.admin-shell` e `.onb-entry` sobrescrevem as cores para a área clara. O cabeçalho e a navegação lateral do painel mantêm o grafite `#11151d`, com item atual identificado por cor, fundo, borda e `aria-current`.
+Os tokens comuns ficam em [globals.css](../src/app/globals.css). O tema base grafite permanece restrito às páginas públicas legadas que ainda o usam. `.workspace-shell`, `.admin-shell`, `.onb-entry` e `.ui-state-page` aplicam os tokens claros; a autenticação possui tokens claros próprios. Cabeçalhos e navegação usam branco, com item atual identificado por ciano, fundo suave, borda e `aria-current`. O fundo do documento acompanha esses contêineres, inclusive durante carregamento e erro.
 
 | Token              | Tema grafite | Área de trabalho clara | Uso                            |
 | ------------------ | ------------ | ---------------------- | ------------------------------ |
-| `--bg`             | `#101216`    | `#f6f7f9`              | Fundo da página                |
+| `--bg`             | `#101216`    | `#f7fafc`              | Fundo da página                |
 | `--panel`          | `#181c23`    | `#ffffff`              | Cartões e painéis              |
-| `--surface-subtle` | `#20252d`    | `#f0f3f6`              | Superfícies secundárias        |
-| `--line`           | `#303640`    | `#e1e6ed`              | Bordas e divisores             |
-| `--text`           | `#f5f7fa`    | `#17212b`              | Conteúdo principal             |
-| `--muted`          | `#a3aab8`    | `#657182`              | Descrições e metadados         |
-| `--cyan`           | `#5eead4`    | `#0d8078`              | Ação principal, seleção e foco |
+| `--surface-subtle` | `#20252d`    | `#edf6fa`              | Superfícies secundárias        |
+| `--line`           | `#303640`    | `#dce7ef`              | Bordas e divisores             |
+| `--text`           | `#f5f7fa`    | `#082b46`              | Conteúdo principal             |
+| `--muted`          | `#a3aab8`    | `#52677a`              | Descrições e metadados         |
+| `--cyan`           | `#5eead4`    | `#007c94`              | Ação principal, seleção e foco |
 | `--on-accent`      | `#093b35`    | `#ffffff`              | Texto sobre a ação principal   |
-| `--accent-soft`    | `#173c38`    | `#e6f4f0`              | Destaques suaves               |
+| `--accent-soft`    | `#173c38`    | `#e5f8fc`              | Destaques suaves               |
 
-O nome histórico `--cyan` permanece no código, embora seu valor varie entre menta e verde conforme a superfície. Erros usam o conjunto `--danger`, `--danger-bg` e `--danger-line`, acompanhado de texto que explica o problema.
+Na interface clara, `--cyan` usa ciano escuro para preservar o contraste de texto, botões e foco. O ciano intenso da marca fica nos detalhes decorativos. Erros usam o conjunto `--danger`, `--danger-bg` e `--danger-line`, acompanhado de texto que explica o problema.
 
 Estilos específicos ficam limitados ao contêiner da experiência:
 
@@ -86,7 +86,7 @@ Transições são curtas e discretas, em geral de 160ms. `prefers-reduced-motion
 
 ## Acesso e orientação no celular
 
-O `AuthShell` mantém a apresentação grafite da marca e a área clara de formulário. O símbolo existente é preservado; os detalhes visuais usam apenas CSS e SVG local. O link de pular conteúdo aparece ao receber foco e leva diretamente ao formulário. No celular, os campos usam 16px e os links auxiliares têm área de toque mínima de 44px. As notas e os placeholders usam cores de leitura, sem depender de cinza muito claro. Os recuos consideram a área segura do dispositivo.
+O `AuthShell` apresenta a marca sobre fundo claro com detalhes suaves em ciano e formulário branco. O símbolo existente é preservado; os detalhes visuais usam apenas CSS e SVG local. O link de pular conteúdo aparece ao receber foco e leva diretamente ao formulário. No celular, os campos usam 16px e os links auxiliares têm área de toque mínima de 44px. As notas e os placeholders usam cores de leitura, sem depender de cinza muito claro. Os recuos consideram a área segura do dispositivo.
 
 O botão do menu móvel mostra a seção atual e mantém o nome acessível de abrir ou fechar o menu. A página exata usa `aria-current="page"`; uma ficha dentro da seção usa `aria-current="location"`, com o mesmo destaque visual na navegação lateral e nos atalhos inferiores. A lista continua sendo montada conforme o papel recebido do servidor. Isso orienta o usuário sem criar novas permissões ou rotas.
 
