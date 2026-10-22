@@ -1,6 +1,6 @@
 # Sistema visual da Web Fidelize
 
-O sistema visual combina superfícies grafite na comunicação comercial e na navegação com uma área de trabalho clara. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
+O sistema visual usa superfícies claras, texto azul-marinho e detalhes em ciano na landing. A área de trabalho permanece clara, com navegação grafite. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
 
 Este documento descreve os padrões e os pontos de manutenção do código. Resultados de build, testes e revisão visual são registrados nos relatórios de cada incremento, separadamente.
 
@@ -24,7 +24,7 @@ O nome histórico `--cyan` permanece no código, embora seu valor varie entre me
 
 Estilos específicos ficam limitados ao contêiner da experiência:
 
-- Landing: `.landing` e tokens `--wf-*` em [landing.css](../src/app/landing.css).
+- Landing: `.wf-site` e tokens `--wf-*` em [landing.css](../src/app/landing.css). O tema claro é independente dos tokens globais; ciano intenso fica nos detalhes, com azul-marinho ou ciano escuro para textos legíveis. As camadas decorativas ficam atrás do conteúdo e não interceptam cliques.
 - Autenticação: [auth.css](../src/components/auth.css), com apresentação de marca e formulário claro.
 - Painel: [painel.css](../src/app/painel/painel.css), [operations.css](../src/app/painel/operations.css) e estilos próprios da agenda.
 - Configuração guiada: `.onb-page`, tokens `--onb-*` e [onboarding.css](../src/components/onboarding/onboarding.css).
@@ -65,6 +65,8 @@ Os componentes estão em `src/components/ui` e usam SVG local e CSS do projeto, 
 Prefira esses componentes ao repetir símbolos, cabeçalhos e estados vazios. A ação exibida deve existir e respeitar as permissões já calculadas no servidor. Estados vazios mostram ausência de registros; não devem receber dados fictícios para preencher a tela.
 
 ## Ícones do site
+
+A marca compartilhada usa [public/webfidelize-logo.png](../public/webfidelize-logo.png), arquivo original de 1600 × 533 enviado pelo proprietário, sem redesenho. O componente `Brand` preserva a proporção e contém o espaço externo da imagem por CSS. A placa clara mantém o contraste também nos cabeçalhos escuros. `public/logo.png` é a versão transparente preexistente da mesma identidade, incorporada ao SVG do ícone com enquadramento no monograma WF. Não substituir pelo antigo símbolo genérico em formato de W.
 
 O símbolo da marca também aparece em [src/app/icon.svg](../src/app/icon.svg), para identificação do site no navegador, e em [src/app/apple-icon.tsx](../src/app/apple-icon.tsx), que gera um PNG de 180 × 180 com `ImageResponse` de `next/og`. São arquivos locais, sem imagens ou fontes externas. O Next.js inclui os metadados de ícone conforme suas [convenções nativas de app icons](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons).
 

@@ -5,13 +5,13 @@
 }
 .wf-tour-window {
   overflow: hidden;
-  border: 1px solid #39434e;
+  border: 1px solid #c9dfe9;
   border-radius: 18px;
-  background: #f6f8fa;
-  color: #202d38;
+  background: #ffffff;
+  color: #082b46;
   box-shadow:
-    0 28px 70px #0004,
-    0 0 0 7px #ffffff03;
+    0 28px 70px #082b4615,
+    0 0 0 7px #00cee60a;
   color-scheme: light;
 }
 .wf-tour-top {
@@ -21,8 +21,9 @@
   gap: 10px;
   min-height: 58px;
   padding: 12px 20px;
-  color: #c3ccd6;
-  background: #1d232c;
+  color: #365b70;
+  background: linear-gradient(110deg, #eff9fd, #f7f4ff);
+  border-bottom: 1px solid #d7e7ef;
   font-size: 11px;
 }
 .wf-tour-top > span:first-child {
@@ -31,16 +32,16 @@
   gap: 12px;
 }
 .wf-tour-mark {
-  color: #5eead4;
+  color: #007c94;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -2px;
 }
 .wf-tour-demo {
-  border: 1px solid #4b615c;
+  border: 1px solid #b8dce6;
   border-radius: 5px;
   padding: 4px 7px;
-  color: #b8d9cf;
+  color: #005f75;
   font-size: 10px;
 }
 .wf-tour-selector {
@@ -54,7 +55,7 @@
 }
 .wf-tour-selector legend {
   padding: 18px 0 10px;
-  color: #637180;
+  color: #52677a;
   font-size: 11px;
 }
 .wf-tour-selector > input {
@@ -75,7 +76,7 @@
   padding: 8px;
   border: 1px solid transparent;
   border-radius: 7px;
-  color: #596775;
+  color: #52677a;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -84,16 +85,16 @@
     color 150ms;
 }
 .wf-tour-selector > input:checked + label {
-  color: #0b6e64;
+  color: #007c94;
   background: #fff;
-  border-color: #dce6e4;
-  box-shadow: 0 2px 4px #20332c08;
+  border-color: #d5e7ed;
+  box-shadow: 0 2px 4px #00a0bd0a;
 }
 .wf-tour-selector > label:hover {
-  background: #e6eeec;
+  background: #eafaff;
 }
 .wf-tour-selector > input:focus-visible + label {
-  outline: 3px solid #0d8078;
+  outline: 3px solid #007c94;
   outline-offset: 2px;
 }
 .wf-tour-panels {
@@ -103,7 +104,7 @@
 }
 .wf-tour-panel {
   display: none;
-  min-height: 356px;
+  min-height: 330px;
 }
 #tour-agenda:checked ~ .wf-tour-panels .wf-tour-agenda,
 #tour-clientes:checked ~ .wf-tour-panels .wf-tour-customers,
@@ -120,14 +121,14 @@
 .wf-tour-heading div > span {
   display: block;
   margin-bottom: 6px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 9px;
   letter-spacing: 1px;
   font-weight: 600;
 }
 .wf-tour-heading h2 {
   margin: 0;
-  color: #202d38;
+  color: #082b46;
   font-size: 18px;
   line-height: 1.35;
   letter-spacing: -0.5px;
@@ -135,7 +136,7 @@
 }
 .wf-tour-heading > svg {
   flex-shrink: 0;
-  color: #7b8c99;
+  color: #597d90;
 }
 .wf-tour-context {
   display: flex;
@@ -143,30 +144,30 @@
   flex-wrap: wrap;
   gap: 5px 12px;
   padding-bottom: 12px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 10px;
 }
 .wf-tour-timeline > div {
   display: grid;
-  grid-template-columns: 38px 1fr;
+  grid-template-columns: 38px minmax(0, 1fr);
   gap: 10px;
   padding: 7px 0;
   border-top: 1px solid #e0e7ed;
 }
 .wf-tour-timeline time {
   padding-top: 10px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 10px;
 }
 .wf-tour-event {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 3px 6px;
   padding: 10px 12px;
-  background: #e2f2ec;
-  border-left: 3px solid #3e9f87;
+  background: #e3f8fc;
+  border-left: 3px solid #36a6bf;
   border-radius: 5px;
-  color: #245e51;
+  color: #216176;
 }
 .wf-tour-event > span {
   grid-column: 2;
@@ -197,7 +198,7 @@
   padding: 12px;
   border: 1px dashed #cbd5de;
   border-radius: 5px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 11px;
 }
 .wf-site .wf-tour-insight {
@@ -207,14 +208,14 @@
   margin: 18px 0 0;
   padding-top: 14px;
   border-top: 1px solid #dfe7ec;
-  color: #536b63;
+  color: #52677a;
   font-size: 11px;
   line-height: 1.7;
 }
 .wf-tour-insight svg {
   flex-shrink: 0;
   margin-top: 2px;
-  color: #278574;
+  color: #007c94;
 }
 .wf-tour-customer,
 .wf-tour-booking-brand {
@@ -231,8 +232,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #dcefe9;
-  color: #2b7664;
+  background: #eafaff;
+  color: #007c94;
   font-size: 12px;
   font-weight: 600;
 }
@@ -245,12 +246,12 @@
 .wf-tour-booking-brand small {
   display: block;
   margin-top: 5px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 10px;
 }
 .wf-site .wf-tour-subheading {
   margin: 15px 0 8px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 10px;
   font-weight: 500;
 }
@@ -262,7 +263,7 @@
   border-bottom: 1px solid #e0e7ed;
 }
 .wf-tour-history > svg {
-  color: #7d8f9a;
+  color: #597d90;
   flex-shrink: 0;
 }
 .wf-tour-history strong {
@@ -272,7 +273,7 @@
 }
 .wf-tour-history div > span {
   display: block;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 10px;
   margin-top: 5px;
 }
@@ -295,7 +296,7 @@
   gap: 8px;
   padding: 16px;
   background: #fff;
-  border: 1px solid #87baae;
+  border: 1px solid #b8dce6;
   border-radius: 9px;
 }
 .wf-tour-booking-service strong {
@@ -305,31 +306,31 @@
 .wf-tour-booking-service small {
   display: block;
   margin-top: 5px;
-  color: #5f6d7a;
+  color: #52677a;
   font-size: 10px;
 }
 .wf-tour-booking-service > svg {
   flex-shrink: 0;
-  color: #298471;
+  color: #007c94;
 }
 .wf-tour-slots {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 .wf-tour-slots span {
   padding: 10px;
-  border: 1px solid #d4e0dc;
+  border: 1px solid #d5e7ed;
   border-radius: 6px;
   background: #fff;
-  color: #3a6659;
+  color: #216176;
   font-size: 11px;
   text-align: center;
 }
 .wf-tour figcaption {
   max-width: 390px;
   margin: 16px auto 0;
-  color: #97a4b0;
+  color: #52677a;
   font-size: 11px;
   line-height: 1.7;
   text-align: center;
@@ -371,7 +372,7 @@
     display: none;
   }
   .wf-tour-panel {
-    min-height: 365px;
+    min-height: 330px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

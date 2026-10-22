@@ -12,7 +12,7 @@ Situação consolidada mais recente: [revisão para o primeiro piloto](docs/STAT
 
 Lembretes por WhatsApp: [configuração e operação](docs/WHATSAPP.md). Inclui confirmação de presença, antecedências configuráveis, consentimento e teto mensal por empresa. O envio fica desabilitado até configurar a conexão oficial, aprovar o modelo e ativar o agendador de produção; não depende do Mercado Pago.
 
-O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a identidade grafite e menta, a área de trabalho clara, os tokens, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
+O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a landing clara em azul-marinho e ciano, a logo oficial, os temas das áreas de trabalho, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
 
 ## Executar
 
