@@ -136,6 +136,7 @@ function harness(
     outcome?: SendResult;
     throwSend?: boolean;
     connections?: WhatsAppConnection[];
+    finalized?: unknown;
   } = {},
 ) {
   const calls: { name: string; args: Record<string, unknown> }[] = [];
@@ -153,7 +154,10 @@ function harness(
         data: options.prepared === undefined ? job : options.prepared,
         error: null,
       };
-    return { data: true, error: null };
+    return {
+      data: Object.hasOwn(options, "finalized") ? options.finalized : true,
+      error: null,
+    };
   };
   return {
     calls,
@@ -259,5 +263,37 @@ test("staff worker fails closed on database errors, oversized claims or malforme
     const h = harness({ claimed });
     await assert.rejects(h.run, /RESPONSE_INVALID/);
     assert.equal(h.sends.length, 0);
+  }
+});
+
+test("staff worker stops without another send or success count when finalization is unconfirmed", async () => {
+  const outcomes: SendResult[] = [
+    { status: "accepted", messageId: "wamid.staff.fixture" },
+    { status: "failed", error: "provider_rejected" },
+    { status: "unknown", error: "network_unknown" },
+  ];
+  for (const finalized of [false, null, undefined, "true", { detail: secret }]) {
+    for (const outcome of outcomes) {
+      const h = harness({
+        finalized,
+        outcome,
+        claimed: [
+          job,
+          { ...job, job_id: "55555555-5555-4555-8555-555555555555" },
+        ],
+      });
+      await assert.rejects(h.run, {
+        message: "WHATSAPP_DATABASE_RESPONSE_INVALID",
+      });
+      assert.equal(h.sends.length, 1);
+      assert.deepEqual(
+        h.calls.map((call) => call.name),
+        [
+          "claim_whatsapp_staff_notifications",
+          "prepare_whatsapp_staff_notification",
+          "finish_whatsapp_staff_notification",
+        ],
+      );
+    }
   }
 });

@@ -306,6 +306,7 @@ function runner(
     sendResult?: SendResult;
     sendThrows?: boolean;
     errorAt?: string;
+    finalized?: unknown;
   } = {},
 ) {
   const calls: { name: string; args: Record<string, unknown> }[] = [];
@@ -324,7 +325,10 @@ function runner(
         data: Object.hasOwn(options, "prepared") ? options.prepared : job,
         error: null,
       };
-    return { data: true, error: null };
+    return {
+      data: Object.hasOwn(options, "finalized") ? options.finalized : true,
+      error: null,
+    };
   };
   const execute = () =>
     processReminders({
@@ -454,5 +458,37 @@ test("worker stops on database failures without resending or accepting unbounded
       /WHATSAPP_DATABASE_RESPONSE_INVALID/,
     );
     assert.equal(invalid.sent.length, 0);
+  }
+});
+
+test("worker stops the batch when finalization is not confirmed and never retries the send", async () => {
+  const outcomes: SendResult[] = [
+    { status: "accepted", messageId: "wamid.accepted" },
+    { status: "failed", error: "provider_rejected" },
+    { status: "unknown", error: "network_unknown" },
+  ];
+  for (const finalized of [false, null, undefined, "true", { detail: secret }]) {
+    for (const sendResult of outcomes) {
+      const r = runner({
+        finalized,
+        sendResult,
+        claimed: [
+          job,
+          { ...job, job_id: "55555555-5555-4555-8555-555555555555" },
+        ],
+      });
+      await assert.rejects(r.execute(), {
+        message: "WHATSAPP_DATABASE_RESPONSE_INVALID",
+      });
+      assert.equal(r.sent.length, 1);
+      assert.deepEqual(
+        r.calls.map((call) => call.name),
+        [
+          "claim_whatsapp_reminders",
+          "prepare_whatsapp_reminder",
+          "finish_whatsapp_reminder",
+        ],
+      );
+    }
   }
 });

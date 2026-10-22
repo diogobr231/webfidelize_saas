@@ -96,6 +96,7 @@ async function main() {
   let staffPending: (typeof staffJob)[] = [];
   let staffCurrent = staffJob;
   let failRpc = "";
+  let rejectFinalizationRpc = "";
   let confirmed = false;
   let optedOut = false;
   let confirmations = 0;
@@ -134,12 +135,15 @@ async function main() {
         result = pending;
         pending = [];
       }
-      if (name === "prepare_whatsapp_reminder") result = job;
+      if (name === "prepare_whatsapp_reminder")
+        result = { ...job, job_id: body.p_job };
       if (name === "claim_whatsapp_staff_notifications") {
         result = staffPending;
         staffPending = [];
       }
-      if (name === "prepare_whatsapp_staff_notification") result = staffCurrent;
+      if (name === "prepare_whatsapp_staff_notification")
+        result = { ...staffCurrent, job_id: body.p_job };
+      if (name === rejectFinalizationRpc) result = false;
       if (name === "whatsapp_delivery_event" && body.p_job === staffJob.job_id)
         result = false;
       if (name === "whatsapp_confirmation") {
@@ -464,6 +468,77 @@ async function main() {
     pass(
       "staff daily and new appointment use separate templates, bounded worker slots and no replay",
     );
+
+    phase = "unconfirmed send finalization";
+    for (const audience of ["customer", "staff"] as const) {
+      const isStaff = audience === "staff";
+      const finishRpc = isStaff
+        ? "finish_whatsapp_staff_notification"
+        : "finish_whatsapp_reminder";
+      rejectFinalizationRpc = finishRpc;
+      const nextJobId = "77777777-7777-4777-8777-777777777777";
+      if (isStaff) {
+        staffCurrent = staffJob;
+        staffPending = [staffJob, { ...staffJob, job_id: nextJobId }];
+      } else {
+        pending = [job, { ...job, job_id: nextJobId }];
+      }
+      const beforeSends: number = metaRequests;
+      const beforeCalls: number = calls.length;
+      const response = await request("/api/whatsapp/process", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${cronSecret}` },
+      });
+      assert.equal(response.status, 503);
+      assert.deepEqual(await response.json(), {
+        error: "Não foi possível concluir o processamento.",
+      });
+      assert.equal(metaRequests, beforeSends + 1);
+      assert.equal(
+        sentBodies.at(-1)!.biz_opaque_callback_data,
+        isStaff ? staffJob.job_id : job.job_id,
+      );
+      assert.deepEqual(
+        calls.slice(beforeCalls).map((call) => call.name),
+        isStaff
+          ? [
+              "claim_whatsapp_reminders",
+              "claim_whatsapp_staff_notifications",
+              "prepare_whatsapp_staff_notification",
+              finishRpc,
+            ]
+          : [
+              "claim_whatsapp_reminders",
+              "prepare_whatsapp_reminder",
+              finishRpc,
+            ],
+      );
+      assert.equal(
+        calls.slice(beforeCalls).some((call) => call.body.p_job === nextJobId),
+        false,
+      );
+      // Claimed jobs are not reissued by this fixture. The route must not
+      // automatically retry the uncertain send or persist a fabricated success.
+      const repeated = await request("/api/whatsapp/process", {
+        headers: { Authorization: `Bearer ${cronSecret}` },
+      });
+      assert.equal(repeated.status, 200);
+      const empty = await repeated.json();
+      assert.equal(empty.claimed, 0);
+      assert.equal(empty.accepted, 0);
+      assert.equal(empty.staff.claimed, 0);
+      assert.equal(empty.staff.accepted, 0);
+      assert.equal(metaRequests, beforeSends + 1);
+      assert.equal(
+        calls.slice(beforeCalls).filter((call) => call.name === finishRpc)
+          .length,
+        1,
+      );
+      rejectFinalizationRpc = "";
+      pass(
+        `${audience} finalization refused by backend returns 503, stops the next send and never retries`,
+      );
+    }
 
     phase = "staff signed delivery fallback";
     const staffEventsStart = calls.length;

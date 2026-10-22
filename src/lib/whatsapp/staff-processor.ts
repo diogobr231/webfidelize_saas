@@ -71,6 +71,9 @@ export async function processStaffNotifications(input: {
       p_error: result.status === "accepted" ? null : result.error,
     });
     if (finished.error) throw new Error("WHATSAPP_DATABASE_UNAVAILABLE");
+    // Stop without resending when the backend cannot confirm reconciliation.
+    if (finished.data !== true)
+      throw new Error("WHATSAPP_DATABASE_RESPONSE_INVALID");
     counts[result.status]++;
   }
   return counts;

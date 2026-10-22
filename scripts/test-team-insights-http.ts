@@ -96,6 +96,7 @@ async function main() {
     hasAppointments: true,
     mismatchedReportPeriod: false,
     failed: false,
+    preferenceFailed: false,
     deniedAppointment: false,
   };
   const calls: { name: string; body: Record<string, unknown> }[] = [];
@@ -149,6 +150,19 @@ async function main() {
           code: "P0001",
           message: "Controlled fixture failure",
         });
+      if (name === "get_my_whatsapp_staff_preferences") {
+        if (body.p_company !== companyId || state.preferenceFailed)
+          return send(400, {
+            code: "P0001",
+            message: "Controlled preference read denial",
+          });
+        return send(200, {
+          phone: null,
+          enabled: false,
+          professional_id: state.linked ? professionalId : null,
+          professional_name: state.linked ? staffName : null,
+        });
+      }
       if (name === "complete_my_appointment") {
         if (
           state.role !== "EMPLOYEE" ||
@@ -229,6 +243,30 @@ async function main() {
         display_density: "comfortable",
         agenda_view: "day",
       });
+    if (url.pathname === "/rest/v1/sales_offers" && request.method === "GET") {
+      if (
+        url.searchParams.get("active") !== "eq.true" ||
+        url.searchParams.get("published") !== "eq.true"
+      ) {
+        unexpected.push("Unscoped public offer read");
+        return send(400, { message: "Only published active fixture offers" });
+      }
+      return send(200, [
+        {
+          id: "55555555-5555-4555-8555-555555555555",
+          slug: "implantacao-qa-isolada",
+          title: "Implantação sintética HTTP",
+          summary: "Oferta fictícia exclusiva do teste HTTP isolado.",
+          niche: null,
+          active: true,
+          published: true,
+          setup_price_cents: null,
+          monthly_price_cents: null,
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+        },
+      ]);
+    }
     if (url.pathname === "/rest/v1/plans") {
       const plans = [
         {
@@ -435,6 +473,16 @@ async function main() {
       ).pathname,
       "/painel",
     );
+    assert.equal(
+      (await location(await request(personal, undefined, false))).pathname,
+      "/entrar",
+    );
+    assert.equal(
+      (await location(await request(`/painel/${otherCompany}/meu-dia`)))
+        .pathname,
+      "/painel",
+    );
+    assert.equal(callCount("get_my_whatsapp_staff_preferences"), 0);
     pass("anonymous and unrelated-company routes redirect before reporting");
 
     phase = "owner report";
@@ -494,6 +542,14 @@ async function main() {
     assert.equal(personalResponse.status, 200);
     const html = await personalResponse.text();
     assert.ok(html.includes("Cliente QA sintético"));
+    assert.ok(html.includes("Minha agenda no WhatsApp"));
+    assert.ok(html.includes("Salvar minha preferência"));
+    assert.ok(!html.includes("Não foi possível carregar sua preferência"));
+    assert.deepEqual(
+      calls.find((call) => call.name === "get_my_whatsapp_staff_preferences")
+        ?.body,
+      { p_company: companyId },
+    );
     const complete = completionForm(html);
     const completion = await location(await request(personal, complete));
     assert.equal(completion.searchParams.get("salvo"), "concluido");
@@ -504,6 +560,22 @@ async function main() {
     );
     pass(
       "employee bound server action completes only the tenant and appointment sent to the guarded RPC",
+    );
+
+    phase = "independent staff preference failure";
+    state.preferenceFailed = true;
+    const preferenceFailure = await (await request(personal)).text();
+    assert.ok(
+      preferenceFailure.includes(
+        "Não foi possível carregar sua preferência de WhatsApp",
+      ),
+    );
+    assert.ok(preferenceFailure.includes("Cliente QA sintético"));
+    assert.ok(preferenceFailure.includes("Concluído"));
+    assert.ok(!preferenceFailure.includes("Salvar minha preferência"));
+    state.preferenceFailed = false;
+    pass(
+      "staff preference reads stay tenant-scoped and an independent failure preserves appointment history",
     );
 
     phase = "role and access changes after rendering";
@@ -734,6 +806,10 @@ async function main() {
       "Public landing regression must pass against the isolated backend",
     );
     process.stdout.write(landingOutput);
+    for (const call of calls.filter(
+      (item) => item.name === "get_my_whatsapp_staff_preferences",
+    ))
+      assert.deepEqual(call.body, { p_company: companyId });
     assert.deepEqual(unexpected, []);
     console.log(
       `${checks} isolated team HTTP groups passed; no real account, provider request or database write.`,

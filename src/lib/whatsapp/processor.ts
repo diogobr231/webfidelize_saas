@@ -84,6 +84,10 @@ export async function processReminders(input: {
       p_error: result.status === "accepted" ? null : result.error,
     });
     if (finished.error) throw new Error("WHATSAPP_DATABASE_UNAVAILABLE");
+    // A false result means the backend rejected reconciliation. Do not report
+    // success or send the next job; the signed webhook can reconcile this send.
+    if (finished.data !== true)
+      throw new Error("WHATSAPP_DATABASE_RESPONSE_INVALID");
     counts[result.status]++;
   }
   return counts;
