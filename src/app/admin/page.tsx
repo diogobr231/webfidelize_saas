@@ -267,7 +267,11 @@ export default async function Admin({
                             {(
                               {
                                 pending_card: "Aguardando cartão",
-                                trialing: "Em teste",
+                                trialing:
+                                  c.trial_ends_at &&
+                                  Date.parse(c.trial_ends_at) <= Date.now()
+                                    ? "Teste encerrado"
+                                    : "Em teste",
                                 active: "Ativa",
                                 past_due: "Pagamento pendente",
                                 suspended: "Suspensa",

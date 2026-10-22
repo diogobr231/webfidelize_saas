@@ -361,7 +361,7 @@ export default async function OperationsPage({
                   </span>
                   <p>
                     {run.status === "succeeded"
-                      ? `${run.created_count} tarefas criadas · ${run.resolved_count} resolvidas`
+                      ? `${run.created_count} tarefas geradas ou reativadas · ${run.resolved_count} resolvidas`
                       : "A verificação não foi concluída. Tente novamente ou consulte o suporte técnico."}
                   </p>
                 </li>
