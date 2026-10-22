@@ -16,7 +16,7 @@ Os tokens comuns ficam em [globals.css](../src/app/globals.css). O tema base gra
 | `--line`           | `#303640`    | `#dce7ef`              | Bordas e divisores             |
 | `--text`           | `#f5f7fa`    | `#082b46`              | Conteúdo principal             |
 | `--muted`          | `#a3aab8`    | `#52677a`              | Descrições e metadados         |
-| `--cyan`           | `#5eead4`    | `#007c94`              | Ação principal, seleção e foco |
+| `--cyan`           | `#5eead4`    | `#00758c`              | Ação principal, seleção e foco |
 | `--on-accent`      | `#093b35`    | `#ffffff`              | Texto sobre a ação principal   |
 | `--accent-soft`    | `#173c38`    | `#e5f8fc`              | Destaques suaves               |
 

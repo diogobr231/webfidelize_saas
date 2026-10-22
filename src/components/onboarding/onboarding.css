@@ -3,7 +3,7 @@
   --onb-card: #fff;
   --onb-border: #dce7ef;
   --onb-muted: #52677a;
-  --onb-cyan: #007c94;
+  --onb-cyan: #00758c;
   --onb-ink: #082b46;
   color-scheme: light;
   width: 100%;
@@ -123,7 +123,7 @@
 .onb-progress-nav li[data-current="true"] {
   border-color: #78b9b0;
   background: #e5f8fc;
-  box-shadow: 0 0 0 1px #007c9408;
+  box-shadow: 0 0 0 1px #00758c08;
 }
 .onb-progress-nav li > a,
 .onb-progress-nav li > div {
@@ -309,7 +309,7 @@
 }
 .onb-page .onb-field input:focus-visible {
   border-color: var(--onb-cyan);
-  outline: 3px solid #007c941c;
+  outline: 3px solid #00758c1c;
   outline-offset: 1px;
 }
 .onb-page .onb-field input[aria-invalid="true"] {
@@ -373,7 +373,7 @@
 .onb-page .onb-niche-card:has(input:checked) {
   border-color: #57a79c;
   background: #e5f8fc;
-  box-shadow: 0 0 0 1px #007c9409;
+  box-shadow: 0 0 0 1px #00758c09;
 }
 .onb-page .onb-niche-card:has(input:focus-visible) {
   outline: 2px solid var(--onb-cyan);
@@ -528,7 +528,7 @@
 .onb-page .button:hover,
 .onb-page .onb-primary:hover {
   background: #006c81;
-  box-shadow: 0 2px 5px #007c9412;
+  box-shadow: 0 2px 5px #00758c12;
 }
 .onb-page .onb-secondary,
 .onb-page .button.secondary {
@@ -846,7 +846,7 @@
   width: 30px;
   height: 30px;
   border: 3px solid #e3eeeb;
-  border-top-color: #007c94;
+  border-top-color: #00758c;
   border-radius: 50%;
   animation: onb-spin 0.8s linear infinite;
 }

@@ -17,7 +17,7 @@
   top: 12px;
   left: 12px;
   padding: 12px 18px;
-  border: 1px solid #007c94;
+  border: 1px solid #00758c;
   border-radius: 8px;
   color: #ffffff;
   background: #082b46;
@@ -25,11 +25,11 @@
 }
 .auth-skip-link:focus-visible {
   transform: translateY(0);
-  outline: 3px solid #007c94;
+  outline: 3px solid #00758c;
   outline-offset: 3px;
 }
 .auth-shell a:focus-visible {
-  outline: 2px solid #007c94;
+  outline: 2px solid #00758c;
   outline-offset: 4px;
 }
 .auth-brand-panel {
@@ -69,7 +69,7 @@
   margin: 22px 0 24px;
 }
 .auth-brand-content h2 span {
-  color: #007c94;
+  color: #00758c;
 }
 .auth-brand-content > p {
   font-size: 15px;
@@ -101,7 +101,7 @@
   height: 42px;
   border-radius: 12px;
   border: 1px solid #ccebf2;
-  color: #007c94;
+  color: #00758c;
   background: #ecfaff;
   flex-shrink: 0;
 }
@@ -134,7 +134,7 @@
   background: #f7fbfd;
 }
 .auth-product-items svg {
-  color: #007c94;
+  color: #00758c;
 }
 .auth-brand-footer {
   display: flex;
@@ -147,7 +147,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #007c94;
+  background: #00758c;
   box-shadow: 0 0 0 4px #00cee614;
 }
 .auth-content-panel {
@@ -156,7 +156,7 @@
   --line: #dce7ef;
   --muted: #52677a;
   --text: #082b46;
-  --cyan: #007c94;
+  --cyan: #00758c;
   --on-accent: #ffffff;
   --accent-soft: #eaf8fc;
   --surface-subtle: #f2f7fb;
@@ -215,7 +215,7 @@
   flex-shrink: 0;
   width: 8px;
   height: 8px;
-  border: 1px solid #007c94;
+  border: 1px solid #00758c;
   border-radius: 3px;
   background: #cceff6;
   box-shadow: 0 0 0 3px #edfaff;
@@ -273,8 +273,8 @@
   color: #62788a;
 }
 .auth-content input:focus-visible {
-  border-color: #007c94;
-  outline: 2px solid #007c94;
+  border-color: #00758c;
+  outline: 2px solid #00758c;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px #00cee618;
 }
@@ -330,7 +330,7 @@
 .auth-content a:focus-visible,
 .auth-content button:focus-visible,
 .auth-content summary:focus-visible {
-  outline: 2px solid #007c94;
+  outline: 2px solid #00758c;
   outline-offset: 4px;
 }
 .auth-content .notice {
@@ -364,7 +364,7 @@
 .auth-trial-note svg {
   flex-shrink: 0;
   margin-top: 2px;
-  color: #007c94;
+  color: #00758c;
 }
 .auth-footer {
   padding-top: 25px;
@@ -434,7 +434,7 @@
   border-radius: 12px;
   border: 1px solid #cce5ee;
   background: #edfaff;
-  color: #007c94;
+  color: #00758c;
   margin-bottom: 23px;
 }
 .auth-access-note {
