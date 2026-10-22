@@ -775,84 +775,155 @@
 }
 .wf-segments {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 55px;
-  padding-top: 38px;
-  padding-bottom: 38px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 28px 48px;
+  padding-top: 36px;
+  padding-bottom: 28px;
   position: relative;
+  isolation: isolate;
 }
-.wf-segments:before {
+.wf-segments::before {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 40px;
-  right: 40px;
+  inset: 0 16px;
+  z-index: 0;
   content: "";
-  border-top: 1px solid var(--wf-line);
-  border-bottom: 1px solid var(--wf-line);
+  border: 1px solid #33434a;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at 8% 0%, #5eead411, transparent 46%),
+    radial-gradient(ellipse at 100% 90%, #a78bfa0b, transparent 42%),
+    linear-gradient(145deg, #151e23, #141820 65%);
   pointer-events: none;
 }
-.wf-segments h2 {
-  font-size: 29px;
-  margin: 12px 0;
+.wf-segments > div {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
 }
-.wf-segments > div > p {
+.wf-segment-signal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -8px 0 20px;
+}
+.wf-segment-signal > svg {
+  display: block;
+  width: 142px;
+  height: auto;
+  flex: 0 0 auto;
+}
+.wf-segment-signal > span {
+  max-width: 105px;
+  color: #9cbdc0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  line-height: 2;
+}
+.wf-segments h2 {
+  font-size: 32px;
+  margin: 12px 0;
+  max-width: 340px;
+  text-wrap: balance;
+}
+.wf-segment-intro > p {
   font-size: 14px;
+  line-height: 1.8;
   margin-bottom: 0;
   max-width: 430px;
+  color: #a9bbc3;
 }
 .wf-segment-links {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   align-content: center;
 }
 .wf-segment-links a {
-  display: flex;
+  --segment-accent: #91e6d5;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 14px;
   align-items: center;
-  gap: 9px;
-  min-height: 44px;
-  border: 1px solid #294052;
-  border-radius: 9px;
-  padding: 16px 13px;
+  gap: 12px;
+  min-height: 92px;
+  min-width: 0;
+  border: 1px solid #35434f;
+  border-radius: 14px;
+  padding: 16px 14px;
+  background: linear-gradient(135deg, #1e2b32, #1a202b);
+  color: #e1edf0;
+  font-size: 13px;
   font-weight: 600;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
 }
-.wf-segment-links a > span {
-  color: var(--wf-cyan);
-  font-size: 17px;
+.wf-segment-links .wf-segment-salao {
+  --segment-accent: #d0b6fc;
 }
-.wf-segment-links svg {
-  width: 13px;
-  height: 13px;
-  margin-left: auto;
-  color: #7893ab;
+.wf-segment-links .wf-segment-clinica {
+  --segment-accent: #91d9f4;
+}
+.wf-segment-links .wf-segment-escritorio {
+  --segment-accent: #b2b9fb;
+}
+.wf-segment-links a:hover {
+  border-color: var(--segment-accent);
+  transform: translateY(-2px);
+}
+.wf-segment-links a:focus-visible {
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+.wf-segment-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--segment-accent);
+  border: 1px solid #637c8d55;
+  border-radius: 12px;
+  background: #2f435044;
+}
+.wf-segment-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.wf-segment-name {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.wf-segment-arrow {
+  width: 14px;
+  height: 14px;
+  color: #91abb5;
 }
 .wf-other-segments {
   grid-column: 1 / -1;
   display: flex;
   gap: 18px;
   align-items: center;
-  border-top: 1px solid #20344b80;
-  margin-top: 8px;
-  padding-top: 20px;
+  border-top: 1px solid #33434a;
+  padding-top: 18px;
 }
 .wf-other-segments > span {
   font-size: 12px;
+  line-height: 1.7;
+  color: #a4b5bd;
 }
 .wf-other-segments > div {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 4px 14px;
 }
 .wf-other-segments a {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   min-height: 44px;
   font-size: 12px;
-}
-.wf-other-segments a > span {
-  margin-left: 5px;
-  color: #628296;
+  color: #bad1da;
 }
 .wf-other-segments a:hover {
   text-decoration: underline;
@@ -1082,10 +1153,6 @@
   .wf-segments {
     gap: 22px 35px;
   }
-  .wf-segments:before {
-    left: 28px;
-    right: 28px;
-  }
   .wf-final-cta {
     padding: 35px;
     gap: 30px;
@@ -1237,7 +1304,7 @@
     padding: 14px 16px 22px;
   }
   .wf-segments {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .wf-other-segments {
     flex-direction: column;
@@ -1418,26 +1485,21 @@
     padding-top: 31px;
     padding-bottom: 31px;
   }
-  .wf-segments:before {
-    left: 20px;
-    right: 20px;
+  .wf-segments::before {
+    left: 8px;
+    right: 8px;
+    border-radius: 18px;
   }
   .wf-segments h2 {
     font-size: 27px;
   }
   .wf-segment-links {
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
   }
   .wf-segment-links a {
-    padding: 13px 9px;
-    gap: 6px;
-  }
-  .wf-segment-links a > span {
-    font-size: 16px;
-  }
-  .wf-segment-links svg {
-    width: 11px;
-    height: 11px;
+    min-height: 68px;
+    padding: 12px;
   }
   .wf-other-segments {
     gap: 13px;
@@ -1508,6 +1570,9 @@
 @media (prefers-reduced-motion: reduce) {
   .wf-site * {
     transition: none !important;
+  }
+  .wf-segment-links a:hover {
+    transform: none;
   }
 }
 
@@ -1795,40 +1860,6 @@
 .wf-centered-action > span {
   color: #7a8e82;
   font-size: 11px;
-}
-.wf-segments:before {
-  background: #2e3c33;
-}
-.wf-segment-links a {
-  border-color: #303a42;
-  background: #181c23;
-  color: #bdcec3;
-  font-size: 12px;
-}
-.wf-segment-links a:hover {
-  border-color: #58725f;
-  background: #22342a;
-}
-.wf-segment-links svg:first-child {
-  width: 19px;
-  height: 19px;
-  margin-left: 0;
-  color: #9bbca7;
-}
-.wf-segment-links svg:last-child {
-  width: 13px;
-  height: 13px;
-  margin-left: auto;
-  color: #6f8e7a;
-}
-.wf-other-segments {
-  border-color: #303e34;
-}
-.wf-other-segments a {
-  color: #91a99a;
-}
-.wf-other-segments > span {
-  color: #7f9788;
 }
 .wf-plan {
   background: #181c23;

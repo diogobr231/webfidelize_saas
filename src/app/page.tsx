@@ -478,7 +478,78 @@ export default async function Home() {
         id="segmentos"
         aria-labelledby="segments-title"
       >
-        <div>
+        <div className="wf-segment-intro">
+          <div className="wf-segment-signal" aria-hidden="true">
+            <svg viewBox="0 0 184 112" fill="none" focusable="false">
+              <defs>
+                <linearGradient
+                  id="segment-calendar-edge"
+                  x1="62"
+                  y1="22"
+                  x2="128"
+                  y2="94"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop stopColor="#5eead4" />
+                  <stop offset="1" stopColor="#a78bfa" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M35 32h18l11 11m56 28 11 11h18M35 81h14l15-15m56-20 14-14h15"
+                stroke="#5eead4"
+                strokeOpacity=".4"
+                strokeDasharray="3 5"
+              />
+              <path
+                d="M58 18h-9v15m77-15h9v15M49 79v15h9m68 0h9V79"
+                stroke="#576776"
+                strokeLinecap="round"
+              />
+              <rect
+                x="64"
+                y="22"
+                width="56"
+                height="68"
+                rx="12"
+                fill="#18242b"
+                stroke="url(#segment-calendar-edge)"
+              />
+              <path
+                d="M65 43h54M80 18v11m24-11v11"
+                stroke="#8bebe0"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <rect
+                x="75"
+                y="53"
+                width="13"
+                height="13"
+                rx="4"
+                fill="#5eead4"
+              />
+              <path
+                d="m78 59 2 2 4-4"
+                stroke="#142b28"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M98 58h10M98 63h6M77 76h30"
+                stroke="#718993"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <circle cx="29" cy="32" r="6" fill="#172e2e" stroke="#5eead4" />
+              <circle cx="155" cy="32" r="6" fill="#20243b" stroke="#a78bfa" />
+              <circle cx="29" cy="81" r="6" fill="#172e2e" stroke="#67d9ee" />
+              <circle cx="155" cy="82" r="6" fill="#172e2e" stroke="#5eead4" />
+              <path d="M92 3v6m-3-3h6m74 51v6m-3-3h6" stroke="#a78bfa" />
+              <circle cx="17" cy="56" r="1.5" fill="#a78bfa" />
+            </svg>
+            <span>AGENDA · CLIENTES · SERVIÇOS</span>
+          </div>
           <span className="wf-eyebrow">
             PARA QUEM TRABALHA COM HORA MARCADA
           </span>
@@ -490,20 +561,26 @@ export default async function Home() {
         </div>
         <div className="wf-segment-links">
           {niches.slice(0, 4).map((niche) => (
-            <Link href={`/entrar/${niche.slug}`} key={niche.slug}>
-              <Icon
-                name={
-                  niche.slug === "salao"
-                    ? "scissors"
-                    : niche.slug === "pet-shop"
-                      ? "paw"
-                      : niche.slug === "clinica"
-                        ? "heart"
-                        : "briefcase"
-                }
-              />
-              {niche.name}
-              <Icon name="arrow-right" />
+            <Link
+              href={`/entrar/${niche.slug}`}
+              key={niche.slug}
+              className={`wf-segment-${niche.slug}`}
+            >
+              <span className="wf-segment-icon">
+                <Icon
+                  name={
+                    niche.slug === "salao"
+                      ? "scissors"
+                      : niche.slug === "pet-shop"
+                        ? "paw"
+                        : niche.slug === "clinica"
+                          ? "heart"
+                          : "briefcase"
+                  }
+                />
+              </span>
+              <span className="wf-segment-name">{niche.name}</span>
+              <Icon name="arrow-up-right" className="wf-segment-arrow" />
             </Link>
           ))}
         </div>
