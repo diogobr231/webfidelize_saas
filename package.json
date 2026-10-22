@@ -14,6 +14,8 @@
     "test:sales:db": "tsx scripts/test-sales-db.ts",
     "test:admin-operations:db": "tsx scripts/test-admin-operations-db.ts",
     "test:admin-operations": "tsx scripts/test-admin-operations-live.ts",
+    "test:ai:db": "tsx scripts/test-admin-ai-db.ts",
+    "test:ai:live": "tsx scripts/test-admin-ai-live.ts",
     "test:sales": "tsx scripts/test-sales-live.ts",
     "test:db": "tsx scripts/test-db.ts",
     "test:dashboard:db": "tsx scripts/test-dashboard-db.ts",
@@ -44,6 +46,7 @@
   "dependencies": {
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",
+    "ai": "7.0.148",
     "next": "16.4.2",
     "nodemailer": "10.1.7",
     "react": "19.3.1",
