@@ -1014,7 +1014,7 @@ await check(
       [
         { id: "essencial", price_cents: 4990, staff_limit: 1 },
         { id: "profissional", price_cents: 8990, staff_limit: 3 },
-        { id: "empresarial", price_cents: 19990, staff_limit: 10 },
+        { id: "empresarial", price_cents: 14990, staff_limit: 10 },
       ],
     );
   },

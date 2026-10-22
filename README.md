@@ -186,7 +186,7 @@ Um profissional é quem aparece na agenda; cadastrá-lo não cria usuário nem e
 
 - **Essencial — R$ 49,90/mês, 1 profissional:** conserva agenda, CRM, reservas públicas e os recursos já existentes. **Meu dia** está disponível em todos os planos: colaborador vinculado consulta seus atendimentos e confirma a conclusão somente depois do horário final, sem poder editar os demais dados da agenda.
 - **Profissional — R$ 89,90/mês, até 3 profissionais:** acrescenta indicadores por profissional, disponíveis ao proprietário e gerente: agendados, concluídos, cancelados, presenças confirmadas e minutos reservados, consultados em períodos de até 31 dias.
-- **Empresarial — R$ 199,90/mês, até 10 profissionais:** acrescenta períodos de até 90 dias e exportação CSV dos indicadores agregados. A exportação não inclui nomes nem contatos dos clientes e protege células contra fórmulas de planilha.
+- **Empresarial — R$ 149,90/mês, até 10 profissionais:** acrescenta períodos de até 90 dias e exportação CSV dos indicadores agregados. A exportação não inclui nomes nem contatos dos clientes e protege células contra fórmulas de planilha.
 
 As permissões extras vêm de `plans.team_insights` e `plans.team_export`, consultadas novamente no banco a cada RPC. Colaboradores não podem consultar indicadores de outros profissionais nem exportar relatórios gerenciais. Profissionais arquivados permanecem no relatório quando têm histórico no período. “Minutos reservados” não é taxa de ocupação nem faturamento; cancelamentos ficam fora desse total. O catálogo do banco continua sendo a fonte de preços e limites exibidos. Pagamentos e mudanças automáticas de plano dependem da futura integração.
 
