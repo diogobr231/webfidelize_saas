@@ -24,11 +24,17 @@ const demoSlugs = [
   "demo-academia",
 ] as const;
 const publicPaths = ["/", "/planos", "/entrar", "/diagnostico"] as const;
+const segmentSlugs = demoSlugs.map((slug) => slug.slice(5));
 const protectedPaths = ["/admin", "/admin/comercial", "/painel"] as const;
 const allowedPaths = new Set<string>([
   ...publicPaths,
   ...protectedPaths,
   ...demoSlugs.map((slug) => `/agendar/${slug}`),
+  ...segmentSlugs.flatMap((slug) => [
+    `/segmentos/${slug}`,
+    `/demonstracao/${slug}`,
+  ]),
+  "/demonstracao",
   "/robots.txt",
   "/sitemap.xml",
 ]);
@@ -139,9 +145,12 @@ for (const path of publicPaths) {
       for (const plan of ["Essencial", "Profissional", "Empresarial"]) {
         assert(text.includes(plan), `${path}: plano ${plan} ausente.`);
       }
-      assert.match(text, /Cartão obrigatório/i);
-      assert.match(text, /Ativação em preparação/i);
-      assert.match(html, /href="\/cadastro"/);
+      for (const price of ["49,90", "89,90", "149,90"]) {
+        assert(text.includes(price), `${path}: preço ${price} ausente.`);
+      }
+      assert.match(text, /Cartão obrigatório|exigem cartão cadastrado/i);
+      assert.match(text, /ativação[\s\S]{0,100}em preparação/i);
+      assert.match(html, /href="\/demonstracao"/);
       assert.match(html, /https:\/\/wa\.me\/5518997695445/);
     }
     if (path === "/entrar") {
@@ -163,6 +172,36 @@ for (const path of publicPaths) {
     }
   });
 }
+
+for (const slug of segmentSlugs) {
+  await verify(`benefícios e demonstração pública ${slug}`, async () => {
+    for (const prefix of ["segmentos", "demonstracao"]) {
+      const path = `/${prefix}/${slug}`;
+      const response = await get(path);
+      assert.equal(response.status, 200);
+      requireSecurityHeaders(response, path);
+      const html = await response.text();
+      assert.equal([...html.matchAll(/<h1\b/gi)].length, 1);
+      if (prefix === "segmentos") {
+        assert(html.includes(`href="/demonstracao/${slug}"`));
+        assert(html.includes(`href="/entrar/${slug}"`));
+      } else {
+        assert.match(html, /name="robots"[^>]*content="noindex/);
+        assert.match(readableText(html), /Criar agendamento de exemplo/);
+        assert.doesNotMatch(html, /name="(?:password|email|phone)"/);
+      }
+    }
+  });
+}
+
+await verify("seletor oferece os oito segmentos igualmente", async () => {
+  const response = await get("/demonstracao");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  for (const slug of segmentSlugs) {
+    assert(html.includes(`href="/demonstracao/${slug}"`));
+  }
+});
 
 for (const path of protectedPaths) {
   await verify(`acesso anônimo protegido ${path}`, async () => {

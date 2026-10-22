@@ -6,6 +6,7 @@
   padding: 0 32px 40px;
   color: var(--experience-ink);
   min-width: 0;
+  min-height: 100vh;
 }
 .experience a:not(.button) {
   color: #006d83;
