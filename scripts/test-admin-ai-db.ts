@@ -866,35 +866,131 @@ await check(
 );
 
 await check(
-  "automatic enqueue is bounded, disabled by flag, idempotent and records honest idle runs",
+  "automatic enqueue creates one authorized synthetic job, deduplicates without quota consumption and records honest idle runs",
   async () => {
-    await as(ids.admin);
-    await save(await settings(), true, false);
-    await anon();
-    assert.deepEqual(await enqueue(), { enqueued: 0 });
-    await as(ids.admin);
-    await save(await settings(), true, true);
-    await anon();
-    const result = await enqueue(2);
-    assert.ok(result.enqueued <= 2);
-    await assert.rejects(() => enqueue(51), /invalid ai batch/);
-    await value(
-      "select public.platform_ai_worker_report($1,'scheduled',null,0,0)",
-      [secret],
-    );
-    await assert.rejects(
-      () =>
-        value(
-          "select public.platform_ai_worker_report($1,'scheduled',null,2,2)",
-          [secret],
+    // Isolate candidate eligibility from earlier fixtures in this disposable
+    // database; rollback also preserves their sources, authority and usage.
+    await postgres();
+    await db.exec("begin");
+    try {
+      await db.exec(`
+        update public.sales_leads set stage='qualified' where stage='new';
+        update public.support_tickets set status='resolved' where status in ('open','in_progress');
+        update public.platform_tasks set status='resolved',completed_at=now(),snoozed_until=null where status='open';
+      `);
+      const marker = "QA-AUTO-" + randomUUID();
+      const sourceId = await value<string>(
+        `insert into public.sales_leads(offer_id,contact_name,company_name,email,phone,source,challenge)
+         values($1,$2,$2,'automatic-qa@example.invalid','5511999999999','manual','Synthetic automatic enqueue fixture for this isolated database.') returning id`,
+        [offer, marker],
+      );
+      await as(ids.admin);
+      const original = await settings();
+      const disabled = await save(
+        original,
+        true,
+        false,
+        original.daily_limit,
+        original.monthly_limit,
+      );
+      const before = await summary();
+      const beforeCount = Number(
+        await value("select count(*) from public.platform_ai_jobs"),
+      );
+      const sourceBefore = await value(
+        "select to_jsonb(l) from public.sales_leads l where id=$1",
+        [sourceId],
+      );
+      await anon();
+      assert.deepEqual(await enqueue(1), { enqueued: 0 });
+      await as(ids.admin);
+      assert.deepEqual(await settings(), disabled);
+      assert.equal(
+        Number(await value("select count(*) from public.platform_ai_jobs")),
+        beforeCount,
+      );
+      const enabled = await save(
+        disabled,
+        true,
+        true,
+        original.daily_limit,
+        original.monthly_limit,
+      );
+      assert.equal(enabled.authorized_by, original.authorized_by);
+      assert.equal(enabled.authorization_id, original.authorization_id);
+      await anon();
+      assert.deepEqual(await enqueue(1), { enqueued: 1 });
+      // Only one eligible source exists, so another pass must not queue any job.
+      assert.deepEqual(await enqueue(1), { enqueued: 0 });
+      await as(ids.admin);
+      const rows = await db.query<{
+        id: string;
+        automatic: boolean;
+        requested_by: string;
+        authorization_id: string;
+      }>(
+        "select id,automatic,requested_by,authorization_id from public.platform_ai_jobs where source_type='lead' and source_id=$1",
+        [sourceId],
+      );
+      assert.equal(rows.rows.length, 1);
+      const queued = rows.rows[0];
+      assert.equal(queued.automatic, true);
+      assert.equal(queued.requested_by, original.authorized_by);
+      assert.equal(queued.authorization_id, original.authorization_id);
+      const stored = await job(queued.id);
+      assert.equal(stored.status, "queued");
+      assert.equal(stored.attempt, 1);
+      assert.equal(stored.consumed_at, null);
+      assert.equal(stored.output, null);
+      assert.equal(stored.usage_input_tokens, null);
+      assert.equal(stored.usage_output_tokens, null);
+      assert.equal(
+        Number(await value("select count(*) from public.platform_ai_jobs")),
+        beforeCount + 1,
+      );
+      assert.deepEqual(await settings(), enabled);
+      assert.deepEqual((await summary()).quota, before.quota);
+      assert.deepEqual(
+        await value(
+          "select to_jsonb(l) from public.sales_leads l where id=$1",
+          [sourceId],
         ),
-      /invalid ai report/,
-    );
-    await as(ids.admin);
-    const data = await summary();
-    assert.equal(data.last_run?.trigger, "scheduled");
-    assert.equal(data.last_run?.processed, 0);
-    assert.equal(data.last_run?.failed, 0);
+        sourceBefore,
+      );
+      await anon();
+      // Isolate expected SQL errors with savepoints so later assertions can run.
+      await db.exec("savepoint invalid_batch");
+      await assert.rejects(() => enqueue(51), /invalid ai batch/);
+      await db.exec("rollback to savepoint invalid_batch");
+      await value(
+        "select public.platform_ai_worker_report($1,'scheduled',null,0,0)",
+        [secret],
+      );
+      await db.exec("savepoint invalid_report");
+      await assert.rejects(
+        () =>
+          value(
+            "select public.platform_ai_worker_report($1,'scheduled',null,2,2)",
+            [secret],
+          ),
+        /invalid ai report/,
+      );
+      await db.exec("rollback to savepoint invalid_report");
+      await as(ids.admin);
+      const data = await summary();
+      assert.equal(data.last_run?.trigger, "scheduled");
+      assert.equal(data.last_run?.processed, 0);
+      assert.equal(data.last_run?.failed, 0);
+      assert.equal(data.last_run?.error_code, null);
+      assert.deepEqual(data.quota, before.quota);
+      assert.equal(data.settings.authorized_by, original.authorized_by);
+      assert.equal(data.settings.authorization_id, original.authorization_id);
+      assert.equal(data.settings.daily_limit, original.daily_limit);
+      assert.equal(data.settings.monthly_limit, original.monthly_limit);
+    } finally {
+      await db.exec("rollback");
+      await postgres();
+    }
   },
 );
 

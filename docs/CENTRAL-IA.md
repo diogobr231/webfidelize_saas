@@ -30,6 +30,10 @@ RLS protege configurações, fila e histórico; usuários comuns não podem lê-
 - `vercel.json` cadastra a rotina diária `0 11 * * *`. O cron não executa por abrir a página; seu resultado é registrado no banco. O primeiro disparo real precisa ser observado separadamente da execução manual.
 - Configure/ative a central autenticado como SUPER_ADMIN. Conexão configurada não comprova geração autorizada nem saldo. Erros de verificação, saldo ou credencial pausam o processamento para impedir repetição de falhas.
 
+Para homologar após a verificação, `scripts/test-admin-ai-success-live.ts` exige opt-ins explícitos e uma fila sem trabalhos alheios; solicita uma única geração sobre um lead sintético e verifica revisão/aprovação interna. Preservar os jobs consumidos e seu uso: o contador de quota deriva de `consumed_at`, portanto excluir esses registros apagaria tentativas contabilizadas. Ao encerrar o teste, arquivar a fonte QA sem apagar o histórico de consumo.
+
+Uma chamada autenticada ao endpoint do cron com uma fila QA e `auto_enqueue=false` valida o processamento, mas não comprova um disparo pelo agendador nem a seleção automática global. Esta seleção é verificada separadamente em PostgreSQL descartável, incluindo criação efetiva, `automatic=true`, deduplicação, autorização e ausência de consumo antes da execução. Não introduzir filtros ou bypasses exclusivos de teste no endpoint de produção.
+
 **Dependência observada em 22/10/2026:** OIDC autenticou, mas o Gateway retornou `customer_verification_required` (HTTP 403), com saldo disponível zero. A geração real permanece bloqueada até o responsável concluir a verificação na Vercel e ter crédito disponível. Pagamentos de assinaturas dos clientes permanecem fora desta entrega.
 
 ## Testes
