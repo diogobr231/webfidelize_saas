@@ -228,6 +228,8 @@
 .ai-form .ai-confirm {
   flex-direction: row;
   align-items: flex-start;
+  min-height: 44px;
+  padding-block: 4px;
   font-weight: 400;
   line-height: 1.65;
 }
