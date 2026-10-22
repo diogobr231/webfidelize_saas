@@ -142,6 +142,12 @@ O primeiro SUPER_ADMIN usa um bootstrap de instalação de uso único: o e-mail 
 
 ## Vercel / implantação
 
+Homologação online: [site](https://webfidelize-saas.vercel.app), [admin](https://webfidelize-saas.vercel.app/admin) e [funil](https://webfidelize-saas.vercel.app/diagnostico). Projeto `diogobr231/webfidelize-saas`, separado do projeto antigo `web-fidelize`. Publicação via CLI; ainda sem deploy automático por Git. O endereço `vercel.app` não exige compra de domínio. A conta atual é Hobby: a operação comercial exige plano compatível com as [regras da Vercel](https://vercel.com/docs/limits/fair-use-guidelines). Nenhum plano pago foi contratado.
+
+`vercel.json` define Next.js, instalação com lockfile e funções em São Paulo; `.vercelignore` exclui ambientes privados, backups e artefatos de teste. As variáveis foram configuradas somente em Production. Pagamentos e envios automáticos do WhatsApp permanecem desativados; SMTP e callbacks/templates de e-mail continuam pendentes de homologação. Os trials DEMO existentes vencem em 25/10/2026 às 14h47 (São Paulo); o deploy não altera seus prazos.
+
+Validação pública de leitura: `TEST_DEPLOYMENT_LIVE=1` e `TEST_DEPLOYMENT_URL=https://webfidelize-saas.vercel.app`, depois `pnpm test:deployment`. Para validar logins reais autorizados, `TEST_DEPLOYMENT_AUTH=1 pnpm test:deployment:auth`, com a senha DEMO somente em `TEST_PLAN_ACCOUNTS_PASSWORD` no ambiente privado. Ambos recusam outros projetos/origens; não executá-los automaticamente em CI contra produção. Os scripts de HTTP não substituem inspeção visual no navegador.
+
 1. Importe `diogobr231/webfidelize_saas` no projeto Vercel correto, framework Next.js, Node.js 24, diretório raiz.
 2. Instale com `pnpm install --frozen-lockfile`; build `pnpm build`.
 3. Configure `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_WHATSAPP` e `APP_URL` com a origem HTTPS estável do projeto antes do build. Cadastre `AUTH_FLOW_SECRET`, `BOOKING_GATEWAY_SECRET` e `SALES_GATEWAY_SECRET` como segredos exclusivos do ambiente Production. Preserve os valores dos gateways já configurados: seus hashes correspondentes estão no banco. Não copie credenciais de produção para previews nem envie secret/service_role ao navegador. Não sobrescreva `.env.local` ao sincronizar configurações da Vercel.

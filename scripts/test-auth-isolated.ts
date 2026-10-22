@@ -309,10 +309,24 @@ async function main() {
     );
     login.set("email", fakeEmail);
     login.set("password", fakePassword);
-    assert.equal(
-      (await destination(await request(new Map(), loginPath, login))).pathname,
-      invitation,
+    const localLogin = await request(new Map(), loginPath, login);
+    const sessionCookies = localLogin.headers
+      .getSetCookie()
+      .filter((header) => /^sb-[^=]+-auth-token(?:\.\d+)?=/.test(header));
+    assert.ok(
+      sessionCookies.length > 0,
+      "Login must issue real SDK session cookies",
     );
+    for (const cookie of sessionCookies) {
+      assert.doesNotMatch(
+        cookie,
+        /;\s*Secure(?:;|$)/i,
+        "Local next start over HTTP must retain its working session",
+      );
+      assert.match(cookie, /;\s*SameSite=Lax(?:;|$)/i);
+      assert.match(cookie, /;\s*Path=\/(?:;|$)/i);
+    }
+    assert.equal((await destination(localLogin)).pathname, invitation);
     login.set("next", "https://external.invalid/");
     assert.equal(
       (await destination(await request(new Map(), "/entrar", login))).pathname,

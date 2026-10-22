@@ -32,7 +32,9 @@
     "test:trial:db": "tsx scripts/test-card-trial-db.ts",
     "test:team-insights:db": "tsx scripts/test-team-insights-db.ts",
     "test:team-insights:http": "tsx scripts/test-team-insights-http.ts",
-    "test:plan-accounts:live": "tsx scripts/test-plan-accounts-live.ts"
+    "test:plan-accounts:live": "tsx scripts/test-plan-accounts-live.ts",
+    "test:deployment": "tsx scripts/test-deployment.ts",
+    "test:deployment:auth": "tsx scripts/test-deployment-auth.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
