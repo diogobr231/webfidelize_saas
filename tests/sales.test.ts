@@ -26,6 +26,30 @@ const inquiry = {
   website: "",
   request_id: "22222222-2222-4222-8222-222222222222",
 };
+test("new plan interests and historical investment bands remain distinct", () => {
+  for (const budget_range of [
+    "plan-essencial",
+    "plan-profissional",
+    "plan-empresarial",
+    "other",
+    "under-1000",
+    "1000-3000",
+  ]) {
+    assert.equal(
+      salesInquirySchema.parse({ ...inquiry, budget_range }).budget_range,
+      budget_range,
+    );
+    assert.equal(
+      salesLeadUpdateSchema.parse({ budget_range }).budget_range,
+      budget_range,
+    );
+  }
+  assert.equal(
+    salesInquirySchema.safeParse({ ...inquiry, budget_range: "plan-admin" })
+      .success,
+    false,
+  );
+});
 test("sales capture validates consent, contact, qualifying enums and request identity", () => {
   const valid = salesInquirySchema.parse(inquiry);
   assert.equal(valid.email, "qa@example.invalid");

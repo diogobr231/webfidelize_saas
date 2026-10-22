@@ -1001,6 +1001,50 @@ await check(
     );
   },
 );
+await check(
+  "requested plan prices and limits persist without altering billing",
+  async () => {
+    await postgres();
+    assert.deepEqual(
+      (
+        await db.query(
+          "select id,price_cents,staff_limit from public.plans order by price_cents",
+        )
+      ).rows,
+      [
+        { id: "essencial", price_cents: 4990, staff_limit: 1 },
+        { id: "profissional", price_cents: 8990, staff_limit: 3 },
+        { id: "empresarial", price_cents: 19990, staff_limit: 10 },
+      ],
+    );
+  },
+);
+await check(
+  "SQL accepts new plan interests, preserves legacy bands and rejects invented plans",
+  async () => {
+    await postgres();
+    for (const budget_range of [
+      "plan-essencial",
+      "plan-profissional",
+      "plan-empresarial",
+      "other",
+      "1000-3000",
+    ]) {
+      const result = await value<{ budget_range: string }>(
+        "select private.sales_contact($1::jsonb,true)",
+        [JSON.stringify({ ...inquiry(), budget_range })],
+      );
+      assert.equal(result.budget_range, budget_range);
+    }
+    await assert.rejects(
+      () =>
+        value("select private.sales_contact($1::jsonb,true)", [
+          JSON.stringify({ ...inquiry(), budget_range: "plan-admin" }),
+        ]),
+      /invalid sales input/,
+    );
+  },
+);
 await db.close();
 console.log(
   `${passed} sales database groups passed. PGlite serializes statements; real multi-connection lock races require separate PostgreSQL validation.`,
