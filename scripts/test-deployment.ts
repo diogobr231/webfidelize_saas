@@ -25,7 +25,12 @@ const demoSlugs = [
 ] as const;
 const publicPaths = ["/", "/planos", "/entrar", "/diagnostico"] as const;
 const segmentSlugs = demoSlugs.map((slug) => slug.slice(5));
-const protectedPaths = ["/admin", "/admin/comercial", "/painel"] as const;
+const protectedPaths = [
+  "/admin",
+  "/admin/comercial",
+  "/admin/automacoes",
+  "/painel",
+] as const;
 const allowedPaths = new Set<string>([
   ...publicPaths,
   ...protectedPaths,

@@ -563,6 +563,7 @@ await check("owner publishes only explicit public profile fields", async () => {
   );
   assert.deepEqual(Object.keys(catalog).sort(), [
     "address",
+    "cover_path",
     "description",
     "is_demo",
     "logo_path",
@@ -575,6 +576,7 @@ await check("owner publishes only explicit public profile fields", async () => {
   ]);
   assert.equal(catalog.description, profileValues[1]);
   assert.equal(catalog.logo_path, null);
+  assert.equal(catalog.cover_path, null);
   assert.equal(catalog.address, profileValues[2]);
   assert.equal(catalog.phone, profileValues[3]);
   assert.equal(catalog.theme, "violet");

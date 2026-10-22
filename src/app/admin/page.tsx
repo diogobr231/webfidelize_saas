@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -8,27 +9,63 @@ import { Brand } from "@/components/ui/brand";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { niches } from "@/lib/catalog";
 import { manageCompany } from "./actions";
+import { commercialPlans } from "@/lib/commercial";
+import { operationsSummarySchema } from "@/lib/admin-operations";
+import { OperationsOverview } from "@/components/admin-operations/overview";
 import "./admin.css";
+import "./automacoes/operations.css";
 export const dynamic = "force-dynamic";
 export default async function Admin({
   searchParams,
 }: {
-  searchParams: Promise<{ erro?: string; salvo?: string }>;
+  searchParams: Promise<{ erro?: string; salvo?: string; empresa?: string }>;
 }) {
   const feedback = await searchParams;
   const { db } = await requireUser();
   const { data: admin, error: authError } = await db.rpc("is_super_admin");
   if (authError || !admin) notFound();
-  const { data: companies, error } = await db
-    .from("companies")
-    .select("id,name,niche,status,trial_ends_at,plan_id,trial_card_required")
-    .order("created_at", { ascending: false })
-    .limit(100);
+  const selectedId = z.uuid().safeParse(feedback.empresa);
+  const [companiesResult, summaryResult, plans, selectedResult] =
+    await Promise.all([
+      db
+        .from("companies")
+        .select(
+          "id,name,niche,status,trial_ends_at,plan_id,trial_card_required",
+        )
+        .order("created_at", { ascending: false })
+        .limit(100),
+      db.rpc("admin_operations_summary"),
+      commercialPlans(),
+      selectedId.success
+        ? db
+            .from("companies")
+            .select(
+              "id,name,niche,status,trial_ends_at,plan_id,trial_card_required",
+            )
+            .eq("id", selectedId.data)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+    ]);
+  const companies = [...(companiesResult.data ?? [])];
+  const selectedCompany = selectedResult.data;
+  if (
+    selectedCompany &&
+    !companies.some((company) => company.id === selectedCompany.id)
+  )
+    companies.push(selectedCompany);
+  const error = companiesResult.error || selectedResult.error;
+  const parsedSummary = !summaryResult.error
+    ? operationsSummarySchema.safeParse(summaryResult.data)
+    : null;
+  const summary = parsedSummary?.success ? parsedSummary.data : null;
   return (
     <main className="admin-shell">
       <nav className="admin-topbar" aria-label="Administração da plataforma">
         <Brand href="/painel" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/automacoes">
+            Automações e tarefas
+          </Link>
           <Link className="button secondary" href="/admin/whatsapp">
             WhatsApp e cotas
           </Link>
@@ -60,10 +97,19 @@ export default async function Admin({
           </p>
         )}
         <PageHeader
-          eyebrow="Visão administrativa"
-          title="Empresas da plataforma"
-          description="Acompanhe os espaços cadastrados e gerencie planos, acesso e períodos de teste."
+          eyebrow="Central de gestão"
+          title="Sua empresa, em uma visão."
+          description="Acompanhe as empresas da plataforma, as oportunidades comerciais e o atendimento. Organize os próximos passos com automações internas."
         />
+        <OperationsOverview summary={summary} plans={plans} />
+        {selectedId.success &&
+          !selectedResult.error &&
+          !selectedResult.data && (
+            <p role="alert" className="notice error">
+              A empresa vinculada não foi localizada. Consulte os espaços
+              disponíveis abaixo.
+            </p>
+          )}
         <div className="admin-billing-note">
           <Icon name="shield" size={20} />
           <div>
@@ -81,11 +127,17 @@ export default async function Admin({
             Não foi possível carregar as empresas.
           </p>
         ) : (
-          <section className="panel admin-companies">
+          <section className="panel admin-companies" id="empresas">
             <div className="admin-section-heading">
               <div>
                 <h2>Todos os espaços</h2>
-                <p>Até 100 empresas mais recentes da plataforma.</p>
+                <p>
+                  Até 100 empresas mais recentes da plataforma
+                  {selectedResult.data
+                    ? ", além da empresa selecionada, quando necessário"
+                    : ""}
+                  .
+                </p>
               </div>
               <span className="admin-count">
                 {companies?.length ?? 0} nesta lista
@@ -108,7 +160,7 @@ export default async function Admin({
                   </thead>
                   <tbody>
                     {companies?.map((c) => (
-                      <tr key={c.id}>
+                      <tr key={c.id} id={`empresa-${c.id}`}>
                         <td data-label="Empresa">
                           <div className="admin-company-name">
                             <span

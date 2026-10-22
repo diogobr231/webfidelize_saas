@@ -12,6 +12,8 @@
     "test:whatsapp:http": "tsx scripts/test-whatsapp-http.ts",
     "test:auth:isolated": "tsx scripts/test-auth-isolated.ts",
     "test:sales:db": "tsx scripts/test-sales-db.ts",
+    "test:admin-operations:db": "tsx scripts/test-admin-operations-db.ts",
+    "test:admin-operations": "tsx scripts/test-admin-operations-live.ts",
     "test:sales": "tsx scripts/test-sales-live.ts",
     "test:db": "tsx scripts/test-db.ts",
     "test:dashboard:db": "tsx scripts/test-dashboard-db.ts",

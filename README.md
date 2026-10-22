@@ -16,6 +16,8 @@ O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a landing clara em azul-mari
 
 As páginas `/segmentos/[nicho]` apresentam benefícios e escopo dos oito segmentos, com o mesmo destaque. `/demonstracao` permite escolher qualquer segmento e experimentar agenda e ficha do cliente sem login, com exemplos apenas na memória do navegador. Recarregar apaga as alterações; nenhum agendamento real é criado. Os módulos específicos ainda planejados são identificados nas páginas. O formulário `/diagnostico` oferece os planos do catálogo e “Outros”; registros antigos de investimento continuam legíveis no admin.
 
+O [painel de operação interna](docs/ADMIN-OPERACOES.md) centraliza métricas reais e tarefas de acompanhamento em `/admin`, com regras e histórico em `/admin/automacoes`. O teste de 7 dias grátis permanece condicionado à autorização do cartão pelo provedor; a integração de pagamento continua pendente.
+
 ## Executar
 
 Requisitos: Node.js 24 e pnpm 11.25.0 (instalação oficial do pnpm ou Corepack).
