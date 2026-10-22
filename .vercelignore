@@ -1,0 +1,10 @@
+.env*
+.recovery
+.git
+.next
+.vercel
+node_modules
+test-results
+playwright-report
+supabase/.temp
+*.tsbuildinfo
