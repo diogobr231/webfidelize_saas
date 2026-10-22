@@ -14,13 +14,13 @@ export const dynamic = "force-dynamic";
 const whatsapp =
   "https://wa.me/5518997695445?text=Ol%C3%A1!%20Quero%20conhecer%20a%20Web%20Fidelize.";
 
-function TrialLink({ secondary = false }: { secondary?: boolean }) {
+function DemoLink({ secondary = false }: { secondary?: boolean }) {
   return (
     <Link
       className={`wf-button ${secondary ? "wf-button-outline" : ""}`}
-      href="/cadastro"
+      href="/demonstracao"
     >
-      Testar grátis por 7 dias
+      Experimentar demonstração
       <Icon name="arrow-right" />
     </Link>
   );
@@ -33,9 +33,9 @@ const questions = [
       "Agenda diária e semanal, cadastro de clientes, serviços e profissionais, disponibilidade semanal e uma página pública para receber reservas. Você também pode remarcar e cancelar atendimentos pelo painel, conforme sua permissão.",
   },
   {
-    question: "Como funcionam os 7 dias gratuitos?",
+    question: "Como funciona a demonstração?",
     answer:
-      "O teste de 7 dias no Essencial, com 1 profissional na agenda, exige cartão cadastrado e autorizado no Mercado Pago. O período começa somente após a confirmação segura do cartão. A primeira mensalidade será cobrada apenas depois dos 7 dias, com renovação mensal. Cancelar antes do fim do teste evita a primeira cobrança. A ativação está em preparação: criar sua conta ou empresa agora não inicia o teste nem gera cobrança.",
+      "Você escolhe seu segmento e experimenta a agenda e a ficha do cliente com dados fictícios. Não precisa de login ou cartão. As alterações existem apenas na demonstração e são apagadas ao recarregar. Para organizar sua operação real, consulte os planos e as condições de ativação.",
   },
   {
     question: "Meu cliente precisa instalar um aplicativo?",
@@ -50,7 +50,7 @@ const questions = [
   {
     question: "Posso compartilhar minha agenda no WhatsApp?",
     answer:
-      "Sim. Copie o link da sua página e compartilhe em conversas, no perfil do Instagram ou onde seus clientes encontrarem você. O compartilhamento é feito por você; mensagens, lembretes automáticos e chatbot ainda não estão disponíveis.",
+      "Sim. Copie o link da sua página e compartilhe em conversas, no perfil do Instagram ou onde seus clientes encontrarem você. O compartilhamento é feito por você; o envio automático de avisos depende da conexão oficial do WhatsApp, de modelos aprovados e da cota da empresa. Chatbot não está incluído.",
   },
   {
     question: "O cliente consegue alterar a reserva sozinho?",
@@ -144,7 +144,7 @@ export default async function Home() {
             disponíveis, direto pelo celular.
           </p>
           <div className="wf-hero-actions">
-            <TrialLink />
+            <DemoLink />
             <a
               className="wf-button wf-button-outline"
               href={whatsapp}
@@ -158,11 +158,11 @@ export default async function Home() {
           <div className="wf-trial-facts">
             <span>
               <Icon name="check" />
-              Cartão obrigatório para ativar
+              Demonstração sem login e sem cartão
             </span>
             <span>
               <Icon name="check" />
-              Ativação do teste em preparação
+              Explore com dados de exemplo
             </span>
           </div>
           <a className="wf-tour-link" href="#demonstracao">
@@ -469,8 +469,8 @@ export default async function Home() {
           </article>
         </div>
         <div className="wf-centered-action">
-          <TrialLink />
-          <span>Teste no plano Essencial, com 1 profissional na agenda.</span>
+          <DemoLink />
+          <span>Explore com dados de exemplo, sem login e sem cartão.</span>
         </div>
       </section>
       <section
@@ -560,9 +560,9 @@ export default async function Home() {
           </p>
         </div>
         <div className="wf-segment-links">
-          {niches.slice(0, 4).map((niche) => (
+          {niches.map((niche) => (
             <Link
-              href={`/entrar/${niche.slug}`}
+              href={`/segmentos/${niche.slug}`}
               key={niche.slug}
               className={`wf-segment-${niche.slug}`}
             >
@@ -575,7 +575,14 @@ export default async function Home() {
                         ? "paw"
                         : niche.slug === "clinica"
                           ? "heart"
-                          : "briefcase"
+                          : niche.slug === "restaurante"
+                            ? "utensils"
+                            : niche.slug === "academia"
+                              ? "dumbbell"
+                              : niche.slug === "fornecedores" ||
+                                  niche.slug === "logistica"
+                                ? "truck"
+                                : "briefcase"
                   }
                 />
               </span>
@@ -585,15 +592,11 @@ export default async function Home() {
           ))}
         </div>
         <div className="wf-other-segments">
-          <span>Outros segmentos com módulos específicos em planejamento:</span>
-          <div>
-            {niches.slice(4).map((niche) => (
-              <Link key={niche.slug} href={`/entrar/${niche.slug}`}>
-                {niche.name}
-                <Icon name="arrow-up-right" size={14} />
-              </Link>
-            ))}
-          </div>
+          <span>
+            Todos os segmentos têm demonstração interativa de agenda, clientes e
+            serviços. Veja os recursos disponíveis e planejados na página de
+            cada segmento.
+          </span>
         </div>
       </section>
       <section
@@ -610,10 +613,11 @@ export default async function Home() {
             <p>
               Converse sobre a implantação da Web Fidelize no seu negócio:
               serviços, profissionais, horários e página de agendamento
-              organizados com você.
+              organizados com você. Conte o que busca e indique um plano de
+              interesse ou escolha Outros.
             </p>
             <Link className="wf-button" href="/diagnostico">
-              Solicitar diagnóstico <Icon name="arrow-right" size={17} />
+              Descreva o que você busca <Icon name="arrow-right" size={17} />
             </Link>
             <span className="wf-implementation-note">
               Escopo e investimento sob consulta. Sem contratação automática.
@@ -710,10 +714,8 @@ export default async function Home() {
               <ul>
                 {[
                   "Agenda visual por dia e semana",
-                  "Cadastro de clientes e serviços",
-                  "Disponibilidade por profissional",
-                  "Página pública de agendamento",
-                  "Seu logotipo e 4 opções de cor",
+                  "Clientes, serviços e histórico",
+                  "Agendamento com sua foto, logo e cores",
                   ...teamPlanBenefits(plan),
                 ].map((feature) => (
                   <li key={feature}>
@@ -722,10 +724,9 @@ export default async function Home() {
                   </li>
                 ))}
               </ul>
-              <TrialLink secondary={plan.id !== "profissional"} />
+              <DemoLink secondary={plan.id !== "profissional"} />
               <span className="wf-plan-trial-note">
-                7 dias no Essencial · cartão obrigatório. Ativação em
-                preparação.
+                Demonstração com dados de exemplo. Não ativa assinatura.
               </span>
             </article>
           ))}
@@ -799,7 +800,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="wf-final-actions">
-            <TrialLink />
+            <DemoLink />
             <a
               className="wf-button wf-button-outline"
               href={whatsapp}
@@ -810,7 +811,7 @@ export default async function Home() {
               Falar no WhatsApp
             </a>
             <span>
-              7 dias no Essencial · cartão obrigatório · ativação em preparação
+              Demonstração sem login · dados de exemplo · sem cobrança
             </span>
           </div>
         </div>

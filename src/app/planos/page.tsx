@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Planos e condições | Web Fidelize",
   description:
-    "Compare planos da Web Fidelize. Teste de 7 dias no Essencial com cartão obrigatório e primeira mensalidade após o período. Ativação em preparação.",
+    "Compare preços, limites de profissionais e benefícios da Web Fidelize. Experimente uma demonstração antes de escolher seu plano.",
   alternates: { canonical: new URL("/planos", site.url).href },
   robots: { index: site.indexable, follow: site.indexable },
 };
@@ -60,23 +60,23 @@ export default async function Plans() {
           </span>
           <h2 id="trial-title">Conheça antes de escolher.</h2>
           <p>
-            Teste grátis por <strong>7 dias no Essencial</strong>, com 1
-            profissional na agenda.
+            Explore a agenda e a ficha de um cliente com{" "}
+            <strong>dados de exemplo</strong>.
           </p>
           <div>
             <span>
-              <Icon name="check" size={15} /> Cartão obrigatório
+              <Icon name="check" size={15} /> Sem login
             </span>
             <span>
-              <Icon name="check" size={15} /> Primeira mensalidade após 7 dias
+              <Icon name="check" size={15} /> Sem cartão
             </span>
           </div>
-          <Link className="button" href="/cadastro">
-            Testar grátis por 7 dias <Icon name="arrow-right" size={16} />
+          <Link className="button" href="/demonstracao">
+            Experimentar demonstração <Icon name="arrow-right" size={16} />
           </Link>
           <small>
-            Ativação em preparação. O período começa após a confirmação do
-            cartão; criar a empresa não inicia o teste.
+            A demonstração não cria reservas reais nem inicia um período de
+            assinatura.
           </small>
         </aside>
       </header>

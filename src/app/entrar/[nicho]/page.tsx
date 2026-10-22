@@ -48,8 +48,10 @@ export default async function NicheLogin({
             Todos os segmentos
           </Link>
           <p>
-            É seu primeiro acesso?{" "}
-            <Link href={authPageUrl("/cadastro", { next })}>Criar conta</Link>
+            Ainda está conhecendo?{" "}
+            <Link href={`/segmentos/${n.slug}`}>
+              Ver benefícios e demonstração
+            </Link>
           </p>
         </>
       }

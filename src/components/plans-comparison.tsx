@@ -81,15 +81,15 @@ export function PlansComparison({
               ) : (
                 <Link
                   className={`button ${plan.id === "profissional" ? "" : "secondary"}`}
-                  href="/cadastro"
+                  href="/demonstracao"
                 >
-                  Testar grátis por 7 dias
+                  Experimentar demonstração
                 </Link>
               )}
               <p className="plan-caption">
                 {authenticated
                   ? "O contato não altera seu plano nem ativa cobrança."
-                  : "7 dias no Essencial, com 1 profissional. Cartão obrigatório; ativação em preparação."}
+                  : "Demonstração com dados de exemplo, sem login e sem cartão."}
               </p>
             </article>
           ))}
@@ -100,11 +100,12 @@ export function PlansComparison({
         <div>
           <h3>Condições claras, desde o primeiro dia</h3>
           <p>
-            Os 7 dias de teste exigem cartão cadastrado e autorizado no Mercado
-            Pago. O período começa somente após a confirmação do cartão. A
-            primeira mensalidade será cobrada apenas depois dos 7 dias, com
-            renovação mensal pelo valor do plano contratado. Cancelar antes do
-            fim do teste evita a primeira cobrança.
+            Os 7 dias no Essencial, com 1 profissional, exigem cartão cadastrado
+            e autorizado no Mercado Pago. O período começa somente após a
+            confirmação do cartão. A primeira mensalidade será cobrada apenas
+            depois dos 7 dias, com renovação mensal pelo valor do plano
+            contratado. Cancelar antes do fim do teste evita a primeira
+            cobrança.
           </p>
           <p>
             A cobrança online pelo Mercado Pago e a ativação de novos testes
@@ -112,7 +113,8 @@ export function PlansComparison({
             nem gera cobrança. O proprietário ocupa uma vaga quando também
             atende; cadastrar um profissional é diferente de convidar alguém
             para acessar o painel. Recursos específicos de nicho, IA, caixa e
-            mensagens automáticas não estão incluídos nesta versão.
+            chatbot não estão incluídos nesta versão. Os avisos de WhatsApp
+            dependem de configuração e cota próprias.
           </p>
         </div>
       </div>

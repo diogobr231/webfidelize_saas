@@ -27,9 +27,12 @@ export default async function Login({
       footer={
         <>
           Ainda não tem uma conta?{" "}
-          <Link href={authPageUrl("/cadastro", { next })}>
-            Comece seu teste grátis
-          </Link>
+          <Link href="/demonstracao">Conheça a demonstração</Link>
+          <p>
+            <Link href={authPageUrl("/cadastro", { next })}>
+              Criar minha conta
+            </Link>
+          </p>
         </>
       }
     >

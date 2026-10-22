@@ -156,28 +156,28 @@ assert.equal(
 );
 const anchors = links(home);
 const trialLinks = anchors.filter(
-  (anchor) => anchor.text === "Testar grátis por 7 dias",
+  (anchor) => anchor.text === "Experimentar demonstração",
 );
 assert(
   trialLinks.length >= 2,
-  "O CTA de teste deve estar disponível ao longo da página.",
+  "O CTA de demonstração deve estar disponível ao longo da página.",
 );
 for (const anchor of trialLinks) {
   const url = new URL(anchor.href, base);
   assert.equal(
     url.origin,
     base.origin,
-    "CTA de cadastro deve continuar no aplicativo.",
+    "CTA de demonstração deve continuar no aplicativo.",
   );
   assert.equal(
     url.pathname,
-    "/cadastro",
-    "CTA de teste deve abrir o cadastro.",
+    "/demonstracao",
+    "CTA de demonstração deve abrir a demonstração.",
   );
   assert.equal(
     url.search,
     "",
-    "CTA de teste deve apontar diretamente para o cadastro.",
+    "CTA de demonstração deve apontar diretamente para a demonstração.",
   );
 }
 const whatsappLinks = anchors.filter((anchor) => {
@@ -207,7 +207,7 @@ for (const anchor of whatsappLinks) {
     "WhatsApp deve usar o número comercial autorizado.",
   );
 }
-pass("H1 único, CTA de 7 dias para cadastro e contato comercial correto");
+pass("H1 único, CTA de demonstração sem login e contato comercial correto");
 
 // Streamed loading fallbacks can also contain a Brand. Check the actual
 // landing landmarks rather than counting every brand in the transport HTML.
@@ -264,17 +264,17 @@ pass(
 );
 
 const homeText = readableText(home);
-assert.match(homeText, /cartão obrigatório para ativar/i);
+assert.match(homeText, /demonstração sem login e sem cartão/i);
 assert.match(homeText, /primeira mensalidade somente após os 7 dias/i);
 assert.match(homeText, /renovação mensal/i);
 assert.match(
   homeText,
   /cancelar antes do fim do teste evita a primeira cobrança/i,
 );
-assert.match(homeText, /ativação do teste em preparação/i);
+assert.match(homeText, /ativação do teste ainda estão em preparação/i);
 assert.doesNotMatch(
   homeText,
-  /sem cartão|nenhum cartão é solicitado|começam na criação da empresa/i,
+  /nenhum cartão é solicitado para ativar|começam na criação da empresa/i,
 );
 assert.match(
   readableText(signup),
@@ -458,13 +458,13 @@ const plansText = readableText(plans);
 for (const condition of [
   /7 dias no Essencial/i,
   /1 profissional/i,
-  /cartão obrigatório/i,
-  /primeira mensalidade após 7 dias/i,
-  /período começa após a confirmação do cartão/i,
-  /criar a empresa não inicia o teste/i,
+  /exigem cartão cadastrado e autorizado/i,
+  /primeira mensalidade será cobrada apenas depois dos 7 dias/i,
+  /período começa somente após a confirmação do cartão/i,
+  /criar a empresa agora não inicia o teste/i,
   /renovação mensal/i,
   /cancelar antes do fim do teste evita a primeira cobrança/i,
-  /ativação em preparação/i,
+  /ativação ainda está em preparação/i,
   /proprietário também conta quando atende/i,
   /convite para acessar o painel é diferente/i,
   /cobrança online ainda não está disponível/i,
@@ -473,12 +473,12 @@ for (const condition of [
   assert.match(plansText, condition);
 assert.doesNotMatch(
   plansText,
-  /sem cartão|sem cobrança automática|começa quando você cria a empresa/i,
+  /sem cobrança automática|começa quando você cria a empresa/i,
   "O teste exige cartão e não pode começar apenas com o cadastro da empresa.",
 );
 const planLinks = links(plans);
 const planTrials = planLinks.filter((link) =>
-  /Testar grátis por 7 dias/.test(link.text),
+  /Experimentar demonstração/.test(link.text),
 );
 assert(
   planTrials.length > 0,
@@ -487,7 +487,7 @@ assert(
 for (const link of planTrials) {
   const url = new URL(link.href, base);
   assert.equal(url.origin, base.origin);
-  assert.equal(url.pathname, "/cadastro");
+  assert.equal(url.pathname, "/demonstracao");
   assert.equal(
     url.search,
     "",
@@ -614,7 +614,7 @@ const publicPlans = displayedPlans(plans);
 const homePlans = displayedPlans(home);
 assert(
   planTrials.length >= publicPlans.length + 1,
-  "A comparação deve entregar um CTA de teste por plano, além do convite inicial, inclusive em fragmentos streamed.",
+  "A comparação deve entregar um CTA de demonstração por plano, além do convite inicial, inclusive em fragmentos streamed.",
 );
 if (publicPlans.length && homePlans.length) {
   assert.deepEqual(
@@ -793,15 +793,27 @@ for (const url of locations) {
     "Sitemap não pode publicar painéis, contas ou demonstrações.",
   );
   assert.equal(
-    url.pathname,
-    "/",
-    "Somente a landing comercial deve constar no sitemap atual.",
+    [
+      "/",
+      "/planos",
+      "/diagnostico",
+      "/segmentos/salao",
+      "/segmentos/pet-shop",
+      "/segmentos/clinica",
+      "/segmentos/escritorio",
+      "/segmentos/restaurante",
+      "/segmentos/fornecedores",
+      "/segmentos/logistica",
+      "/segmentos/academia",
+    ].includes(url.pathname),
+    true,
+    "Sitemap deve conter apenas páginas comerciais públicas.",
   );
 }
-assert.equal(locations.length, expectedSite.indexable ? 1 : 0);
+assert.equal(locations.length, expectedSite.indexable ? 11 : 0);
 pass(
   expectedSite.indexable
-    ? "Sitemap contém somente a landing comercial"
+    ? "Sitemap contém páginas comerciais e segmentos disponíveis"
     : "Sitemap local vazio e sem páginas privadas ou demonstrações",
 );
 
@@ -839,6 +851,48 @@ assert(
 );
 pass("URL inexistente responde 404 com marca, noindex e caminhos de retorno");
 
+for (const slug of [
+  "salao",
+  "pet-shop",
+  "clinica",
+  "escritorio",
+  "restaurante",
+  "fornecedores",
+  "logistica",
+  "academia",
+]) {
+  const segment = await (await get("/segmentos/" + slug)).text();
+  assert(links(home).some((a) => a.href === "/segmentos/" + slug));
+  assert(links(segment).some((a) => a.href === "/demonstracao/" + slug));
+  assert(
+    links(segment).some((a) => a.href === "/entrar/" + slug),
+    "Existing customer login remains available",
+  );
+  const demo = await (await get("/demonstracao/" + slug)).text();
+  assert.match(metadata(demo, "robots"), /noindex/);
+  assert.match(readableText(demo), /não criam reservas, contas ou cobranças/);
+  assert.match(readableText(demo), /Criar agendamento de exemplo/);
+  assert.doesNotMatch(demo, /name="(?:password|email|phone)"/);
+}
+await get("/segmentos/nao-existe", 404);
+await get("/demonstracao/nao-existe", 404);
+const discovery = await (await get("/demonstracao")).text();
+assert.match(metadata(discovery, "robots"), /noindex/);
+assert.doesNotMatch(
+  readableText(home + " " + plans + " " + login),
+  /grátis|gratuit[oa]/i,
+);
+const inquiry = await (await get("/diagnostico")).text();
+assert.match(readableText(inquiry), /Descreva o que você busca/);
+const budget = inquiry.match(
+  /<select[^>]*name="budget_range"[^>]*>([\s\S]*?)<\/select>/,
+)?.[1];
+assert.ok(budget);
+assert.match(budget, /value="other"/);
+assert.doesNotMatch(budget, /under-1000|1000-3000|3000-10000|over-10000/);
+pass(
+  "Segmentos levam a benefícios e demonstração sem login; formulário preserva planos + Outros",
+);
 console.log(
   `${passed} grupos HTTP da landing aprovados; apenas leituras locais, sem cadastros ou mensagens.`,
 );
