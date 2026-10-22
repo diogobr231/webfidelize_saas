@@ -14,6 +14,9 @@ importers:
       '@supabase/supabase-js':
         specifier: 2.118.0
         version: 2.118.0
+      '@vercel/oidc':
+        specifier: 3.2.0
+        version: 3.2.0
       ai:
         specifier: 7.0.148
         version: 7.0.148(zod@4.3.6)

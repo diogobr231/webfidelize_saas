@@ -46,6 +46,7 @@
   "dependencies": {
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",
+    "@vercel/oidc": "3.2.0",
     "ai": "7.0.148",
     "next": "16.4.2",
     "nodemailer": "10.1.7",
