@@ -7,6 +7,9 @@ import { teamInsightsSchema } from "../src/lib/team-insights";
 // platform owner. No business writes, reset emails, invites, payments or messages.
 // Cookies and password remain in memory; only local test sessions are signed out.
 const origin = "https://webfidelize-saas.vercel.app";
+// Optional process-only override: rotating the platform owner's password must
+// not require changing any of the six existing DEMO account passwords.
+const requestedAdminPassword = process.env.TEST_ADMIN_PASSWORD;
 const accounts = [
   {
     plan: "essencial",
@@ -171,7 +174,11 @@ async function main() {
     );
     return source;
   }
-  async function login(client: Session, email: string) {
+  async function login(
+    client: Session,
+    email: string,
+    accountPassword: string = password!,
+  ) {
     const source = await html(client, "/entrar");
     const form = [...source.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/g)]
       .map((match) => match[0])
@@ -191,7 +198,7 @@ async function main() {
       "The real Server Action binding is missing.",
     );
     body.set("email", email);
-    body.set("password", password!);
+    body.set("password", accountPassword);
     body.set("next", "/painel");
     const result = await destination(await request(client, "/entrar", body));
     check(
@@ -395,15 +402,24 @@ async function main() {
   phase = "SUPER_ADMIN";
   const admin = session();
   try {
-    await login(admin, "diogohf231@gmail.com");
+    await login(
+      admin,
+      "diogohf231@gmail.com",
+      requestedAdminPassword || password!,
+    );
     const role = await admin.db.rpc("is_super_admin");
     check(
       !role.error && role.data === true,
       "Platform owner is not authorized as SUPER_ADMIN.",
     );
-    const page = visible(await html(admin, "/admin"));
+    const adminHtml = await html(admin, "/admin");
+    const page = visible(adminHtml);
     check(
-      page.includes("Empresas da plataforma") &&
+      /<section\b[^>]*\bid="empresas"/.test(adminHtml) &&
+        /<table\b[^>]*class="[^"]*admin-companies-table/.test(adminHtml) &&
+        page.includes(
+          "Empresas cadastradas, situação de acesso e data final do teste",
+        ) &&
         page.includes("SUPER_ADMIN") &&
         !page.includes("Não foi possível carregar"),
       "Authorized admin dashboard failed.",

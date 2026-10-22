@@ -4,7 +4,7 @@ Central IA exclusiva do SUPER_ADMIN: [funcionamento, limites e configuração](d
 
 SaaS B2B multiempresa em reconstrução. Next.js App Router, TypeScript, Tailwind e Supabase. **Ainda não liberado para clientes pagantes.**
 
-Auditoria atual, correções, evidências de testes e prioridades para o lançamento: [auditoria para a primeira venda](docs/AUDITORIA-PRIMEIRA-VENDA.md), de 19/10/2026.
+Revisão mais recente: [segurança e estabilidade em 22/10/2026](docs/AUDITORIA-SEGURANCA.md). Histórico comercial: [auditoria para a primeira venda](docs/AUDITORIA-PRIMEIRA-VENDA.md), de 19/10/2026.
 
 Incremento operacional posterior: [edição, arquivamento e bloqueios de agenda](docs/STATUS-OPERACOES.md), com migração aplicada, testes de regressão e evidências dos fluxos DEMO.
 
