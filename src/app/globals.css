@@ -134,19 +134,25 @@ nav {
   letter-spacing: -1.2px;
   white-space: nowrap;
 }
-.brand-mark {
-  flex-shrink: 0;
-  color: var(--cyan);
+.brand-logo {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 210px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #f7f7f7;
 }
-.brand .brand-word {
-  color: inherit;
-}
-.brand span span,
-.brand > span:not(.brand-word) {
-  color: var(--cyan);
-}
-.brand .brand-period {
-  color: var(--cyan);
+.brand-logo img {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  transform: translateY(-50%);
 }
 .links {
   display: flex;
@@ -907,9 +913,9 @@ tbody tr:hover {
     font-size: 21px;
     gap: 5px;
   }
-  .brand-mark {
-    width: 24px;
-    height: 24px;
+  .brand-logo {
+    width: 150px;
+    height: 44px;
   }
   .links {
     gap: 12px;

@@ -209,6 +209,60 @@ for (const anchor of whatsappLinks) {
 }
 pass("H1 único, CTA de 7 dias para cadastro e contato comercial correto");
 
+// Streamed loading fallbacks can also contain a Brand. Check the actual
+// landing landmarks rather than counting every brand in the transport HTML.
+const brandLandmarks = [
+  ...resolvedHtmlFragments(home).matchAll(
+    /<(header|footer)\b([^>]*)>([\s\S]*?)<\/\1>/gi,
+  ),
+];
+const brandImagePaths = new Set<string>();
+for (const landmarkName of ["header", "footer"]) {
+  const landmarks = brandLandmarks.filter(
+    (match) =>
+      match[1] === landmarkName &&
+      attributes(match[2]).class?.split(/\s+/).includes(`wf-${landmarkName}`),
+  );
+  assert.equal(
+    landmarks.length,
+    1,
+    `A landing deve entregar um ${landmarkName} identificável.`,
+  );
+  const brandedLinks = [
+    ...landmarks[0][3].matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi),
+  ].filter(
+    (match) => attributes(match[1])["aria-label"] === "Web Fidelize — início",
+  );
+  assert.equal(
+    brandedLinks.length,
+    1,
+    `O ${landmarkName} deve oferecer a marca com nome acessível.`,
+  );
+  const link = brandedLinks[0];
+  const images = [...link[2].matchAll(/<img\b[^>]*>/gi)].map(([tag]) =>
+    attributes(tag),
+  );
+  assert.equal(images.length, 1, "Cada marca deve entregar uma imagem.");
+  assert.equal(
+    images[0].alt,
+    "",
+    "O nome da marca já pertence ao link, sem anúncio duplicado da imagem.",
+  );
+  assert(images[0].src, "A imagem da marca precisa de uma origem.");
+  brandImagePaths.add(localAssetPath(images[0].src));
+}
+assert.deepEqual(
+  [...brandImagePaths],
+  ["/webfidelize-logo.png"],
+  "Cabeçalho e rodapé devem usar a logo oficial hospedada no aplicativo.",
+);
+const brandResponse = await get([...brandImagePaths][0]);
+assert.match(brandResponse.headers.get("content-type") || "", /^image\/png\b/i);
+assertPng(Buffer.from(await brandResponse.arrayBuffer()), 1600, 533);
+pass(
+  "Logo oficial entregue no cabeçalho e rodapé, com PNG local de 1600 × 533",
+);
+
 const homeText = readableText(home);
 assert.match(homeText, /cartão obrigatório para ativar/i);
 assert.match(homeText, /primeira mensalidade somente após os 7 dias/i);
