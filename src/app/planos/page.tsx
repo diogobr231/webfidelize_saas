@@ -44,6 +44,11 @@ export default async function Plans() {
             planos. Compare o espaço para profissionais e os recursos de análise
             para acompanhar o crescimento da sua equipe.
           </p>
+          <p>
+            <strong>7 dias grátis no Essencial</strong>, com cartão autorizado.
+            Ativação em preparação. <a href="#condicoes-teste">Ver condições</a>
+            .
+          </p>
           <a
             className="plans-contact"
             href={whatsapp}
@@ -150,17 +155,16 @@ export default async function Plans() {
           </details>
           <details>
             <summary>
-              O teste começa em qual plano?
+              Como funcionam os 7 dias grátis?
               <Icon name="plus" size={18} />
             </summary>
             <p>
-              Todos os botões de teste iniciam o mesmo fluxo: cadastro da conta
-              e criação da empresa no Essencial, com 1 profissional. O cartão é
-              obrigatório e a contagem de 7 dias começa somente após sua
-              confirmação no Mercado Pago. A primeira mensalidade será cobrada
+              O teste de 7 dias grátis é no Essencial, com 1 profissional. O
+              cartão é obrigatório e a contagem começa somente após sua
+              confirmação pelo Mercado Pago. A primeira mensalidade será cobrada
               depois do teste, com renovação mensal. Cancelar antes do fim do
               teste evita a primeira cobrança. A ativação ainda está em
-              preparação.
+              preparação; o cadastro da conta e da empresa não inicia o teste.
             </p>
           </details>
           <details>

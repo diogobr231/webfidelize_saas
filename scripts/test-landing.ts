@@ -265,6 +265,11 @@ pass(
 
 const homeText = readableText(home);
 assert.match(homeText, /demonstração sem login e sem cartão/i);
+assert.match(homeText, /7 dias grátis no Essencial/i);
+assert.match(
+  homeText,
+  /teste começa somente após a confirmação do cartão no Mercado Pago/i,
+);
 assert.match(homeText, /primeira mensalidade somente após os 7 dias/i);
 assert.match(homeText, /renovação mensal/i);
 assert.match(
@@ -280,6 +285,16 @@ assert.match(
   readableText(signup),
   /exige cartão cadastrado e autorizado no Mercado Pago/i,
 );
+assert.match(readableText(signup), /7 dias grátis no Essencial/i);
+assert.match(
+  readableText(signup),
+  /período começa somente após a confirmação do cartão pelo provedor/i,
+);
+assert.match(
+  readableText(signup),
+  /cancelar antes do fim do teste evita a primeira cobrança/i,
+);
+assert.match(readableText(signup), /ativação está em preparação/i);
 assert.match(
   readableText(signup),
   /criar sua conta agora não inicia o período/i,
@@ -456,11 +471,11 @@ assert.equal([...plans.matchAll(/<h1\b[^>]*>/gi)].length, 1);
 assert.match(plans, /<section\b[^>]*aria-label="Comparação de planos"/i);
 const plansText = readableText(plans);
 for (const condition of [
-  /7 dias no Essencial/i,
+  /7 dias grátis no Essencial/i,
   /1 profissional/i,
   /exigem cartão cadastrado e autorizado/i,
   /primeira mensalidade será cobrada apenas depois dos 7 dias/i,
-  /período começa somente após a confirmação do cartão/i,
+  /período começa somente após a confirmação do cartão pelo provedor/i,
   /criar a empresa agora não inicia o teste/i,
   /renovação mensal/i,
   /cancelar antes do fim do teste evita a primeira cobrança/i,
@@ -477,6 +492,17 @@ assert.doesNotMatch(
   "O teste exige cartão e não pode começar apenas com o cadastro da empresa.",
 );
 const planLinks = links(plans);
+for (const publicLinks of [anchors, planLinks]) {
+  const preparationLinks = publicLinks.filter(
+    (link) => link.text === "Preparar meu cadastro",
+  );
+  assert.equal(preparationLinks.length, 1);
+  assert.equal(
+    new URL(preparationLinks[0].href, base).pathname,
+    "/cadastro",
+    "O preparo do teste deve abrir o cadastro, sem simular autorização do cartão.",
+  );
+}
 const planTrials = planLinks.filter((link) =>
   /Experimentar demonstração/.test(link.text),
 );
@@ -878,10 +904,23 @@ await get("/segmentos/nao-existe", 404);
 await get("/demonstracao/nao-existe", 404);
 const discovery = await (await get("/demonstracao")).text();
 assert.match(metadata(discovery, "robots"), /noindex/);
-assert.doesNotMatch(
-  readableText(home + " " + plans + " " + login),
-  /grátis|gratuit[oa]/i,
-);
+for (const publicHtml of [home, plans, signup]) {
+  const publicText = readableText(publicHtml);
+  assert.match(publicText, /7 dias grátis/);
+  assert.match(
+    publicText,
+    /ativação (?:do teste ainda estão|de novos testes ainda estão|ainda está|está) em preparação/i,
+  );
+  assert.match(
+    publicText,
+    /cancelar antes do fim do teste evita a primeira cobrança/i,
+  );
+  assert.doesNotMatch(
+    publicText,
+    /teste grátis sem cartão|7 dias grátis sem cartão|teste já está ativo/i,
+    "A oferta de teste deve preservar a autorização do cartão e nunca simular ativação.",
+  );
+}
 const inquiry = await (await get("/diagnostico")).text();
 assert.match(readableText(inquiry), /Descreva o que você busca/);
 const budget = inquiry.match(

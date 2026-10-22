@@ -95,17 +95,17 @@ export function PlansComparison({
           ))}
         </div>
       )}
-      <div className="plan-conditions">
+      <div className="plan-conditions" id="condicoes-teste">
         <Icon name="shield" size={22} />
         <div>
-          <h3>Condições claras, desde o primeiro dia</h3>
+          <h3>7 dias grátis para conhecer sua rotina no sistema</h3>
           <p>
-            Os 7 dias no Essencial, com 1 profissional, exigem cartão cadastrado
-            e autorizado no Mercado Pago. O período começa somente após a
-            confirmação do cartão. A primeira mensalidade será cobrada apenas
-            depois dos 7 dias, com renovação mensal pelo valor do plano
-            contratado. Cancelar antes do fim do teste evita a primeira
-            cobrança.
+            Os 7 dias grátis no Essencial, com 1 profissional, exigem cartão
+            cadastrado e autorizado no Mercado Pago. O período começa somente
+            após a confirmação do cartão pelo provedor. A primeira mensalidade
+            será cobrada apenas depois dos 7 dias, com renovação mensal pelo
+            valor do plano contratado. Cancelar antes do fim do teste evita a
+            primeira cobrança.
           </p>
           <p>
             A cobrança online pelo Mercado Pago e a ativação de novos testes
@@ -116,6 +116,11 @@ export function PlansComparison({
             chatbot não estão incluídos nesta versão. Os avisos de WhatsApp
             dependem de configuração e cota próprias.
           </p>
+          {!authenticated && (
+            <Link className="button secondary" href="/cadastro">
+              Preparar meu cadastro <Icon name="arrow-right" size={16} />
+            </Link>
+          )}
         </div>
       </div>
     </section>

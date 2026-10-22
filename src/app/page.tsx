@@ -38,6 +38,11 @@ const questions = [
       "Você escolhe seu segmento e experimenta a agenda e a ficha do cliente com dados fictícios. Não precisa de login ou cartão. As alterações existem apenas na demonstração e são apagadas ao recarregar. Para organizar sua operação real, consulte os planos e as condições de ativação.",
   },
   {
+    question: "Como funcionam os 7 dias grátis?",
+    answer:
+      "O teste é no Essencial, com 1 profissional, e exige cartão cadastrado e autorizado no Mercado Pago. Os 7 dias começam somente após a confirmação do cartão pelo provedor. A primeira mensalidade será cobrada apenas depois do teste, com renovação mensal pelo valor do plano contratado. Cancelar antes do fim do teste evita a primeira cobrança. A ativação está em preparação: criar uma conta agora não inicia o período nem gera cobrança. Enquanto isso, você pode explorar a demonstração sem login e sem cartão.",
+  },
+  {
     question: "Meu cliente precisa instalar um aplicativo?",
     answer:
       "Não. Ele abre seu link no navegador, escolhe serviço, profissional e horário e informa nome e telefone para reservar. Não precisa criar uma conta. Ao concluir, recebe um comprovante na tela e pode adicionar o horário ao calendário.",
@@ -165,6 +170,10 @@ export default async function Home() {
               Explore com dados de exemplo
             </span>
           </div>
+          <p className="wf-plan-trial-note">
+            <strong>7 dias grátis no Essencial</strong>, com cartão autorizado.
+            Ativação em preparação. <a href="#teste-gratis">Ver condições</a>.
+          </p>
           <a className="wf-tour-link" href="#demonstracao">
             Veja como seu cliente agenda <Icon name="arrow-right" size={15} />
           </a>
@@ -731,10 +740,12 @@ export default async function Home() {
             </article>
           ))}
         </div>
-        <div className="wf-pricing-note">
+        <div className="wf-pricing-note" id="teste-gratis">
           <Icon name="phone" />
           <div>
             <p>
+              <strong>7 dias grátis no Essencial, com 1 profissional.</strong> O
+              teste começa somente após a confirmação do cartão no Mercado Pago.{" "}
               <strong>
                 Cartão obrigatório. Primeira mensalidade somente após os 7 dias.
               </strong>{" "}
@@ -752,6 +763,9 @@ export default async function Home() {
               na agenda. O cartão será cadastrado no ambiente seguro do Mercado
               Pago; criar a empresa não inicia o teste nem gera cobrança.
             </p>
+            <Link className="wf-button wf-button-outline" href="/cadastro">
+              Preparar meu cadastro <Icon name="arrow-right" />
+            </Link>
           </div>
         </div>
       </section>

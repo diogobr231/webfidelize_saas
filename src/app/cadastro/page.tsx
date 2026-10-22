@@ -38,7 +38,7 @@ export default async function Signup({
         <Icon name="check" size={17} />
         <span>
           {next === "/painel"
-            ? "O teste de 7 dias exige cartão cadastrado e autorizado no Mercado Pago. Primeira mensalidade somente após o teste. A ativação está em preparação; criar sua conta agora não inicia o período nem gera cobrança."
+            ? "O teste de 7 dias grátis no Essencial exige cartão cadastrado e autorizado no Mercado Pago. O período começa somente após a confirmação do cartão pelo provedor. Primeira mensalidade somente após o teste. Cancelar antes do fim do teste evita a primeira cobrança. A ativação está em preparação; criar sua conta agora não inicia o período nem gera cobrança."
             : "Você revisará o convite antes de participar. Criar uma conta não aceita o convite automaticamente."}
         </span>
       </div>
