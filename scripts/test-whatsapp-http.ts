@@ -27,6 +27,26 @@ const job = {
   company_name: "Empresa QA",
   offset_minutes: 1440,
 };
+const staffJob = {
+  job_id: "55555555-5555-4555-8555-555555555555",
+  kind: "daily",
+  company_id: companyId,
+  professional_id: "66666666-6666-4666-8666-666666666666",
+  professional_name: "Profissional QA",
+  company_name: "Empresa QA",
+  recipient: "5511990000001",
+  local_date: "2026-10-22",
+  part_index: 1,
+  part_count: 1,
+  appointments: [
+    {
+      appointment_id: job.appointment_id,
+      starts_at: job.starts_at,
+      customer_name: job.customer_name,
+      service_name: "Serviço QA",
+    },
+  ],
+};
 type RpcCall = { name: string; body: Record<string, unknown> };
 let phase = "setup";
 let checks = 0;
@@ -73,6 +93,8 @@ async function main() {
   let providerStatus = 200;
   let providerMalformed = false;
   let pending: (typeof job)[] = [];
+  let staffPending: (typeof staffJob)[] = [];
+  let staffCurrent = staffJob;
   let failRpc = "";
   let confirmed = false;
   let optedOut = false;
@@ -113,6 +135,13 @@ async function main() {
         pending = [];
       }
       if (name === "prepare_whatsapp_reminder") result = job;
+      if (name === "claim_whatsapp_staff_notifications") {
+        result = staffPending;
+        staffPending = [];
+      }
+      if (name === "prepare_whatsapp_staff_notification") result = staffCurrent;
+      if (name === "whatsapp_delivery_event" && body.p_job === staffJob.job_id)
+        result = false;
       if (name === "whatsapp_confirmation") {
         result = null;
         if (
@@ -189,6 +218,8 @@ async function main() {
             phoneNumberId,
             accessToken: "isolated-meta-access-token-never-sent-externally",
             templateName: "web_fidelize_lembrete",
+            staffDailyTemplateName: "web_fidelize_resumo_equipe",
+            staffNewAppointmentTemplateName: "web_fidelize_novo_equipe",
             languageCode: "pt_BR",
           },
         ]),
@@ -324,7 +355,11 @@ async function main() {
     const rawToken = template.components[1].parameters[0].text;
     assert.match(rawToken, /^[a-f0-9]{64}$/);
     assert.equal(JSON.stringify(calls).includes(rawToken), false);
-    assert.equal(calls.at(-1)!.body.p_status, "accepted");
+    assert.equal(
+      calls.findLast((call) => call.name === "finish_whatsapp_reminder")!.body
+        .p_status,
+      "accepted",
+    );
     const again = await request("/api/whatsapp/process", {
       headers: { Authorization: `Bearer ${cronSecret}` },
     });
@@ -366,11 +401,94 @@ async function main() {
       assert.equal(response.status, 200);
       assert.equal((await response.json())[scenario.outcome], 1);
       assert.equal(metaRequests, before + 1);
-      assert.equal(calls.at(-1)!.body.p_status, scenario.outcome);
-      assert.equal(calls.at(-1)!.body.p_error, scenario.error);
+      assert.equal(
+        calls.findLast((call) => call.name === "finish_whatsapp_reminder")!.body
+          .p_status,
+        scenario.outcome,
+      );
+      assert.equal(
+        calls.findLast((call) => call.name === "finish_whatsapp_reminder")!.body
+          .p_error,
+        scenario.error,
+      );
     }
     pass(
       "provider failures and uncertain responses persist safe outcomes without automatic retry",
+    );
+
+    phase = "staff daily and new appointment provider protocol";
+    providerStatus = 200;
+    providerMalformed = false;
+    for (const kind of ["daily", "new_appointment"]) {
+      staffCurrent = { ...staffJob, kind };
+      staffPending = [staffCurrent];
+      const before: number = metaRequests;
+      const response = await request("/api/whatsapp/process", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${cronSecret}` },
+      });
+      assert.equal(response.status, 200);
+      assert.equal((await response.json()).staff.accepted, 1);
+      assert.equal(metaRequests, before + 1);
+      const body = sentBodies.at(-1)!;
+      assert.equal(body.to, staffJob.recipient);
+      assert.equal(body.biz_opaque_callback_data, staffJob.job_id);
+      const staffTemplate = body.template as {
+        name: string;
+        components: { parameters: { text: string }[] }[];
+      };
+      assert.equal(
+        staffTemplate.name,
+        kind === "daily"
+          ? "web_fidelize_resumo_equipe"
+          : "web_fidelize_novo_equipe",
+      );
+      assert.equal(staffTemplate.components.length, 1);
+      assert.ok(JSON.stringify(staffTemplate).includes("20:00"));
+      assert.equal(
+        calls.findLast((call) => call.name === "claim_whatsapp_reminders")!.body
+          .p_batch,
+        3,
+      );
+      assert.equal(
+        calls.findLast(
+          (call) => call.name === "claim_whatsapp_staff_notifications",
+        )!.body.p_batch,
+        2,
+      );
+      await request("/api/whatsapp/process", {
+        headers: { Authorization: `Bearer ${cronSecret}` },
+      });
+      assert.equal(metaRequests, before + 1);
+    }
+    pass(
+      "staff daily and new appointment use separate templates, bounded worker slots and no replay",
+    );
+
+    phase = "staff signed delivery fallback";
+    const staffEventsStart = calls.length;
+    const staffDelivery = JSON.stringify(
+      webhook({
+        statuses: [
+          {
+            id: "wamid.staff.accepted",
+            status: "delivered",
+            biz_opaque_callback_data: staffJob.job_id,
+          },
+        ],
+      }),
+    );
+    assert.equal((await postWebhook(staffDelivery)).status, 200);
+    assert.deepEqual(
+      calls.slice(staffEventsStart).map((call) => call.name),
+      ["whatsapp_delivery_event", "whatsapp_staff_delivery_event"],
+    );
+    assert.equal(calls.at(-1)!.body.p_company, companyId);
+    failRpc = "whatsapp_staff_delivery_event";
+    assert.equal((await postWebhook(staffDelivery)).status, 503);
+    failRpc = "";
+    pass(
+      "staff receipts reconcile through signed tenant-bound fallback and retry on database outage",
     );
 
     phase = "verified delivery and optout";

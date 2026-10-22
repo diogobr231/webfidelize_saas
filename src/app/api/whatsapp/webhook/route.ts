@@ -85,6 +85,17 @@ export async function POST(request: Request) {
               p_phone: event.phone,
             });
       if (result.error) throw new Error("DATABASE_UNAVAILABLE");
+      if (event.type === "delivery" && result.data === false) {
+        const staffResult = await rpc("whatsapp_staff_delivery_event", {
+          p_secret: secret,
+          p_company: event.companyId,
+          p_job: event.jobId,
+          p_message_id: event.messageId,
+          p_status: event.status,
+          p_error: event.error,
+        });
+        if (staffResult.error) throw new Error("DATABASE_UNAVAILABLE");
+      }
     }
     return Response.json({ received: true }, { headers });
   } catch {

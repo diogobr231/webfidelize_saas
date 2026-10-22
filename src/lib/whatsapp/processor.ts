@@ -20,6 +20,7 @@ export async function processReminders(input: {
   secret: string;
   connections: WhatsAppConnection[];
   rpc: ReminderRpc;
+  batch?: number;
   send: (
     connection: WhatsAppConnection,
     job: ReminderJob,
@@ -30,7 +31,12 @@ export async function processReminders(input: {
   const claimed = await input.rpc("claim_whatsapp_reminders", {
     p_secret: input.secret,
     p_companies: input.connections.map((item) => item.companyId),
-    p_batch: 5,
+    p_batch: z
+      .number()
+      .int()
+      .min(1)
+      .max(5)
+      .parse(input.batch ?? 5),
   });
   if (claimed.error) throw new Error("WHATSAPP_DATABASE_UNAVAILABLE");
   const jobs = z.array(reminderJobSchema).max(5).safeParse(claimed.data);

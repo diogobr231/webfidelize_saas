@@ -1,8 +1,11 @@
 import { equalSecret } from "@/lib/whatsapp/core";
 import { processReminders } from "@/lib/whatsapp/processor";
+import { processStaffNotifications } from "@/lib/whatsapp/staff-processor";
 import {
   getWhatsAppConnectionStatus,
+  getStaffWhatsAppConnectionStatus,
   sendWhatsAppReminder,
+  sendWhatsAppStaffNotification,
   whatsappConnections,
   whatsappGatewaySecret,
   whatsappRpc,
@@ -37,13 +40,26 @@ async function handleProcess(request: Request) {
         },
         { status: 503, headers },
       );
+    const staffConnections = connections.filter(
+      (item) => getStaffWhatsAppConnectionStatus(item.companyId).configured,
+    );
+    const secret = whatsappGatewaySecret();
+    const rpc = whatsappRpc();
     const result = await processReminders({
-      secret: whatsappGatewaySecret(),
+      secret,
       connections,
-      rpc: whatsappRpc(),
+      rpc,
+      batch: staffConnections.length ? 3 : 5,
       send: sendWhatsAppReminder,
     });
-    return Response.json(result, { headers });
+    const staff = await processStaffNotifications({
+      secret,
+      connections: staffConnections,
+      rpc,
+      batch: 2,
+      send: sendWhatsAppStaffNotification,
+    });
+    return Response.json({ ...result, staff }, { headers });
   } catch {
     // Provider errors can include recipients and credentials. Keep logs/responses generic.
     return Response.json(

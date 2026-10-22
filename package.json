@@ -34,7 +34,10 @@
     "test:team-insights:http": "tsx scripts/test-team-insights-http.ts",
     "test:plan-accounts:live": "tsx scripts/test-plan-accounts-live.ts",
     "test:deployment": "tsx scripts/test-deployment.ts",
-    "test:deployment:auth": "tsx scripts/test-deployment-auth.ts"
+    "test:deployment:auth": "tsx scripts/test-deployment-auth.ts",
+    "test:staff-whatsapp:db": "tsx scripts/test-staff-notifications-db.ts",
+    "test:cover:db": "tsx scripts/test-company-cover-db.ts",
+    "test:cover:live": "tsx scripts/test-company-cover-live.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

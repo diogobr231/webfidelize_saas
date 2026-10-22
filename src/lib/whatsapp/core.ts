@@ -7,6 +7,14 @@ export const whatsappConnectionSchema = z
     phoneNumberId: z.string().regex(/^\d{5,30}$/),
     accessToken: z.string().min(20).max(4096),
     templateName: z.string().regex(/^[a-z][a-z0-9_]{0,511}$/),
+    staffDailyTemplateName: z
+      .string()
+      .regex(/^[a-z][a-z0-9_]{0,511}$/)
+      .optional(),
+    staffNewAppointmentTemplateName: z
+      .string()
+      .regex(/^[a-z][a-z0-9_]{0,511}$/)
+      .optional(),
     languageCode: z.enum(["pt_BR"]),
   })
   .strict();

@@ -6,8 +6,38 @@ import { z } from "zod";
 import { requireCompany } from "@/lib/auth";
 import {
   parseReminderSettings,
+  parseStaffReminderSettings,
   type WhatsAppFormState,
 } from "@/lib/whatsapp-forms";
+
+export async function saveStaffReminders(
+  companyId: string,
+  _previous: WhatsAppFormState,
+  form: FormData,
+): Promise<WhatsAppFormState> {
+  if (!z.uuid().safeParse(companyId).success) notFound();
+  const { db } = await requireCompany(companyId, true, true);
+  const input = parseStaffReminderSettings(form);
+  if (!input.success)
+    return { error: "Informe um horário válido para o resumo diário." };
+  const { error } = await db.rpc("save_whatsapp_staff_settings", {
+    p_company: companyId,
+    p_daily_enabled: input.data.dailyEnabled,
+    p_daily_time: input.data.dailyTime,
+    p_new_enabled: input.data.newAppointmentEnabled,
+  });
+  if (error)
+    return {
+      error:
+        "Não foi possível salvar os avisos da equipe. Atualize a página e tente novamente.",
+    };
+  revalidatePath(`/painel/${companyId}/lembretes`);
+  revalidatePath(`/painel/${companyId}/meu-dia`);
+  return {
+    success:
+      "Preferências da equipe salvas. Cada profissional precisa autorizar o próprio WhatsApp em Meu dia. Os envios dependem da conexão e da cota disponível.",
+  };
+}
 
 export async function saveReminders(
   companyId: string,

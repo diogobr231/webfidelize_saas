@@ -12,8 +12,12 @@ import {
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmSubmit } from "@/components/confirm-submit";
-import { completeMyAppointment } from "./actions";
+import { myStaffWhatsAppPreferenceSchema } from "@/lib/whatsapp-forms";
+import { getStaffWhatsAppConnectionStatus } from "@/lib/whatsapp/server";
+import { MyWhatsAppPreferenceForm } from "./whatsapp-form";
+import { completeMyAppointment, saveMyWhatsAppPreference } from "./actions";
 import "@/components/team/team.css";
+import "../lembretes/reminders.css";
 
 export default async function MyDay({
   params,
@@ -33,6 +37,72 @@ export default async function MyDay({
   const now = new Date();
   const day = validDay(query.day) ? query.day : saoPauloDay(now);
   const base = `/painel/${companyId}`;
+  const writable = hasAccess(company.status, company.trial_ends_at);
+  const [preferenceResult, professional] = await Promise.all([
+    db.rpc("get_my_whatsapp_staff_preferences", { p_company: companyId }),
+    role === "EMPLOYEE"
+      ? db
+          .from("professionals")
+          .select("id,name")
+          .eq("company_id", companyId)
+          .eq("user_id", user.id)
+          .is("archived_at", null)
+          .maybeSingle()
+      : Promise.resolve(null),
+  ]);
+  const parsedPreference = myStaffWhatsAppPreferenceSchema.safeParse(
+    preferenceResult.data,
+  );
+  const preference =
+    !preferenceResult.error && parsedPreference.success
+      ? parsedPreference.data
+      : null;
+  const staffConnection = getStaffWhatsAppConnectionStatus(companyId);
+  const whatsAppPreference = (
+    <section
+      className="panel my-day-whatsapp"
+      aria-labelledby="my-whatsapp-title"
+    >
+      <details>
+        <summary>
+          <span>
+            <strong id="my-whatsapp-title">Minha agenda no WhatsApp</strong>
+            <small>
+              {preference?.enabled
+                ? "Autorização registrada · gerenciar preferência"
+                : "Receba seu resumo diário e avisos de novos agendamentos"}
+            </small>
+          </span>
+        </summary>
+        <div className="my-day-whatsapp-content">
+          <p className="reminder-help">
+            A empresa define o horário do resumo e quais avisos estão ativos.
+            Você recebe somente sua própria agenda e pode revogar a autorização
+            quando quiser.
+          </p>
+          <p className="notice">
+            {staffConnection.reason} Os avisos compartilham a cota de mensagens
+            da empresa.
+          </p>
+          {preference ? (
+            <MyWhatsAppPreferenceForm
+              key={`${preference.phone ?? "none"}-${preference.enabled}`}
+              phone={preference.phone}
+              enabled={preference.enabled}
+              writable={writable && Boolean(preference.professional_id)}
+              action={saveMyWhatsAppPreference.bind(null, companyId)}
+              permalink={`${base}/meu-dia`}
+            />
+          ) : (
+            <p className="notice error" role="alert">
+              Não foi possível carregar sua preferência de WhatsApp. Atualize a
+              página antes de editar.
+            </p>
+          )}
+        </div>
+      </details>
+    </section>
+  );
   const header = (
     <PageHeader
       eyebrow="Sua rotina de atendimento"
@@ -44,6 +114,7 @@ export default async function MyDay({
     return (
       <>
         {header}
+        {whatsAppPreference}
         <section className="panel">
           <EmptyState
             icon="calendar"
@@ -64,27 +135,22 @@ export default async function MyDay({
       </>
     );
 
-  const professional = await db
-    .from("professionals")
-    .select("id,name")
-    .eq("company_id", companyId)
-    .eq("user_id", user.id)
-    .is("archived_at", null)
-    .maybeSingle();
-  if (professional.error)
+  if (professional?.error)
     return (
       <>
         {header}
+        {whatsAppPreference}
         <p className="notice error" role="alert">
           Não foi possível consultar seu vínculo. Atualize a página para tentar
           novamente.
         </p>
       </>
     );
-  if (!professional.data)
+  if (!professional?.data)
     return (
       <>
         {header}
+        {whatsAppPreference}
         <section className="panel">
           <EmptyState
             icon="user"
@@ -120,12 +186,12 @@ export default async function MyDay({
       ? String(value.name)
       : "Cadastro indisponível";
   };
-  const writable = hasAccess(company.status, company.trial_ends_at);
   const previousDay = addDays(day, -1);
   const nextDay = addDays(day, 1);
   return (
     <>
       {header}
+      {whatsAppPreference}
       <form key={day} className="panel team-filters" method="get">
         <label htmlFor="my-day">
           Dia de atendimento

@@ -88,7 +88,7 @@
   height: 20px;
   flex: 0 0 20px;
   margin-top: 2px;
-  accent-color: #0f766e;
+  accent-color: var(--cyan, #007c94);
 }
 .reminder-toggle small {
   display: block;
@@ -129,8 +129,8 @@
   font-size: 0.85rem;
 }
 .reminder-connection-icon {
-  background: #e0f2f1;
-  color: #0f766e;
+  background: var(--accent-soft, #e5f8fc);
+  color: var(--cyan, #007c94);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -203,6 +203,70 @@
 .reminder-admin-item p {
   font-size: 0.85rem;
   color: var(--muted, #64748b);
+}
+.reminder-page .reminder-intro {
+  margin: 12px 0 20px;
+}
+.reminder-settings input:not([type="checkbox"]),
+.reminder-settings select {
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+.reminder-toggle > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.reminder-settings button {
+  min-height: 44px;
+}
+.my-day-whatsapp {
+  margin-bottom: 20px;
+  min-width: 0;
+}
+.my-day-whatsapp summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  cursor: pointer;
+  list-style: none;
+}
+.my-day-whatsapp summary::-webkit-details-marker {
+  display: none;
+}
+.my-day-whatsapp summary::after {
+  content: "+";
+  color: var(--cyan);
+  font-size: 1.5rem;
+  flex: 0 0 auto;
+}
+.my-day-whatsapp details[open] summary::after {
+  content: "−";
+}
+.my-day-whatsapp summary:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 6px;
+  border-radius: 8px;
+}
+.my-day-whatsapp summary strong,
+.my-day-whatsapp summary small {
+  display: block;
+  line-height: 1.6;
+}
+.my-day-whatsapp summary small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+.my-day-whatsapp-content {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  max-width: 680px;
 }
 @media (max-width: 1000px) {
   .reminder-grid {

@@ -10,7 +10,7 @@ Preparação de acesso por e-mail: [configuração, testes e pendências de prod
 
 Situação consolidada mais recente: [revisão para o primeiro piloto](docs/STATUS-PILOTO.md), de 21/10/2026, incluindo testes por segmento, perfis e limites comerciais.
 
-Lembretes por WhatsApp: [configuração e operação](docs/WHATSAPP.md). Inclui confirmação de presença, antecedências configuráveis, consentimento e teto mensal por empresa. O envio fica desabilitado até configurar a conexão oficial, aprovar o modelo e ativar o agendador de produção; não depende do Mercado Pago.
+Lembretes por WhatsApp: [configuração e operação](docs/WHATSAPP.md). Inclui confirmação de presença para clientes, resumo diário da equipe, aviso de novo agendamento, autorização individual e teto mensal compartilhado por empresa. O envio fica desabilitado até configurar a conexão oficial, aprovar os modelos e ativar o agendador de produção; não depende do Mercado Pago. Cada colaborador configura seu número em **Meu dia**. A foto do espaço pode ser enviada e publicada em **Personalização**, com prévia na página de reservas.
 
 O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a landing clara em azul-marinho e ciano, a logo oficial, os temas das áreas de trabalho, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
 

@@ -9,6 +9,7 @@ import {
   type WhatsAppConnection,
 } from "./core";
 import type { ReminderRpc, SendResult } from "./processor";
+import { staffNotificationTemplate, type StaffJob } from "./staff-core";
 
 export function whatsappConnections() {
   return parseConnections(process.env.WHATSAPP_CONNECTIONS_JSON);
@@ -69,10 +70,55 @@ export function whatsappRpc(): ReminderRpc {
   };
 }
 
+export function getStaffWhatsAppConnectionStatus(companyId: string): {
+  configured: boolean;
+  reason: string;
+} {
+  const base = getWhatsAppConnectionStatus(companyId);
+  if (!base.configured) return base;
+  const connection = whatsappConnections().find(
+    (item) => item.companyId === companyId,
+  );
+  if (
+    !connection?.staffDailyTemplateName ||
+    !connection?.staffNewAppointmentTemplateName
+  )
+    return {
+      configured: false,
+      reason:
+        "Os modelos de resumo diário e novo agendamento da equipe ainda precisam ser configurados e aprovados na Meta.",
+    };
+  return {
+    configured: true,
+    reason:
+      "Configuração da equipe disponível. O envio depende das preferências, autorização do colaborador, cota e agendador em execução.",
+  };
+}
+
 export async function sendWhatsAppReminder(
   connection: WhatsAppConnection,
   job: ReminderJob,
   token: string,
+): Promise<SendResult> {
+  return sendWhatsAppTemplate(
+    connection,
+    reminderTemplate(connection, job, token),
+  );
+}
+
+export async function sendWhatsAppStaffNotification(
+  connection: WhatsAppConnection,
+  job: StaffJob,
+): Promise<SendResult> {
+  return sendWhatsAppTemplate(
+    connection,
+    staffNotificationTemplate(connection, job),
+  );
+}
+
+async function sendWhatsAppTemplate(
+  connection: WhatsAppConnection,
+  body: unknown,
 ): Promise<SendResult> {
   const version = process.env.WHATSAPP_GRAPH_VERSION;
   if (
@@ -92,7 +138,7 @@ export async function sendWhatsAppReminder(
           Authorization: `Bearer ${connection.accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(reminderTemplate(connection, job, token)),
+        body: JSON.stringify(body),
       },
     );
     if (!response.ok)

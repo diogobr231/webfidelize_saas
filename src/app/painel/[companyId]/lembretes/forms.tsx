@@ -50,7 +50,7 @@ export function ReminderSettingsForm({
         <label className="reminder-toggle">
           <input type="checkbox" name="enabled" defaultChecked={enabled} />
           <span>
-            <strong>Ativar lembretes da empresa</strong>
+            <strong>Ativar lembretes dos clientes</strong>
             <small>
               Envie somente para clientes que autorizaram o contato.
             </small>
@@ -102,12 +102,95 @@ export function ReminderSettingsForm({
           />
         </label>
         <p id="reminder-limit-help" className="reminder-help">
-          Use zero para pausar o consumo. O limite efetivo será o menor entre
-          este valor e a cota liberada pela Web Fidelize. Não há compra ou
-          cobrança nesta tela.
+          Clientes e equipe compartilham este limite. Use zero para pausar todo
+          o consumo. O limite efetivo será o menor entre este valor e a cota
+          liberada pela Web Fidelize. Não há compra ou cobrança nesta tela.
         </p>
         {writable ? (
           <PendingButton>Salvar preferências</PendingButton>
+        ) : (
+          <p className="notice">
+            As preferências estão em modo de consulta enquanto a empresa estiver
+            sem acesso válido.
+          </p>
+        )}
+      </fieldset>
+      <Feedback state={state} />
+    </form>
+  );
+}
+
+export function StaffReminderSettingsForm({
+  dailyEnabled,
+  dailyTime,
+  newAppointmentEnabled,
+  writable,
+  action,
+  permalink,
+}: {
+  dailyEnabled: boolean;
+  dailyTime: string;
+  newAppointmentEnabled: boolean;
+  writable: boolean;
+  action: Action;
+  permalink: string;
+}) {
+  const [state, submit] = useActionState(action, empty, permalink);
+  return (
+    <form action={submit} className="reminder-settings">
+      <fieldset disabled={!writable}>
+        <legend className="sr-only">Avisos da equipe no WhatsApp</legend>
+        <label className="reminder-toggle">
+          <input
+            name="staff_daily_enabled"
+            type="checkbox"
+            defaultChecked={dailyEnabled}
+          />
+          <span>
+            <strong>Resumo da agenda no começo do dia</strong>
+            <small>
+              Cada profissional recebe apenas os próprios atendimentos do dia,
+              com horário, cliente e serviço.
+            </small>
+          </span>
+        </label>
+        <label className="reminder-limit">
+          Horário do resumo diário
+          <input
+            name="staff_daily_time"
+            type="time"
+            step={60}
+            defaultValue={dailyTime.slice(0, 5)}
+            required
+            aria-describedby="staff-daily-help"
+          />
+        </label>
+        <p id="staff-daily-help" className="reminder-help">
+          Horário de São Paulo. O processamento começa a partir deste horário.
+          Dias sem atendimentos não geram resumo. Agendas longas podem ser
+          divididas em mais de uma mensagem.
+        </p>
+        <label className="reminder-toggle">
+          <input
+            name="staff_new_appointment_enabled"
+            type="checkbox"
+            defaultChecked={newAppointmentEnabled}
+          />
+          <span>
+            <strong>Avisar quando entrar um novo agendamento</strong>
+            <small>
+              Envia um aviso ao profissional responsável quando um atendimento
+              futuro é criado. Alterações e remarcações não geram este aviso.
+            </small>
+          </span>
+        </label>
+        <p className="reminder-help">
+          O colaborador autoriza o próprio número em Meu dia. Você não pode
+          autorizar em nome dele. Os avisos da equipe usam a mesma cota mensal
+          dos lembretes dos clientes.
+        </p>
+        {writable ? (
+          <PendingButton>Salvar avisos da equipe</PendingButton>
         ) : (
           <p className="notice">
             As preferências estão em modo de consulta enquanto a empresa estiver
