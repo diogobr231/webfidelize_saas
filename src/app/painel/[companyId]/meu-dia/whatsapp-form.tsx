@@ -26,7 +26,13 @@ export function MyWhatsAppPreferenceForm({
   const [state, submit] = useActionState(action, empty, permalink);
   const [choice, setChoice] = useState(enabled ? "yes" : "no");
   return (
-    <form action={submit} className="reminder-settings">
+    <form
+      action={submit}
+      className="reminder-settings"
+      // A resolved server action can contain a validation error. Preserve the
+      // entered phone and consent instead of letting React reset the native form.
+      onReset={(event) => event.preventDefault()}
+    >
       {writable ? (
         <fieldset>
           <legend className="sr-only">

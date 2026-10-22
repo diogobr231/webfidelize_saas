@@ -34,9 +34,13 @@ export function CoverForm({
   const [failedPreview, setFailedPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState("");
   const selection = useRef(0);
+  const fileInput = useRef<HTMLInputElement>(null);
   const [state, action, pending] = useActionState(saveAction, {}, permalink);
   useEffect(() => {
-    if (state.success) setPrepared(null);
+    if (state.success) {
+      setPrepared(null);
+      if (fileInput.current) fileInput.current.value = "";
+    }
   }, [state]);
   useEffect(() => {
     if (!prepared) {
@@ -54,6 +58,10 @@ export function CoverForm({
       action={action}
       className="personalization-logo-form"
       aria-busy={preparing || pending}
+      // React also resets after a resolved action containing validation errors.
+      // Keep the actual FileList and publication choice paired with their preview;
+      // clear only the file after the backend explicitly confirms success.
+      onReset={(event) => event.preventDefault()}
       onSubmit={(event) => {
         if (preparing || fileError) {
           event.preventDefault();
@@ -96,6 +104,7 @@ export function CoverForm({
         <input
           id="cover"
           name="cover"
+          ref={fileInput}
           type="file"
           accept="image/png,image/jpeg,image/webp"
           aria-describedby="cover-tip"
