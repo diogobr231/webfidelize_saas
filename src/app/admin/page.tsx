@@ -63,6 +63,9 @@ export default async function Admin({
       <nav className="admin-topbar" aria-label="Administração da plataforma">
         <Brand href="/painel" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/ia">
+            <Icon name="sparkles" size={16} /> Central IA
+          </Link>
           <Link className="button secondary" href="/admin/automacoes">
             Automações e tarefas
           </Link>

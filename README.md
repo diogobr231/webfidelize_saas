@@ -1,5 +1,7 @@
 # Web Fidelize
 
+Central IA exclusiva do SUPER_ADMIN: [funcionamento, limites e configuração](docs/CENTRAL-IA.md). Integrada ao funil, suporte e tarefas, com fila e revisão de rascunhos. Geração real depende da liberação da conta AI Gateway; pagamentos de clientes permanecem pendentes.
+
 SaaS B2B multiempresa em reconstrução. Next.js App Router, TypeScript, Tailwind e Supabase. **Ainda não liberado para clientes pagantes.**
 
 Auditoria atual, correções, evidências de testes e prioridades para o lançamento: [auditoria para a primeira venda](docs/AUDITORIA-PRIMEIRA-VENDA.md), de 19/10/2026.

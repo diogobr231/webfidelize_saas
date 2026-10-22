@@ -299,6 +299,15 @@ export default async function OperationsPage({
                       task={task}
                       returnFilters={returnFilters}
                     />
+                    {task.status === "open" && (
+                      <Link
+                        className="ops-text-link"
+                        href={`/admin/ia?source_type=task&source_id=${task.id}#solicitar`}
+                      >
+                        <Icon name="sparkles" size={15} /> Preparar próximo
+                        passo com IA
+                      </Link>
+                    )}
                   </article>
                 );
               })}

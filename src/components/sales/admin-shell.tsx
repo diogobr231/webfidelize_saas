@@ -18,6 +18,9 @@ export function AdminSalesShell({
       <nav className="admin-topbar" aria-label="Administração comercial">
         <Brand href="/admin" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/ia">
+            <Icon name="sparkles" size={16} /> Central IA
+          </Link>
           <span className="admin-access">
             <Icon name="shield" size={14} /> SUPER_ADMIN
           </span>

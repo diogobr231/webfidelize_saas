@@ -8,6 +8,9 @@ export function OperationsShell({ children }: { children: React.ReactNode }) {
       <nav className="admin-topbar" aria-label="Administração da plataforma">
         <Brand href="/admin" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/ia">
+            Central IA
+          </Link>
           <Link className="button secondary" href="/admin">
             Visão geral
           </Link>

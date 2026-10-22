@@ -29,6 +29,7 @@ const protectedPaths = [
   "/admin",
   "/admin/comercial",
   "/admin/automacoes",
+  "/admin/ia",
   "/painel",
 ] as const;
 const allowedPaths = new Set<string>([

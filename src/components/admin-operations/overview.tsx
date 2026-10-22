@@ -45,6 +45,12 @@ export function OperationsOverview({
     icon: IconName;
   }[] = [
     {
+      href: "/admin/ia",
+      title: "Central IA",
+      description: "Análises e rascunhos para sua revisão",
+      icon: "sparkles",
+    },
+    {
       href: "/admin/automacoes",
       title: "Automações e tarefas",
       description: "Prazos, prioridades e execução",

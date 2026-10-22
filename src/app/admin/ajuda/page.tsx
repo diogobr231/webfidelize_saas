@@ -89,6 +89,9 @@ export default async function AdminHelp({
       <nav className="admin-topbar" aria-label="Administração da ajuda">
         <Brand href="/admin" />
         <div className="admin-topbar-actions">
+          <Link className="button secondary" href="/admin/ia">
+            <Icon name="sparkles" size={16} /> Central IA
+          </Link>
           <span className="admin-access">
             <Icon name="shield" size={14} /> SUPER_ADMIN
           </span>
@@ -239,6 +242,14 @@ export default async function AdminHelp({
                     <small>{ticket.company_id}</small>
                   </div>
                   <TicketCard ticket={ticket}>
+                    {ticket.status !== "resolved" && (
+                      <Link
+                        className="button secondary"
+                        href={`/admin/ia?source_type=ticket&source_id=${ticket.id}#solicitar`}
+                      >
+                        Preparar análise interna com IA
+                      </Link>
+                    )}
                     <details
                       className="help-response-details"
                       open={query.solicitacao === ticket.id}
