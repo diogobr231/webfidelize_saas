@@ -306,6 +306,13 @@ export default async function Setup({
           <section className="onb-card">
             <h2>Antes de receber agendamentos</h2>
             <p>
+              Já usa outra agenda? Importe horários do Google Agenda ou de uma
+              planilha, com revisão antes de salvar.
+            </p>
+            <Link className="button secondary" href={`${base}/agenda/importar`}>
+              Importar meus horários →
+            </Link>
+            <p>
               Profissionais novos recebem turnos de segunda a sexta, das 8h às
               18h, no fuso de São Paulo. Revise seus dias, intervalos e horários
               reais.

@@ -28,6 +28,9 @@ jobs:
       - run: pnpm test:team:db
       - run: pnpm test:personalization:db
       - run: pnpm test:operations:db
+      - run: pnpm test:classes:db
+      - run: pnpm test:import:db
+      - run: pnpm test:admin-diagnostics:db
       - run: pnpm test:sales:db
       - run: pnpm test:admin-operations:db
       - run: pnpm test:ai:db

@@ -1,0 +1,316 @@
+.calendar-import-page {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin-inline: auto;
+  min-width: 0;
+}
+.calendar-import-page > header h1 {
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  letter-spacing: -0.04em;
+  margin: 0.4rem 0;
+}
+.calendar-import-page p {
+  line-height: 1.6;
+  color: var(--muted, #536779);
+  overflow-wrap: anywhere;
+}
+.calendar-import-back {
+  width: fit-content;
+  font-weight: 600;
+}
+.calendar-import-intro {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.calendar-import-intro > div {
+  border: 1px solid var(--border, #dce7ee);
+  border-radius: 18px;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #fff, #f2fbfd);
+}
+.calendar-import-intro strong {
+  color: #12374a;
+}
+.calendar-import-intro p {
+  font-size: 0.9rem;
+  margin: 0.65rem 0;
+}
+.calendar-import-intro a {
+  font-size: 0.85rem;
+}
+.calendar-import-form {
+  display: grid;
+  gap: 1.1rem;
+  min-width: 0;
+}
+.calendar-import-form fieldset {
+  min-width: 0;
+}
+.calendar-import-upload {
+  border: 1px solid var(--border, #dce7ee);
+  border-radius: 20px;
+  background: white;
+  padding: 1.4rem;
+}
+.calendar-import-upload legend {
+  padding: 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #173c50;
+}
+.calendar-import-form label {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+.calendar-import-form input,
+.calendar-import-form select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+}
+.calendar-import-form input[type="file"] {
+  padding: 0.7rem;
+  background: #f6fafc;
+  border: 1px dashed #a9c8d7;
+  border-radius: 12px;
+  font-size: 0.88rem;
+}
+.calendar-import-form input[type="checkbox"] {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+  accent-color: #008ba5;
+  margin: 0;
+}
+.calendar-import-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.calendar-import-note,
+#import-file-hint {
+  font-size: 0.84rem;
+  margin: 0.65rem 0;
+}
+.calendar-import-note strong {
+  color: #163d4e;
+}
+.calendar-import-form button {
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.calendar-import-form > button {
+  justify-self: start;
+}
+.calendar-import-form summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #204f64;
+  font-size: 0.9rem;
+}
+.calendar-import-form summary:before {
+  content: "+";
+  font-weight: 700;
+}
+.calendar-import-form details[open] > summary:before {
+  content: "−";
+}
+.calendar-import-columns {
+  margin-top: 1rem;
+  border-top: 1px solid #e0ebf0;
+  padding-top: 0.5rem;
+}
+.calendar-import-feedback:empty {
+  display: none;
+}
+.calendar-import-feedback:focus-visible {
+  outline: 2px solid #0b9db4;
+  outline-offset: 5px;
+  border-radius: 8px;
+}
+.calendar-import-preview {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.calendar-import-preview > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.calendar-import-preview h2,
+.calendar-import-exclusions h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+.calendar-import-preview > header p {
+  margin: 0.4rem 0;
+  font-size: 0.88rem;
+}
+.calendar-import-rows {
+  display: grid;
+  gap: 0.8rem;
+}
+.calendar-import-row {
+  border: 1px solid #dce7ee;
+  border-radius: 16px;
+  padding: 1rem;
+  background: #fff;
+  min-width: 0;
+}
+.calendar-import-row.is-selected {
+  border-color: #a4d8e1;
+  box-shadow: 0 2px 8px #123e4b05;
+}
+.calendar-import-select {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 0.7rem !important;
+  min-height: 44px;
+}
+.calendar-import-select span {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.calendar-import-select strong {
+  overflow-wrap: anywhere;
+  color: #173c50;
+  font-weight: 650;
+}
+.calendar-import-select small {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #536779;
+  line-height: 1.5;
+}
+.calendar-import-status {
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  background: #edf2f6;
+  color: #526579;
+  margin: 0.6rem 0;
+}
+.calendar-import-status.status-ready,
+.calendar-import-status.status-imported {
+  background: #e7f7ef;
+  color: #176742;
+}
+.calendar-import-status.status-conflict,
+.calendar-import-status.status-invalid {
+  background: #fff2e6;
+  color: #96501c;
+}
+.calendar-import-status.status-duplicate {
+  background: #edf3fb;
+  color: #335e92;
+}
+.calendar-import-reason {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: #8c4c1e !important;
+}
+.calendar-import-confirm {
+  border: 1px solid #b8e0e8;
+  border-radius: 18px;
+  padding: 1.2rem;
+  background: #f1fbfd;
+  display: grid;
+  gap: 1rem;
+}
+.calendar-import-confirm > label {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.calendar-import-confirm p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+.calendar-import-confirm button,
+.calendar-import-confirm a {
+  justify-self: start;
+}
+.calendar-import-exclusions {
+  border: 1px solid #eadbc4;
+  border-radius: 16px;
+  padding: 1.2rem;
+  background: #fffcf6;
+}
+.calendar-import-exclusions ul {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+.calendar-import-exclusions li {
+  display: grid;
+  gap: 0.25rem;
+  border-bottom: 1px solid #eee3d3;
+  padding-bottom: 0.65rem;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.calendar-import-exclusions li span {
+  color: #715d44;
+}
+.calendar-import-page :focus-visible {
+  outline: 2px solid #008ba5;
+  outline-offset: 3px;
+}
+.calendar-import-page [aria-busy="true"] {
+  cursor: progress;
+}
+@media (max-width: 700px) {
+  .calendar-import-intro {
+    grid-template-columns: 1fr;
+  }
+  .calendar-import-grid {
+    grid-template-columns: 1fr;
+  }
+  .calendar-import-upload {
+    padding: 1rem;
+  }
+  .calendar-import-preview > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .calendar-import-form > button,
+  .calendar-import-confirm button,
+  .calendar-import-confirm a {
+    width: 100%;
+    justify-self: stretch;
+  }
+  .calendar-import-page {
+    gap: 1.1rem;
+  }
+  .calendar-import-intro > div {
+    padding: 1rem;
+  }
+  .calendar-import-form input[type="file"] {
+    font-size: 0.8rem;
+  }
+  .calendar-import-row {
+    padding: 0.9rem;
+  }
+}

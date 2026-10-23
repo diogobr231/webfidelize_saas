@@ -20,6 +20,9 @@ importers:
       ai:
         specifier: 7.0.148
         version: 7.0.148(zod@4.3.6)
+      ical.js:
+        specifier: 2.2.1
+        version: 2.2.1
       next:
         specifier: 16.4.2
         version: 16.4.2(@types/node@24.10.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -692,6 +695,9 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  ical.js@2.2.1:
+    resolution: {integrity: sha512-yK/UlPbEs316igb/tjRgbFA8ZV75rCsBJp/hWOatpyaPNlgw0dGDmU+FoicOcwX4xXkeXOkYiOmCqNPFpNPkQg==}
+
   iceberg-js@0.8.1:
     resolution: {integrity: sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA==}
     engines: {node: '>=20.0.0'}
@@ -1354,6 +1360,8 @@ snapshots:
     optional: true
 
   graceful-fs@4.2.11: {}
+
+  ical.js@2.2.1: {}
 
   iceberg-js@0.8.1: {}
 
