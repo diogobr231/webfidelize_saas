@@ -601,7 +601,7 @@ await check(
   },
 );
 await check(
-  "pending, expired and suspended company states close class writes and public access",
+  "blocked companies close class writes and catalogs but preserve the existing minimal receipt",
   async () => {
     for (const status of [
       "pending_card",
@@ -620,12 +620,50 @@ await check(
         await scalar("select public_classes('classes-qa',$1)", [date]),
         [],
       );
+      await as(null);
+      const receipt = (await scalar(
+        "select public_class_booking_receipt('classes-qa',$1,$2)",
+        [publicRequest, gateway],
+      )) as Record<string, unknown>;
+      assert.equal(receipt.registration_id, publicRegistration);
+      assert.equal(receipt.status, "canceled");
+      assert.equal(receipt.class_status, "canceled");
+      assert.deepEqual(Object.keys(receipt).sort(), [
+        "class_id",
+        "class_status",
+        "company_name",
+        "ends_at",
+        "professional_name",
+        "registration_id",
+        "service_name",
+        "starts_at",
+        "status",
+        "title",
+      ]);
+      assert.equal(await scalar("select public_catalog('classes-qa')"), null);
       assert.equal(
         await scalar(
-          "select public_class_booking_receipt('classes-qa',$1,$2)",
+          "select public_class_booking_receipt('other-slug',$1,$2)",
           [publicRequest, gateway],
         ),
         null,
+      );
+      assert.equal(
+        await scalar(
+          "select public_class_booking_receipt('classes-qa',$1,$2)",
+          [randomUUID(), gateway],
+        ),
+        null,
+      );
+      await denied(
+        "select public_class_booking_receipt('classes-qa',$1,$2)",
+        [publicRequest, "wrong-secret"],
+        /gateway unauthorized/,
+      );
+      await denied(
+        "select submit_public_class_booking($1,$2,$3,$4,$5,$6,$7)",
+        [...publicArgs.slice(0, 4), randomUUID(), gateway, "b".repeat(64)],
+        /class unavailable/,
       );
     }
     await db.exec("reset role");
@@ -633,6 +671,32 @@ await check(
       "update companies set status='trialing',trial_ends_at=now()+interval '7 days' where id=$1",
       [company],
     );
+    await as(owner);
+  },
+);
+await check(
+  "unpublished booking page preserves only a stored class receipt",
+  async () => {
+    await db.exec("reset role");
+    await db.query("update companies set booking_enabled=false where id=$1", [
+      company,
+    ]);
+    await as(null);
+    assert.equal(await scalar("select public_catalog('classes-qa')"), null);
+    assert.deepEqual(
+      await scalar("select public_classes('classes-qa',$1)", [date]),
+      [],
+    );
+    const receipt = (await scalar(
+      "select public_class_booking_receipt('classes-qa',$1,$2)",
+      [publicRequest, gateway],
+    )) as { registration_id: string; status: string };
+    assert.equal(receipt.registration_id, publicRegistration);
+    assert.equal(receipt.status, "canceled");
+    await db.exec("reset role");
+    await db.query("update companies set booking_enabled=true where id=$1", [
+      company,
+    ]);
     await as(owner);
   },
 );

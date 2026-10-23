@@ -969,28 +969,71 @@ await check(
   },
 );
 await check(
-  "disabled and unpaid public pages cannot expose a receipt",
+  "closed public pages preserve only existing gateway-authorized receipts",
   async () => {
     await db.query("select public.configure_booking($1,'demo-salao',false)", [
       ca,
     ]);
-    assert.equal(
-      await scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]),
-      "null",
-    );
+    const stored = () =>
+      scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]);
+    const expected = JSON.parse(await stored());
+    assert.equal(expected.id, reservation);
+    assert.equal(expected.status, "canceled");
+    assert.equal(await scalar("select public_catalog('demo-salao')"), "null");
     await db.query("select public.configure_booking($1,'demo-salao',true)", [
       ca,
     ]);
-    await db.exec("reset role");
-    await db.query(
-      "update public.companies set status='past_due' where id=$1",
-      [ca],
-    );
-    await as(null);
-    assert.equal(
-      await scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]),
-      "null",
-    );
+    for (const status of ["past_due", "trialing", "suspended", "canceled"]) {
+      await db.exec("reset role");
+      await db.query(
+        "update public.companies set status=$2,trial_ends_at=now()-interval '1 day' where id=$1",
+        [ca, status],
+      );
+      await as(null);
+      assert.deepEqual(JSON.parse(await stored()), expected);
+      assert.equal(await scalar("select public_catalog('demo-salao')"), "null");
+      assert.deepEqual(
+        (
+          await db.query("select * from public_slots($1,$2,$3,$4)", [
+            "demo-salao",
+            service,
+            professional,
+            day,
+          ])
+        ).rows,
+        [],
+      );
+      const newBooking = [...args];
+      newBooking[6] = "00000000-0000-4000-8000-000000000098";
+      await assert.rejects(
+        () => db.query(submit, newBooking),
+        /booking unavailable/,
+      );
+      assert.equal(
+        await scalar(receiptSql, ["demo-outro", request, "test-only-gateway"]),
+        "null",
+      );
+      assert.equal(
+        await scalar(receiptSql, [
+          "demo-salao",
+          newBooking[6],
+          "test-only-gateway",
+        ]),
+        "null",
+      );
+      await assert.rejects(
+        () => db.query(receiptSql, ["demo-salao", request, "wrong-secret"]),
+        /gateway unauthorized/,
+      );
+    }
+    assert.deepEqual(Object.keys(expected).sort(), [
+      "ends_at",
+      "id",
+      "professional_name",
+      "service_name",
+      "starts_at",
+      "status",
+    ]);
   },
 );
 await db.close();

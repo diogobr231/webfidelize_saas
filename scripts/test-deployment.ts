@@ -68,7 +68,9 @@ function requireSecurityHeaders(response: Response, path: string) {
   );
   assert.equal(
     response.headers.get("referrer-policy"),
-    "strict-origin-when-cross-origin",
+    path.startsWith("/agendar/")
+      ? "no-referrer"
+      : "strict-origin-when-cross-origin",
     `${path}: política de referência inesperada.`,
   );
   assert.match(
@@ -81,6 +83,10 @@ function requireSecurityHeaders(response: Response, path: string) {
     false,
     `${path}: não deve anunciar o framework.`,
   );
+  if (path.startsWith("/agendar/")) {
+    requireNoStore(response, path);
+    assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
+  }
 }
 
 function requireNoStore(response: Response, path: string) {

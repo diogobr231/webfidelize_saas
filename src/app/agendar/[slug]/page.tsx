@@ -5,6 +5,7 @@ import { publicDatabase } from "@/lib/supabase/public";
 import { signedPublicLogo } from "@/lib/company-logo";
 import { signedPublicCover } from "@/lib/company-cover";
 import { BookingCover } from "@/components/booking/booking-cover";
+import { StoredReceipt } from "@/components/booking/stored-receipt";
 import { money } from "@/lib/catalog";
 import {
   bookingReceiptSchema,
@@ -60,7 +61,29 @@ export default async function Booking({
   const db = publicDatabase();
   const { data, error } = await db.rpc("public_catalog", { slug });
   if (error) throw new Error("Catálogo temporariamente indisponível");
-  if (!data) notFound();
+  if (!data) {
+    // A closed catalog must not hide an existing customer's receipt. Only a
+    // signed, tenant-bound capability permits this minimal stored lookup.
+    const secret = process.env.BOOKING_GATEWAY_SECRET;
+    const claims =
+      q.recibo && secret ? readDetailedReceipt(q.recibo, slug, secret) : null;
+    if (!claims || !secret) notFound();
+    const result = await db.rpc("public_booking_receipt", {
+      slug,
+      request_id: claims.request_id,
+      gateway_secret: secret,
+    });
+    if (result.error)
+      throw new Error("Comprovante temporariamente indisponível");
+    const stored = bookingReceiptSchema.safeParse(result.data);
+    if (!stored.success || stored.data.id !== claims.receipt.id) notFound();
+    return (
+      <StoredReceipt
+        receipt={stored.data}
+        calendarUrl={`/agendar/${slug}/calendario?${new URLSearchParams({ recibo: q.recibo! })}`}
+      />
+    );
+  }
   const catalog = data as Catalog;
   const [logo, cover] = await Promise.all([
     signedPublicLogo(db, catalog.logo_path),

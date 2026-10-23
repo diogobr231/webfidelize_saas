@@ -7,6 +7,7 @@ import { publicDatabase } from "@/lib/supabase/public";
 import { signedPublicLogo } from "@/lib/company-logo";
 import { signedPublicCover } from "@/lib/company-cover";
 import { BookingCover } from "@/components/booking/booking-cover";
+import { StoredReceipt } from "@/components/booking/stored-receipt";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { money } from "@/lib/catalog";
@@ -59,7 +60,23 @@ export default async function PublicClassesPage({
   const result = await db.rpc("public_catalog", { slug });
   if (result.error)
     throw new Error("Página de turmas temporariamente indisponível");
-  if (!result.data) notFound();
+  if (!result.data) {
+    const secret = process.env.BOOKING_GATEWAY_SECRET;
+    const requestId = secret
+      ? readClassReceipt(query.recibo, slug, secret)
+      : null;
+    if (!requestId || !secret) notFound();
+    const response = await db.rpc("public_class_booking_receipt", {
+      p_slug: slug,
+      p_request_id: requestId,
+      p_gateway_secret: secret,
+    });
+    if (response.error)
+      throw new Error("Comprovante temporariamente indisponível");
+    const stored = classReceiptSchema.safeParse(response.data);
+    if (!stored.success) notFound();
+    return <StoredReceipt receipt={stored.data} />;
+  }
   const parsedCatalog = catalogSchema.safeParse(result.data);
   if (!parsedCatalog.success)
     throw new Error("Apresentação temporariamente indisponível");
