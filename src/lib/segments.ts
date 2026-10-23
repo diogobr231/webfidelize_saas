@@ -1,6 +1,18 @@
 import { niches } from "./catalog";
 
 const content = {
+  academia: {
+    headline: "Uma turma, várias vagas e uma agenda organizada.",
+    description:
+      "Organize aulas e atendimentos individuais com controle de vagas, participantes e inscrições online.",
+    services: [
+      "Aula de exemplo",
+      "Avaliação de exemplo",
+      "Atendimento de exemplo",
+    ],
+    limitation:
+      "Turmas e reservas estão disponíveis no painel. A demonstração interativa apresenta atendimentos individuais; fichas de treino, catracas e mensalidades de alunos não estão incluídas.",
+  },
   salao: {
     headline:
       "Mais cuidado com suas clientes. Menos tempo organizando horários.",

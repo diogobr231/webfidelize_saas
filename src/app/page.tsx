@@ -70,7 +70,7 @@ const questions = [
   {
     question: "O sistema tem módulos específicos para cada segmento?",
     answer:
-      "Hoje, os segmentos compartilham o núcleo de agenda, clientes e serviços. Recursos como prontuário, comandas, caixa, cadastro de pets, rotas, turmas e inteligência artificial não fazem parte da versão disponível.",
+      "Os segmentos compartilham agenda individual, turmas com limite de vagas, reservas online, clientes e serviços. Recursos como prontuário, comandas, caixa, cadastro de pets, rotas e inteligência artificial para clientes não fazem parte da versão disponível.",
   },
 ];
 

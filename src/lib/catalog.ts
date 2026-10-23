@@ -53,7 +53,7 @@ export const niches = [
     name: "Academia",
     icon: "◈",
     color: "#c084fc",
-    description: "Módulo de turmas e alunos em planejamento.",
+    description: "Turmas com vagas, inscrições online e agenda individual.",
   },
 ] as const;
 export const plans = [

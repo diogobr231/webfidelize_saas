@@ -101,6 +101,16 @@ export default async function Segment({
               title: "Receba pelo seu próprio link",
               text: "Personalize a página de agendamento com logo, cores e foto do espaço. Seu cliente escolhe serviço, profissional e horário pelo celular.",
             },
+            {
+              icon: "users" as const,
+              title: "Atenda grupos com controle de vagas",
+              text: "Crie uma turma ou atividade com um profissional, acompanhe os participantes e receba inscrições até o limite configurado.",
+            },
+            {
+              icon: "calendar" as const,
+              title: "Traga a agenda que você já usa",
+              text: "Importe um arquivo ICS do Google Agenda ou CSV de outro sistema. Revise os horários antes de salvar, com prevenção de duplicidades e conflitos.",
+            },
           ].map((b) => (
             <article key={b.title}>
               <Icon name={b.icon} />

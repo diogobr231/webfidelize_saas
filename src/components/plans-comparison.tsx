@@ -10,6 +10,8 @@ const features = [
   "Clientes e catálogo de serviços",
   "Turnos e intervalos por profissional",
   "Página pública de agendamento",
+  "Turmas com limite de vagas e inscrição online",
+  "Importação de agenda por ICS ou CSV",
   "Configuração guiada e central de ajuda",
 ];
 export function PlansComparison({
