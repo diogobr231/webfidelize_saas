@@ -176,7 +176,8 @@ export function OperationsOverview({
               </dl>
               <p className="ops-hint">
                 A automação prepara tarefas para os testes próximos do fim. O
-                cartão e a assinatura dependem de confirmação do provedor.
+                teste dispensa cartão; a assinatura paga depende de confirmação
+                do provedor.
               </p>
               <Link
                 href="/admin/automacoes?regra=trial_ending"

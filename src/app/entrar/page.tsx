@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
 import { login } from "@/app/auth/actions";
 import { configured } from "@/lib/supabase/server";
 import { niches } from "@/lib/catalog";
@@ -70,10 +71,9 @@ export default async function Login({
           <label htmlFor="password">Senha</label>
           <Link href="/recuperar">Esqueceu sua senha?</Link>
         </div>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           minLength={8}
           maxLength={128}
           required

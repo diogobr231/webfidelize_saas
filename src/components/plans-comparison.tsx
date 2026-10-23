@@ -102,25 +102,24 @@ export function PlansComparison({
         <div>
           <h3>7 dias grátis para conhecer sua rotina no sistema</h3>
           <p>
-            Os 7 dias grátis no Essencial, com 1 profissional, exigem cartão
-            cadastrado e autorizado no Mercado Pago. O período começa somente
-            após a confirmação do cartão pelo provedor. A primeira mensalidade
-            será cobrada apenas depois dos 7 dias, com renovação mensal pelo
-            valor do plano contratado. Cancelar antes do fim do teste evita a
-            primeira cobrança.
+            Experimente o Essencial, com 1 profissional, por 7 dias grátis, sem
+            cartão e sem cobrança automática. Confirme seu e-mail e cadastre a
+            empresa para começar. O prazo fica salvo no sistema e aparece no
+            painel. Ao terminar, alterações ficam bloqueadas e seus dados
+            permanecem disponíveis para consulta.
           </p>
           <p>
-            A cobrança online pelo Mercado Pago e a ativação de novos testes
-            ainda estão em preparação. Criar a empresa agora não inicia o teste
-            nem gera cobrança. O proprietário ocupa uma vaga quando também
-            atende; cadastrar um profissional é diferente de convidar alguém
-            para acessar o painel. Recursos específicos de nicho, IA, caixa e
-            chatbot não estão incluídos nesta versão. Os avisos de WhatsApp
-            dependem de configuração e cota próprias.
+            A contratação e a cobrança online ainda estão em preparação. Para
+            continuar após o teste, fale com a Web Fidelize. O proprietário
+            ocupa uma vaga quando também atende; cadastrar um profissional é
+            diferente de convidar alguém para acessar o painel. Recursos
+            específicos de nicho, IA, caixa e chatbot não estão incluídos nesta
+            versão. Os avisos de WhatsApp dependem de configuração e cota
+            próprias.
           </p>
           {!authenticated && (
             <Link className="button secondary" href="/cadastro">
-              Preparar meu cadastro <Icon name="arrow-right" size={16} />
+              Testar grátis por 7 dias <Icon name="arrow-right" size={16} />
             </Link>
           )}
         </div>

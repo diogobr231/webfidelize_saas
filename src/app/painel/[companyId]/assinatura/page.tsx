@@ -3,7 +3,7 @@ import { commercialPlans } from "@/lib/commercial";
 import { hasAccess } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/page-header";
 import { PlansComparison } from "@/components/plans-comparison";
-import { money, niches } from "@/lib/catalog";
+import { niches } from "@/lib/catalog";
 import Link from "next/link";
 export default async function Subscription({
   params,
@@ -46,29 +46,14 @@ export default async function Subscription({
           </p>
           <h2 id="trial-activation-title">Ativação do teste pendente</h2>
           <p>
-            Sua empresa foi cadastrada. Para liberar os 7 dias de teste, é
-            obrigatório cadastrar e autorizar um cartão no ambiente seguro do
-            Mercado Pago. Esta integração ainda está em configuração; seu
-            período de teste não começou.
-          </p>
-          <p>
-            A primeira mensalidade será cobrada somente após os 7 dias, com
-            renovação mensal
-            {current
-              ? ` de ${money(current.cents)} no plano ${current.name}`
-              : " pelo valor do plano contratado"}
-            . Cancelar antes do fim do teste evita a primeira cobrança. O prazo
-            e as condições serão apresentados na ativação.
-          </p>
-          <p>
-            O provedor pode realizar uma validação temporária do cartão,
-            conforme as condições informadas no ambiente de pagamento. Essa
-            validação não é a primeira mensalidade.
+            Sua empresa foi cadastrada, mas ainda consta com a ativação
+            pendente. A oferta atual permite 7 dias sem cartão. Fale com o
+            suporte para verificar este cadastro; nenhuma cobrança foi iniciada.
           </p>
           <p>
             {role === "OWNER"
-              ? "O cadastro do cartão será realizado pelo proprietário quando a integração estiver disponível. Sua conta permanece salva e nenhuma cobrança foi iniciada por este cadastro."
-              : "A ativação é responsabilidade do proprietário da empresa. Colaboradores convidados não precisam cadastrar cartão."}
+              ? "Seus dados estão salvos. O suporte pode consultar o diagnóstico de acesso da empresa."
+              : "O proprietário da empresa pode solicitar a verificação do acesso."}
           </p>
           <a
             className="button secondary"
@@ -93,8 +78,10 @@ export default async function Subscription({
       {company.status === "trialing" &&
         company.trial_card_required === false && (
           <p className="notice">
-            Seu teste já existente mantém o prazo e as condições anteriores. A
-            exigência de cartão se aplica à ativação de novos testes.
+            Este teste não exige cartão e não gera cobrança automática. Confira
+            abaixo o prazo registrado para sua empresa. Ao terminar, as
+            alterações ficam bloqueadas e seus dados permanecem disponíveis para
+            consulta.
           </p>
         )}
       <section
@@ -130,7 +117,7 @@ export default async function Subscription({
           </strong>
           <small>
             {company.status === "pending_card"
-              ? "Os 7 dias começam após a confirmação segura do cartão."
+              ? "Fale com o suporte para verificar a ativação deste cadastro."
               : "Reabrir esta tela não renova o teste."}
           </small>
         </div>

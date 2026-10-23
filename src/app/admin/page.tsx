@@ -90,7 +90,7 @@ export default async function Admin({
         {feedback.erro && (
           <p role="alert" className="notice error">
             {feedback.erro === "cartao"
-              ? "O teste de novas empresas depende da autorização do cartão pelo provedor. Não é possível iniciá-lo manualmente."
+              ? "Este cadastro mantém uma restrição de ativação no backend. Confira o diagnóstico da empresa antes de alterar o acesso."
               : "Não foi possível aplicar a alteração. Confira os valores, permissões e confirme a operação."}
           </p>
         )}
@@ -118,10 +118,10 @@ export default async function Admin({
           <div>
             <strong>Ativação paga em preparação</strong>
             <p>
-              A ativação de assinaturas depende da conciliação Mercado Pago,
-              ainda pendente. Novos testes exigem cartão autorizado pelo
-              provedor. Os testes anteriores mantêm seus prazos; não é possível
-              liberar cartão ou assinatura paga manualmente.
+              Novas empresas recebem 7 dias grátis sem cartão, com prazo
+              controlado no backend. A ativação de assinaturas pagas depende da
+              conciliação Mercado Pago, ainda pendente; não é possível liberar
+              uma assinatura paga manualmente.
             </p>
           </div>
         </div>

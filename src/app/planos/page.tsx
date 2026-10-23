@@ -45,9 +45,8 @@ export default async function Plans() {
             para acompanhar o crescimento da sua equipe.
           </p>
           <p>
-            <strong>7 dias grátis no Essencial</strong>, com cartão autorizado.
-            Ativação em preparação. <a href="#condicoes-teste">Ver condições</a>
-            .
+            <strong>7 dias grátis no Essencial</strong>, sem cartão e sem
+            cobrança automática. <a href="#condicoes-teste">Ver condições</a>.
           </p>
           <a
             className="plans-contact"
@@ -159,12 +158,11 @@ export default async function Plans() {
               <Icon name="plus" size={18} />
             </summary>
             <p>
-              O teste de 7 dias grátis é no Essencial, com 1 profissional. O
-              cartão é obrigatório e a contagem começa somente após sua
-              confirmação pelo Mercado Pago. A primeira mensalidade será cobrada
-              depois do teste, com renovação mensal. Cancelar antes do fim do
-              teste evita a primeira cobrança. A ativação ainda está em
-              preparação; o cadastro da conta e da empresa não inicia o teste.
+              O teste de 7 dias grátis é no Essencial, com 1 profissional, sem
+              cartão e sem cobrança automática. Confirme seu e-mail e cadastre
+              sua empresa para começar. O prazo fica salvo no sistema e aparece
+              no painel. Ao terminar, as alterações ficam bloqueadas e seus
+              dados permanecem disponíveis para consulta.
             </p>
           </details>
           <details>
@@ -173,12 +171,11 @@ export default async function Plans() {
               <Icon name="plus" size={18} />
             </summary>
             <p>
-              A cobrança online ainda não está disponível. O cadastro do cartão
-              será feito no ambiente seguro do Mercado Pago. Enquanto essa
-              integração estiver em configuração, novos testes ficam com a
-              ativação pendente. Fale pelo WhatsApp para consultar as condições;
-              entrar em contato não ativa uma assinatura nem altera o plano da
-              sua empresa.
+              O teste já está disponível sem cartão. A contratação e a cobrança
+              online ainda estão em preparação. Fale pelo WhatsApp para
+              consultar as condições para continuar após o teste; entrar em
+              contato não ativa uma assinatura paga nem altera o plano da sua
+              empresa.
             </p>
           </details>
         </div>

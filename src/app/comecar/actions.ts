@@ -127,7 +127,7 @@ export async function startCompany(
     );
   }
   revalidatePath("/painel");
-  redirect(`/painel/${data}/assinatura`);
+  finish(data, "servicos", form);
 }
 
 async function saveSetupRecord(

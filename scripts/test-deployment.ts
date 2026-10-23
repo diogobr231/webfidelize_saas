@@ -154,8 +154,9 @@ for (const path of publicPaths) {
       for (const price of ["49,90", "89,90", "149,90"]) {
         assert(text.includes(price), `${path}: preço ${price} ausente.`);
       }
-      assert.match(text, /Cartão obrigatório|exigem cartão cadastrado/i);
-      assert.match(text, /ativação[\s\S]{0,100}em preparação/i);
+      assert.match(text, /sem cartão e sem cobrança automática/i);
+      assert.match(text, /prazo fica salvo no sistema e aparece no painel/i);
+      assert.doesNotMatch(text, /Cartão obrigatório|exigem cartão cadastrado/i);
       assert.match(html, /href="\/demonstracao"/);
       assert.match(html, /https:\/\/wa\.me\/5518997695445/);
     }

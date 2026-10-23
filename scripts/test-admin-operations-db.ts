@@ -98,7 +98,9 @@ const tasks = () =>
   db
     .query<{
       item: Task;
-    }>("select to_jsonb(t) as item from public.platform_tasks t order by created_at,id")
+    }>(
+      "select to_jsonb(t) as item from public.platform_tasks t order by created_at,id",
+    )
     .then((r) => r.rows.map((row) => row.item));
 const getTask = (id: string) =>
   scalar<Task>("select to_jsonb(t) from public.platform_tasks t where id=$1", [
@@ -141,7 +143,7 @@ const demo = await scalar<string>(
   "insert into public.companies(name,niche,is_demo) values('DEMO excluded','academia',true) returning id",
 );
 const pending = await scalar<string>(
-  "insert into public.companies(name,niche,trial_card_required) values('Pending card','pet-shop',true) returning id",
+  "insert into public.companies(name,niche,trial_card_required,status,trial_ends_at) values('Pending card','pet-shop',true,'pending_card',null) returning id",
 );
 const active = await scalar<string>(
   "insert into public.companies(name,niche) values('Active fixture','escritorio') returning id",

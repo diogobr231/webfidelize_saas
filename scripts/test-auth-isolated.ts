@@ -9,6 +9,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createRecoveryProof } from "../src/lib/auth-recovery-proof";
 import {
   confirmationHash,
+  onboardingConfirmationHash,
   fakeEmail,
   fakePassword,
   recoveryHash,
@@ -301,11 +302,155 @@ async function main() {
       "GET leaves OTP untouched; explicit POST confirms once and returns to invitation",
     );
 
+    phase = "new owner onboarding without a card";
+    const newOwner: Browser = new Map();
+    const regularSignup = form(
+      await (await request(newOwner, "/cadastro")).text(),
+      'name="password"',
+    );
+    regularSignup.set("email", fakeEmail);
+    regularSignup.set("password", fakePassword);
+    const regularSignupDestination = await destination(
+      await request(newOwner, "/cadastro", regularSignup),
+    );
+    assert.equal(regularSignupDestination.pathname, "/entrar");
+    assert.equal(
+      regularSignupDestination.searchParams.get("aviso"),
+      "confirme-email",
+    );
+    const normalConfirmationPath = `/auth/confirm?${new URLSearchParams({ token_hash: onboardingConfirmationHash, type: "email", next: "/painel" })}`;
+    const normalConfirmationForm = form(
+      await (await request(newOwner, normalConfirmationPath)).text(),
+      'name="token_hash"',
+    );
+    assert.equal(
+      (
+        await destination(
+          await request(
+            newOwner,
+            normalConfirmationPath,
+            normalConfirmationForm,
+          ),
+        )
+      ).pathname,
+      "/painel",
+    );
+    assert.equal(
+      (await destination(await request(newOwner, "/painel"))).pathname,
+      "/comecar",
+    );
+    const startHtml = await (await request(newOwner, "/comecar")).text();
+    assert.match(startHtml, /sem cartão|[Nn]ão precisa de cartão/i);
+    const companyForm = form(startHtml, 'name="niche"');
+    companyForm.set("name", "Salão de teste isolado");
+    companyForm.set("niche", "salao");
+    companyForm.set("intent", "next");
+    const companyDestination = await destination(
+      await request(newOwner, "/comecar", companyForm),
+    );
+    const company = backend.state.company;
+    assert.ok(company);
+    const panelPath = `/painel/${company.id}`;
+    const setupPath = `${panelPath}/configuracao`;
+    assert.equal(companyDestination.pathname, setupPath);
+    assert.equal(companyDestination.searchParams.get("etapa"), "servicos");
+    assert.equal(backend.state.companyCreations, 1);
+    assert.equal(company.status, "trialing");
+    assert.equal(company.trial_card_required, false);
+    const originalExpiry = company.trial_ends_at;
+    const servicePath = `${setupPath}?etapa=servicos`;
+    const service = form(
+      await (await request(newOwner, servicePath)).text(),
+      'name="price"',
+    );
+    service.set("name", "Corte de teste isolado");
+    service.set("duration", "30");
+    service.set("price", "49,90");
+    service.set("intent", "next");
+    assert.equal(
+      (
+        await destination(await request(newOwner, servicePath, service))
+      ).searchParams.get("etapa"),
+      "equipe",
+    );
+    assert.equal(backend.state.services.length, 1);
+    const staffPath = `${setupPath}?etapa=equipe`;
+    const professional = form(
+      await (await request(newOwner, staffPath)).text(),
+      'name="record_id"',
+    );
+    professional.set("name", "Profissional de teste isolado");
+    professional.set("intent", "next");
+    assert.equal(
+      (
+        await destination(await request(newOwner, staffPath, professional))
+      ).searchParams.get("etapa"),
+      "resumo",
+    );
+    assert.equal(backend.state.professionals.length, 1);
+    const panel = await request(newOwner, panelPath);
+    assert.equal(panel.status, 200);
+    const panelHtml = await panel.text();
+    assert.match(panelHtml, /Seu negócio, em perspectiva/);
+    assert.match(panelHtml, /Teste gratuito até/);
+    assert.doesNotMatch(
+      panelHtml,
+      /Não foi possível carregar os indicadores|Seu teste ainda não começou/,
+    );
+    assert.equal(
+      (await destination(await request(newOwner, "/painel"))).pathname,
+      panelPath,
+    );
+    assert.equal(
+      (await destination(await request(newOwner, "/comecar", companyForm)))
+        .pathname,
+      setupPath,
+    );
+    assert.equal(backend.state.companyCreations, 1);
+    assert.equal(company.trial_ends_at, originalExpiry);
+    pass(
+      "confirmed signup reaches company setup, saves service and professional, enters dashboard without card, and retry preserves expiry (isolated provider)",
+    );
+
+    phase = "expired trial server action";
+    company.trial_ends_at = new Date(Date.now() - 1000).toISOString();
+    const expiredWrite = await destination(
+      await request(newOwner, servicePath, service),
+    );
+    assert.equal(expiredWrite.pathname, panelPath);
+    assert.equal(expiredWrite.searchParams.get("erro"), "assinatura");
+    assert.equal(backend.state.services.length, 1);
+    const expiredPanel = await (await request(newOwner, panelPath)).text();
+    assert.match(expiredPanel, /Alterações bloqueadas/);
+    company.trial_ends_at = originalExpiry;
+    pass(
+      "server rechecks trial expiry before writes while retaining read access",
+    );
+
     phase = "login and destination allowlist";
     const loginPath = `/entrar?${new URLSearchParams({ next: invitation })}`;
-    const login = form(
-      await (await request(new Map(), loginPath)).text(),
-      'name="password"',
+    const loginHtml = await (await request(new Map(), loginPath)).text();
+    const login = form(loginHtml, 'name="password"');
+    assert.ok(
+      [...loginHtml.matchAll(/<input\b[^>]*>/g)]
+        .map((match) => attrs(match[0]))
+        .some(
+          (input) =>
+            input.name === "password" &&
+            input.type === "password" &&
+            (input.autocomplete || input.autoComplete) === "current-password",
+        ),
+    );
+    assert.ok(
+      [...loginHtml.matchAll(/<button\b[^>]*>/g)]
+        .map((match) => attrs(match[0]))
+        .some(
+          (button) =>
+            button.type === "button" &&
+            button["aria-label"] === "Mostrar senha" &&
+            button["aria-pressed"] === "false" &&
+            button["aria-controls"] === "password",
+        ),
     );
     login.set("email", fakeEmail);
     login.set("password", fakePassword);

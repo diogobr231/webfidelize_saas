@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
 import { signup } from "@/app/auth/actions";
 import { PendingButton } from "@/components/pending-button";
 import { AuthShell } from "@/components/auth-shell";
@@ -22,7 +23,7 @@ export default async function Signup({
       title="Um novo começo para seu negócio."
       description={
         next === "/painel"
-          ? "Crie sua conta, confirme seu e-mail e cadastre a empresa. A configuração dos serviços e profissionais será liberada após a ativação do teste."
+          ? "Crie sua conta, confirme seu e-mail e configure sua empresa para começar os 7 dias grátis, sem cartão."
           : "Crie sua conta usando o e-mail que recebeu o convite. Após confirmar o cadastro, você poderá aceitar sua participação na empresa."
       }
       footer={
@@ -38,7 +39,7 @@ export default async function Signup({
         <Icon name="check" size={17} />
         <span>
           {next === "/painel"
-            ? "O teste de 7 dias grátis no Essencial exige cartão cadastrado e autorizado no Mercado Pago. O período começa somente após a confirmação do cartão pelo provedor. Primeira mensalidade somente após o teste. Cancelar antes do fim do teste evita a primeira cobrança. A ativação está em preparação; criar sua conta agora não inicia o período nem gera cobrança."
+            ? "Seu teste no plano Essencial, com 1 profissional, começa quando você cadastra sua empresa após confirmar o e-mail. São 7 dias grátis, sem cartão e sem cobrança automática. O prazo aparece no painel e não é renovado ao entrar novamente."
             : "Você revisará o convite antes de participar. Criar uma conta não aceita o convite automaticamente."}
         </span>
       </div>
@@ -60,10 +61,9 @@ export default async function Signup({
           placeholder="voce@empresa.com.br"
         />
         <label htmlFor="password">Senha com pelo menos 8 caracteres</label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           minLength={8}
           maxLength={128}
           required

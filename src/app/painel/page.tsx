@@ -101,15 +101,14 @@ export default async function Companies({
               : "Bem-vindo à Web Fidelize"}
           </h2>
           <p>
-            Cadastre sua empresa e segmento. Após a ativação do teste, você
-            poderá configurar serviços e profissionais. Os cadastros salvos
-            serão mantidos para continuar depois.
+            Cadastre sua empresa e segmento para começar. Em seguida, configure
+            os serviços e profissionais. Os cadastros salvos serão mantidos para
+            continuar depois.
           </p>
           <p>
-            Os sete dias de teste no Essencial exigem cartão autorizado e
-            começam após sua confirmação no Mercado Pago. A primeira mensalidade
-            será cobrada somente depois do teste. A ativação está em preparação;
-            criar a empresa agora não inicia o período.
+            Os 7 dias grátis no Essencial começam ao criar sua empresa, sem
+            cartão e sem cobrança automática. O prazo aparece no painel; entrar
+            novamente não renova o período de teste.
           </p>
           <Link className="button" href="/comecar">
             Continuar configuração →

@@ -170,13 +170,13 @@ export function CompanySetupForm() {
           <Icon name="sparkles" size={18} />
         </span>
         <p>
-          O teste de 7 dias no Essencial, com 1 profissional, exige confirmação
-          do cartão no Mercado Pago. A primeira mensalidade será cobrada somente
-          após o teste, com renovação mensal. A ativação está em preparação:
-          criar a empresa agora não inicia o período nem gera cobrança.
+          Ao criar sua empresa, você começa os 7 dias grátis no Essencial, com 1
+          profissional. Não precisa de cartão e não há cobrança automática. O
+          prazo fica salvo no sistema; você pode continuar a configuração depois
+          sem perder os dados ou reiniciar o teste.
         </p>
       </div>
-      <FormActions nextLabel="Criar empresa e ver ativação" />
+      <FormActions nextLabel="Criar empresa e começar teste" />
     </form>
   );
 }

@@ -53,7 +53,7 @@ const reasons: Record<string, string> = {
   trialing: "Empresa em período de teste.",
   trial_expired: "O período de teste terminou.",
   pending_card:
-    "O cadastro foi concluído, mas a ativação aguarda autorização do cartão. Como a integração de pagamentos ainda está em preparação, o teste não começou e os cadastros operacionais permanecem bloqueados.",
+    "O cadastro foi concluído, mas o banco ainda registra ativação pendente. A oferta atual permite teste sem cartão. Verifique o histórico antes de alterar o acesso; os cadastros operacionais continuam bloqueados até uma ativação válida.",
   past_due: "O acesso operacional aguarda regularização da assinatura.",
   canceled: "A empresa está cancelada.",
   suspended: "A empresa está suspensa.",

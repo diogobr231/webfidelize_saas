@@ -264,40 +264,37 @@ pass(
 );
 
 const homeText = readableText(home);
-assert.match(homeText, /demonstração sem login e sem cartão/i);
+assert.match(homeText, /sem login e sem cartão/i);
 assert.match(homeText, /7 dias grátis no Essencial/i);
+assert.match(homeText, /sem cartão e sem cobrança automática/i);
 assert.match(
   homeText,
-  /teste começa somente após a confirmação do cartão no Mercado Pago/i,
+  /confirme seu e-mail e (?:cadastre|crie) (?:a|sua) empresa para (?:começar|iniciar)/i,
 );
-assert.match(homeText, /primeira mensalidade somente após os 7 dias/i);
-assert.match(homeText, /renovação mensal/i);
 assert.match(
   homeText,
-  /cancelar antes do fim do teste evita a primeira cobrança/i,
+  /ao terminar(?: o teste)?, (?:as )?alterações ficam bloqueadas/i,
 );
-assert.match(homeText, /ativação do teste ainda estão em preparação/i);
+assert.match(
+  homeText,
+  /contratação e a cobrança online ainda estão em preparação/i,
+);
 assert.doesNotMatch(
   homeText,
-  /nenhum cartão é solicitado para ativar|começam na criação da empresa/i,
+  /cartão obrigatório|exigem cartão cadastrado|teste começa somente após a confirmação do cartão/i,
+);
+assert.match(readableText(signup), /sem cartão e sem cobrança automática/i);
+assert.match(
+  readableText(signup),
+  /teste no plano Essencial, com 1 profissional/i,
 );
 assert.match(
   readableText(signup),
-  /exige cartão cadastrado e autorizado no Mercado Pago/i,
-);
-assert.match(readableText(signup), /7 dias grátis no Essencial/i);
-assert.match(
-  readableText(signup),
-  /período começa somente após a confirmação do cartão pelo provedor/i,
+  /começa quando você cadastra sua empresa após confirmar o e-mail/i,
 );
 assert.match(
   readableText(signup),
-  /cancelar antes do fim do teste evita a primeira cobrança/i,
-);
-assert.match(readableText(signup), /ativação está em preparação/i);
-assert.match(
-  readableText(signup),
-  /criar sua conta agora não inicia o período/i,
+  /prazo aparece no painel e não é renovado ao entrar novamente/i,
 );
 assert.doesNotMatch(
   signup,
@@ -312,7 +309,7 @@ assert.doesNotMatch(
   /cartão|mensalidade|ativação do teste/i,
 );
 pass(
-  "Oferta exige cartão antes do teste sem coletar dados de pagamento ou impor cobrança ao colaborador convidado",
+  "Oferta libera sete dias sem cartão, explica início e expiração e preserva o convite do colaborador",
 );
 
 const ids = new Set(
@@ -473,35 +470,33 @@ const plansText = readableText(plans);
 for (const condition of [
   /7 dias grátis no Essencial/i,
   /1 profissional/i,
-  /exigem cartão cadastrado e autorizado/i,
-  /primeira mensalidade será cobrada apenas depois dos 7 dias/i,
-  /período começa somente após a confirmação do cartão pelo provedor/i,
-  /criar a empresa agora não inicia o teste/i,
-  /renovação mensal/i,
-  /cancelar antes do fim do teste evita a primeira cobrança/i,
-  /ativação ainda está em preparação/i,
+  /sem cartão e sem cobrança automática/i,
+  /confirme seu e-mail e cadastre a empresa para começar/i,
+  /prazo fica salvo no sistema e aparece no painel/i,
+  /ao terminar, alterações ficam bloqueadas/i,
   /proprietário também conta quando atende/i,
   /convite para acessar o painel é diferente/i,
-  /cobrança online ainda não está disponível/i,
-  /não ativa uma assinatura nem altera o plano/i,
+  /contratação e a cobrança online ainda estão em preparação/i,
+  /não ativa uma assinatura paga nem altera o plano/i,
 ])
   assert.match(plansText, condition);
 assert.doesNotMatch(
   plansText,
-  /sem cobrança automática|começa quando você cria a empresa/i,
-  "O teste exige cartão e não pode começar apenas com o cadastro da empresa.",
+  /cartão obrigatório|exigem cartão cadastrado|criar a empresa agora não inicia o teste/i,
+  "O teste deve começar na criação da empresa sem cartão, mantendo a expiração.",
 );
 const planLinks = links(plans);
 for (const publicLinks of [anchors, planLinks]) {
-  const preparationLinks = publicLinks.filter(
-    (link) => link.text === "Preparar meu cadastro",
+  const preparationLinks = publicLinks.filter((link) =>
+    link.text.startsWith("Testar grátis por 7 dias"),
   );
-  assert.equal(preparationLinks.length, 1);
-  assert.equal(
-    new URL(preparationLinks[0].href, base).pathname,
-    "/cadastro",
-    "O preparo do teste deve abrir o cadastro, sem simular autorização do cartão.",
-  );
+  assert.ok(preparationLinks.length >= 1);
+  for (const link of preparationLinks)
+    assert.equal(
+      new URL(link.href, base).pathname,
+      "/cadastro",
+      "O teste deve abrir o cadastro, sem coletar dados de pagamento.",
+    );
 }
 const planTrials = planLinks.filter((link) =>
   /Experimentar demonstração/.test(link.text),
@@ -907,18 +902,12 @@ assert.match(metadata(discovery, "robots"), /noindex/);
 for (const publicHtml of [home, plans, signup]) {
   const publicText = readableText(publicHtml);
   assert.match(publicText, /7 dias grátis/);
-  assert.match(
-    publicText,
-    /ativação (?:do teste ainda estão|de novos testes ainda estão|ainda está|está) em preparação/i,
-  );
-  assert.match(
-    publicText,
-    /cancelar antes do fim do teste evita a primeira cobrança/i,
-  );
+  assert.match(publicText, /sem cartão e sem cobrança automática/i);
+  assert.match(publicText, /(?:prazo|período).*(?:painel|sistema)/i);
   assert.doesNotMatch(
     publicText,
-    /teste grátis sem cartão|7 dias grátis sem cartão|teste já está ativo/i,
-    "A oferta de teste deve preservar a autorização do cartão e nunca simular ativação.",
+    /cartão obrigatório|exigem cartão cadastrado|teste já está ativo/i,
+    "A oferta deve permitir o teste sem cartão sem simular a criação da empresa ou da assinatura.",
   );
 }
 const inquiry = await (await get("/diagnostico")).text();

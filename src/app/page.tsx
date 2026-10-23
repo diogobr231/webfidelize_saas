@@ -40,7 +40,7 @@ const questions = [
   {
     question: "Como funcionam os 7 dias grátis?",
     answer:
-      "O teste é no Essencial, com 1 profissional, e exige cartão cadastrado e autorizado no Mercado Pago. Os 7 dias começam somente após a confirmação do cartão pelo provedor. A primeira mensalidade será cobrada apenas depois do teste, com renovação mensal pelo valor do plano contratado. Cancelar antes do fim do teste evita a primeira cobrança. A ativação está em preparação: criar uma conta agora não inicia o período nem gera cobrança. Enquanto isso, você pode explorar a demonstração sem login e sem cartão.",
+      "São 7 dias grátis no Essencial, com 1 profissional, sem cartão e sem cobrança automática. Confirme seu e-mail e cadastre a empresa para iniciar o teste. O prazo fica salvo no sistema e aparece no painel; entrar novamente não o renova. Ao terminar, as alterações ficam bloqueadas e seus dados continuam disponíveis para consulta. Para continuar depois do teste, fale com a Web Fidelize sobre a contratação.",
   },
   {
     question: "Meu cliente precisa instalar um aplicativo?",
@@ -65,7 +65,7 @@ const questions = [
   {
     question: "Já posso contratar e pagar pelo site?",
     answer:
-      "A assinatura e a cobrança online ainda não estão disponíveis. O cadastro do cartão e a ativação de novos testes dependem da integração com o Mercado Pago. Você pode criar sua conta e falar pelo WhatsApp para conhecer a proposta para seu negócio; seu teste não começa enquanto a ativação estiver pendente.",
+      "Você já pode testar por 7 dias sem cartão. A contratação e a cobrança online ainda estão em preparação e este teste não gera cobrança automática. Fale pelo WhatsApp para conhecer os planos e as condições para continuar; entrar em contato não ativa uma assinatura paga.",
   },
   {
     question: "O sistema tem módulos específicos para cada segmento?",
@@ -149,7 +149,9 @@ export default async function Home() {
             disponíveis, direto pelo celular.
           </p>
           <div className="wf-hero-actions">
-            <DemoLink />
+            <Link className="wf-button" href="/cadastro">
+              Testar grátis por 7 dias <Icon name="arrow-right" />
+            </Link>
             <a
               className="wf-button wf-button-outline"
               href={whatsapp}
@@ -163,16 +165,16 @@ export default async function Home() {
           <div className="wf-trial-facts">
             <span>
               <Icon name="check" />
-              Demonstração sem login e sem cartão
+              Teste sem cartão e sem cobrança automática
             </span>
             <span>
               <Icon name="check" />
-              Explore com dados de exemplo
+              Comece com 1 profissional no Essencial
             </span>
           </div>
           <p className="wf-plan-trial-note">
-            <strong>7 dias grátis no Essencial</strong>, com cartão autorizado.
-            Ativação em preparação. <a href="#teste-gratis">Ver condições</a>.
+            <strong>7 dias grátis no Essencial</strong>, sem cartão e sem
+            cobrança automática. <a href="#teste-gratis">Ver condições</a>.
           </p>
           <a className="wf-tour-link" href="#demonstracao">
             Veja como seu cliente agenda <Icon name="arrow-right" size={15} />
@@ -455,9 +457,9 @@ export default async function Home() {
             <span className="wf-setup-number">01</span>
             <h3>Crie seu espaço.</h3>
             <p>
-              Cadastre sua conta, confirme o e-mail e crie sua empresa. O teste
-              começa após a confirmação do cartão; a ativação está em
-              preparação.
+              Cadastre sua conta, confirme o e-mail e crie sua empresa. Os 7
+              dias de teste começam nesse momento, sem precisar cadastrar
+              cartão.
             </p>
           </article>
           <article>
@@ -744,15 +746,11 @@ export default async function Home() {
           <Icon name="phone" />
           <div>
             <p>
-              <strong>7 dias grátis no Essencial, com 1 profissional.</strong> O
-              teste começa somente após a confirmação do cartão no Mercado Pago.{" "}
-              <strong>
-                Cartão obrigatório. Primeira mensalidade somente após os 7 dias.
-              </strong>{" "}
-              Depois do teste, a assinatura tem renovação mensal pelo valor do
-              plano contratado. Cancelar antes do fim do teste evita a primeira
-              cobrança. A integração de pagamento e a ativação do teste ainda
-              estão em preparação. Para conhecer a proposta para sua empresa,{" "}
+              <strong>7 dias grátis no Essencial, com 1 profissional.</strong>{" "}
+              Confirme seu e-mail e crie sua empresa para começar.{" "}
+              <strong>Sem cartão e sem cobrança automática.</strong> O prazo
+              aparece no painel e termina automaticamente após os 7 dias. Para
+              continuar depois do teste e conhecer os planos,{" "}
               <a href={whatsapp} target="_blank" rel="noopener noreferrer">
                 fale no WhatsApp
               </a>
@@ -760,11 +758,12 @@ export default async function Home() {
             </p>
             <p>
               O proprietário ocupa uma vaga quando cadastrado como profissional
-              na agenda. O cartão será cadastrado no ambiente seguro do Mercado
-              Pago; criar a empresa não inicia o teste nem gera cobrança.
+              na agenda. Ao terminar o teste, alterações ficam bloqueadas e os
+              dados permanecem disponíveis para consulta. A contratação online
+              ainda está em preparação.
             </p>
             <Link className="wf-button wf-button-outline" href="/cadastro">
-              Preparar meu cadastro <Icon name="arrow-right" />
+              Testar grátis por 7 dias <Icon name="arrow-right" />
             </Link>
           </div>
         </div>
@@ -814,7 +813,9 @@ export default async function Home() {
             </p>
           </div>
           <div className="wf-final-actions">
-            <DemoLink />
+            <Link className="wf-button" href="/cadastro">
+              Testar grátis por 7 dias <Icon name="arrow-right" />
+            </Link>
             <a
               className="wf-button wf-button-outline"
               href={whatsapp}
@@ -825,7 +826,7 @@ export default async function Home() {
               Falar no WhatsApp
             </a>
             <span>
-              Demonstração sem login · dados de exemplo · sem cobrança
+              7 dias no Essencial · sem cartão · sem cobrança automática
             </span>
           </div>
         </div>

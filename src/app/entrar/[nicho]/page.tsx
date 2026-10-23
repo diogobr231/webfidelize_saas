@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
 import { notFound } from "next/navigation";
 import { niches } from "@/lib/catalog";
 import { login } from "@/app/auth/actions";
@@ -75,10 +76,9 @@ export default async function NicheLogin({
           <label htmlFor="password">Senha</label>
           <Link href="/recuperar">Recuperar senha</Link>
         </div>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           minLength={8}
           maxLength={128}
           required

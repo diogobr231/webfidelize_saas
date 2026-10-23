@@ -32,9 +32,16 @@ const migrations = await Promise.all(
 const cardIndex = migrations.findIndex(({ sql }) =>
   sql.includes("trial_card_required"),
 );
+const noCardIndex = migrations.findIndex(({ name }) =>
+  name.endsWith("_no_card_trial.sql"),
+);
 assert.ok(
   cardIndex > 0,
   "The versioned card requirement migration must exist after the foundation",
+);
+assert.ok(
+  noCardIndex > cardIndex,
+  "The no-card policy must follow the historical card policy",
 );
 for (const migration of migrations.slice(0, cardIndex))
   await db.exec(migration.sql);
@@ -86,7 +93,7 @@ const legacyBefore = await scalar(
   [legacyCompany],
 );
 await postgres();
-for (const migration of migrations.slice(cardIndex))
+for (const migration of migrations.slice(cardIndex, noCardIndex))
   await db.exec(migration.sql);
 
 let passed = 0;
@@ -591,7 +598,589 @@ await check(
   },
 );
 
+// Verify the policy transition using the actual old cohort above, then exercise
+// the new policy without the legacy test-fixture helper or a trigger bypass.
+await postgres();
+const preservedSnapshots = new Map<string, unknown>();
+preservedSnapshots.set(
+  legacyCompany,
+  await scalar("select to_jsonb(c) from public.companies c where id=$1", [
+    legacyCompany,
+  ]),
+);
+const blockedCard: string[] = [];
+for (const status of ["suspended", "canceled"]) {
+  const id = await scalar<string>(
+    "insert into public.companies(name,niche) values($1,'salao') returning id",
+    [`Preserved ${status}`],
+  );
+  await db.query("update public.companies set status=$2 where id=$1", [
+    id,
+    status,
+  ]);
+  blockedCard.push(id);
+  preservedSnapshots.set(
+    id,
+    await scalar("select to_jsonb(c) from public.companies c where id=$1", [
+      id,
+    ]),
+  );
+}
+// Older non-card cohort states are created before the new migration too.
+for (const status of [
+  "active",
+  "past_due",
+  "trialing",
+  "suspended",
+  "canceled",
+]) {
+  const id = await scalar<string>(
+    "insert into public.companies(name,niche,trial_card_required) values($1,'salao',false) returning id",
+    [`Legacy ${status}`],
+  );
+  await db.query(
+    "update public.companies set status=$2,trial_ends_at=now()+interval '2 days' where id=$1",
+    [id, status],
+  );
+  preservedSnapshots.set(
+    id,
+    await scalar("select to_jsonb(c) from public.companies c where id=$1", [
+      id,
+    ]),
+  );
+}
+const pendingBefore = await scalar<Record<string, unknown>>(
+  "select to_jsonb(c) from public.companies c where id=$1",
+  [company],
+);
+const migrationStarted = Number(
+  await scalar("select extract(epoch from now())::double precision"),
+);
+for (const migration of migrations.slice(noCardIndex))
+  await db.exec(migration.sql);
+const migrationEnded = Number(
+  await scalar("select extract(epoch from now())::double precision"),
+);
+
+await check(
+  "no-card migration converts only never-started pending companies with seven days from the server clock",
+  async () => {
+    await as(users.owner);
+    const after = await scalar<Record<string, unknown>>(
+      "select to_jsonb(c) from public.companies c where id=$1",
+      [company],
+    );
+    assert.equal(after.status, "trialing");
+    assert.equal(after.trial_card_required, false);
+    const expiry = Date.parse(String(after.trial_ends_at)) / 1000;
+    assert.ok(
+      expiry >= migrationStarted + 604800 - 0.001 &&
+        expiry <= migrationEnded + 604800 + 0.001,
+    );
+    const excluded = new Set([
+      "status",
+      "trial_card_required",
+      "trial_ends_at",
+    ]);
+    assert.deepEqual(
+      Object.fromEntries(
+        Object.entries(after).filter(([key]) => !excluded.has(key)),
+      ),
+      Object.fromEntries(
+        Object.entries(pendingBefore).filter(([key]) => !excluded.has(key)),
+      ),
+    );
+    assert.equal(await scalar("select private.writable($1)", [company]), true);
+    assert.equal(
+      await scalar(
+        "select role from public.memberships where company_id=$1 and user_id=$2",
+        [company, users.owner],
+      ),
+      "OWNER",
+    );
+    await postgres();
+    for (const [id, before] of preservedSnapshots)
+      assert.deepEqual(
+        await scalar("select to_jsonb(c) from public.companies c where id=$1", [
+          id,
+        ]),
+        before,
+      );
+  },
+);
+
+async function createFreshCompany(niche: string) {
+  await postgres();
+  const user = randomUUID();
+  await db.query(
+    "insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())",
+    [user, `${user}@example.invalid`],
+  );
+  await as(user);
+  const id = await scalar<string>("select public.create_company($1,$2)", [
+    `New free ${niche}`,
+    niche,
+  ]);
+  return { id, user };
+}
+const fresh = await createFreshCompany("salao");
+const originalExpiry = await scalar(
+  "select trial_ends_at from public.companies where id=$1",
+  [fresh.id],
+);
+
+await check(
+  "new signup and every supported segment get an exact seven-day Essencial trial with OWNER access",
+  async () => {
+    const fixtures = [fresh];
+    for (const niche of [
+      "pet-shop",
+      "clinica",
+      "escritorio",
+      "restaurante",
+      "fornecedores",
+      "logistica",
+      "academia",
+    ])
+      fixtures.push(await createFreshCompany(niche));
+    for (const fixture of fixtures) {
+      await as(fixture.user);
+      assert.deepEqual(
+        await scalar(
+          "select jsonb_build_object('status',status,'required',trial_card_required,'plan',plan_id,'seconds',extract(epoch from(trial_ends_at-created_at))::integer) from public.companies where id=$1",
+          [fixture.id],
+        ),
+        {
+          status: "trialing",
+          required: false,
+          plan: "essencial",
+          seconds: 604800,
+        },
+      );
+      assert.equal(
+        await scalar(
+          "select staff_limit from public.plans where id='essencial'",
+        ),
+        1,
+      );
+      assert.equal(
+        await scalar("select private.writable($1)", [fixture.id]),
+        true,
+      );
+      assert.equal(
+        await scalar(
+          "select role from public.memberships where company_id=$1 and user_id=$2",
+          [fixture.id, fixture.user],
+        ),
+        "OWNER",
+      );
+    }
+  },
+);
+
+await check(
+  "no-card trials cannot be duplicated or renewed by anonymous signup, repeated requests or reauthentication",
+  async () => {
+    await as(null);
+    await assert.rejects(
+      () => scalar("select public.create_company('Anonymous free','salao')"),
+      /permission denied|authentication required/,
+    );
+    for (let i = 0; i < 3; i++) {
+      await as(fresh.user);
+      await assert.rejects(
+        () => scalar("select public.create_company('Duplicate free','salao')"),
+        /existing owner/,
+      );
+      assert.deepEqual(
+        await scalar("select trial_ends_at from public.companies where id=$1", [
+          fresh.id,
+        ]),
+        originalExpiry,
+      );
+      assert.equal(
+        Number(
+          await scalar(
+            "select count(*) from public.memberships where user_id=$1 and role='OWNER'",
+            [fresh.user],
+          ),
+        ),
+        1,
+      );
+    }
+  },
+);
+
+await check(
+  "no-card trials retain direct-write protection, RLS isolation and admin authorization",
+  async () => {
+    for (const user of [fresh.user, users.admin]) {
+      await as(user);
+      for (const assignment of [
+        "trial_card_required=true",
+        "status='active'",
+        "trial_ends_at=now()+interval '7 days'",
+        "plan_id='empresarial'",
+      ])
+        await assert.rejects(
+          () =>
+            scalar(
+              `update public.companies set ${assignment} where id=$1 returning id`,
+              [fresh.id],
+            ),
+          /permission denied/,
+        );
+      await assert.rejects(
+        () =>
+          scalar(
+            "insert into public.companies(name,niche) values('Injected free','salao') returning id",
+          ),
+        /permission denied/,
+      );
+    }
+    await as(fresh.user);
+    assert.equal(
+      Number(await scalar("select count(*) from public.companies")),
+      1,
+    );
+    assert.equal(
+      Number(
+        await scalar("select count(*) from public.companies where id=$1", [
+          otherCompany,
+        ]),
+      ),
+      0,
+    );
+    assert.equal(
+      Number(
+        await scalar("select count(*) from public.customers where id=$1", [
+          legacyCustomer,
+        ]),
+      ),
+      0,
+    );
+    await assert.rejects(
+      () =>
+        scalar(
+          "select public.admin_company($1,'essencial','trialing',now()+interval '7 days')",
+          [otherCompany],
+        ),
+      /not authorized/,
+    );
+  },
+);
+
+let newCustomer = "";
+let service = "";
+let professional = "";
+await check(
+  "no-card owner can onboard, add real business records, configure bookings and invite within plan limits",
+  async () => {
+    await as(fresh.user);
+    newCustomer = await scalar<string>(
+      "insert into public.customers(company_id,name) values($1,'Free trial customer') returning id",
+      [fresh.id],
+    );
+    service = await scalar<string>(
+      "insert into public.services(company_id,name,duration_minutes,price_cents) values($1,'Free trial service',30,5000) returning id",
+      [fresh.id],
+    );
+    professional = await scalar<string>(
+      "insert into public.professionals(company_id,name) values($1,'Free trial professional') returning id",
+      [fresh.id],
+    );
+    await assert.rejects(
+      () =>
+        scalar(
+          "insert into public.professionals(company_id,name) values($1,'Second professional') returning id",
+          [fresh.id],
+        ),
+      /professional limit/,
+    );
+    await scalar("select public.configure_booking($1,'no-card-qa',true)", [
+      fresh.id,
+    ]);
+    assert.ok(
+      await scalar(
+        "select public.create_team_invitation($1,'staff@example.invalid','EMPLOYEE')",
+        [fresh.id],
+      ),
+    );
+    await as(null);
+    assert.ok(await scalar("select public.public_catalog('no-card-qa')"));
+  },
+);
+
+await check(
+  "no-card expiration blocks backend writes and public booking while keeping records readable and support available",
+  async () => {
+    await postgres();
+    await db.query(
+      "update public.companies set trial_ends_at=now()-interval '1 second' where id=$1",
+      [fresh.id],
+    );
+    await as(fresh.user);
+    assert.equal(
+      await scalar("select private.writable($1)", [fresh.id]),
+      false,
+    );
+    assert.equal(
+      await scalar("select id from public.customers where id=$1", [
+        newCustomer,
+      ]),
+      newCustomer,
+    );
+    for (const statement of [
+      "insert into public.customers(company_id,name) values($1,'Expired customer') returning id",
+      "insert into public.services(company_id,name,duration_minutes,price_cents) values($1,'Expired service',30,5000) returning id",
+    ])
+      await assert.rejects(
+        () => scalar(statement, [fresh.id]),
+        /row-level security|subscription blocked/,
+      );
+    await assert.rejects(
+      () =>
+        scalar(
+          "select public.create_team_invitation($1,'expired@example.invalid','EMPLOYEE')",
+          [fresh.id],
+        ),
+      /not authorized|subscription blocked/,
+    );
+    await assert.rejects(
+      () =>
+        scalar(
+          "select public.book_appointment($1,$2,$3,$4,now()+interval '1 day')",
+          [fresh.id, newCustomer, service, professional],
+        ),
+      /not authorized|subscription blocked/,
+    );
+    const expiry = await scalar(
+      "select trial_ends_at from public.companies where id=$1",
+      [fresh.id],
+    );
+    assert.ok(
+      await scalar(
+        "select public.open_support_ticket($1,$2,'assinatura','Trial help','Synthetic request for help with expired trial.')",
+        [fresh.id, randomUUID()],
+      ),
+    );
+    assert.deepEqual(
+      await scalar("select trial_ends_at from public.companies where id=$1", [
+        fresh.id,
+      ]),
+      expiry,
+    );
+    await assert.rejects(
+      () => scalar("select public.create_company('Renewal attempt','salao')"),
+      /existing owner/,
+    );
+    await as(null);
+    assert.equal(
+      await scalar("select public.public_catalog('no-card-qa')"),
+      null,
+    );
+    assert.equal(
+      Number(
+        await scalar(
+          "select count(*) from public.public_slots('no-card-qa',$1,$2,current_date+1)",
+          [service, professional],
+        ),
+      ),
+      0,
+    );
+  },
+);
+
+await check(
+  "PostgreSQL enforces the no-card deadline at the exact expiration instant",
+  async () => {
+    await postgres();
+    await db.exec("begin");
+    await db.query(
+      "update public.companies set trial_ends_at=now() where id=$1",
+      [fresh.id],
+    );
+    await db.query("select set_config('request.jwt.claim.sub',$1,true)", [
+      fresh.user,
+    ]);
+    await db.exec("set local role authenticated");
+    assert.equal(
+      await scalar("select private.writable($1)", [fresh.id]),
+      false,
+    );
+    await db.exec("rollback");
+  },
+);
+
+await check(
+  "no-card administration still rejects invented paid activation and unbounded trial dates",
+  async () => {
+    await as(users.admin);
+    for (const status of ["active", "past_due", "pending_card"])
+      await assert.rejects(
+        () =>
+          scalar(
+            "select public.admin_company($1,'essencial',$2,now()+interval '7 days')",
+            [fresh.id, status],
+          ),
+        /invalid manual status/,
+      );
+    for (const date of [null, "infinity", "-infinity"])
+      await assert.rejects(
+        () =>
+          scalar(
+            "select public.admin_company($1,'essencial','trialing',$2::timestamptz)",
+            [fresh.id, date],
+          ),
+        /invalid trial date/,
+      );
+    await assert.rejects(
+      () =>
+        scalar(
+          "select public.admin_company($1,'essencial','trialing',now()+interval '31 days')",
+          [fresh.id],
+        ),
+      /trial extension maximum/,
+    );
+    await scalar(
+      "select public.admin_company($1,'essencial','trialing',now()+interval '7 days')",
+      [fresh.id],
+    );
+    for (const id of blockedCard)
+      await assert.rejects(
+        () =>
+          scalar(
+            "select public.admin_company($1,'essencial','trialing',now()+interval '7 days')",
+            [id],
+          ),
+        /card authorization required/,
+      );
+    await as(fresh.user);
+    assert.equal(await scalar("select private.writable($1)", [fresh.id]), true);
+  },
+);
+
+await check(
+  "database no-card defaults require exactly seven days and reject inserted paid or unbounded trial rows",
+  async () => {
+    await postgres();
+    const direct = await scalar<string>(
+      "insert into public.companies(name,niche) values('Default free trial','salao') returning id",
+    );
+    assert.equal(
+      await scalar(
+        "select status='trialing' and not trial_card_required and trial_ends_at=created_at+interval '7 days' from public.companies where id=$1",
+        [direct],
+      ),
+      true,
+    );
+    for (const status of ["active", "suspended", "pending_card"])
+      await assert.rejects(
+        () =>
+          scalar(
+            "insert into public.companies(name,niche,status) values('Injected free company','salao',$1) returning id",
+            [status],
+          ),
+        /new trial must last seven days/,
+      );
+    for (const date of [
+      "null",
+      "now()+interval '8 days'",
+      "'infinity'::timestamptz",
+    ])
+      await assert.rejects(
+        () =>
+          scalar(
+            `insert into public.companies(name,niche,trial_ends_at) values('Injected dated free','salao',${date}) returning id`,
+          ),
+        /new trial must last seven days/,
+      );
+    await assert.rejects(
+      () =>
+        scalar(
+          "update public.companies set trial_ends_at='infinity' where id=$1 returning id",
+          [direct],
+        ),
+      /invalid trial date/,
+    );
+    await assert.rejects(
+      () =>
+        scalar(
+          "update public.companies set trial_card_required=true where id=$1 returning id",
+          [fresh.id],
+        ),
+      /trial enrollment policy is immutable/,
+    );
+    await assert.rejects(
+      () =>
+        scalar(
+          "update public.companies set trial_card_required=false where id=$1 returning id",
+          [blockedCard[0]],
+        ),
+      /trial enrollment policy is immutable/,
+    );
+  },
+);
+
+await check(
+  "migration replay never restarts or extends an already converted, expired or running trial",
+  async () => {
+    await postgres();
+    const before = await scalar(
+      "select jsonb_agg(to_jsonb(c) order by id) from public.companies c",
+    );
+    await db.exec(migrations[noCardIndex].sql);
+    assert.deepEqual(
+      await scalar(
+        "select jsonb_agg(to_jsonb(c) order by id) from public.companies c",
+      ),
+      before,
+    );
+  },
+);
+
+await check(
+  "RPC privileges, RLS and private trigger access survive the no-card policy switch",
+  async () => {
+    await postgres();
+    assert.equal(
+      await scalar(
+        "select relrowsecurity from pg_class where oid='public.companies'::regclass",
+      ),
+      true,
+    );
+    assert.equal(
+      await scalar(
+        "select has_function_privilege('anon','public.create_company(text,text)','EXECUTE')",
+      ),
+      false,
+    );
+    assert.equal(
+      await scalar(
+        "select has_function_privilege('authenticated','public.create_company(text,text)','EXECUTE')",
+      ),
+      true,
+    );
+    assert.equal(
+      await scalar(
+        "select p.prosecdef from pg_proc p where p.oid='public.create_company(text,text)'::regprocedure",
+      ),
+      false,
+    );
+    assert.equal(
+      await scalar(
+        "select has_function_privilege('authenticated','private.guard_company_trial_card()','EXECUTE')",
+      ),
+      false,
+    );
+    assert.equal(
+      Number(await scalar("select count(*) from private.platform_admins")),
+      1,
+    );
+  },
+);
+
 await db.close();
 console.log(
-  `${passed} card-required trial database groups passed; no payment requests or remote writes.`,
+  `${passed} trial policy database groups passed; historical card policy plus no-card transition, no payment requests or remote writes.`,
 );
