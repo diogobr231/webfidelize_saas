@@ -5,6 +5,7 @@
 .vercel
 node_modules
 test-results
+artifacts
 playwright-report
 supabase/.temp
 *.tsbuildinfo

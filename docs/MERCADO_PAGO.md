@@ -48,6 +48,27 @@ Um pagamento de produção aprovado e confirmado cria um **período pago finito 
 
 ## Validação e liberação
 
+### Homologação externa de 23/10/2026
+
+- O token TEST foi aceito e o catálogo retornou Pix `active`. Isso não comprova aprovação financeira.
+- A criação de Pix em TEST foi recusada com `400/4020` para callback localhost. Com URL HTTPS pública sintaticamente válida de homologação, a API retornou HTTP 500: resultado desconhecido. Nenhum QR ou pagamento aprovado foi confirmado; não houve novo POST para repetir essa tentativa.
+- A consulta de recuperação revelou um defeito real: `range=date_created` sem `begin_date`/`end_date` era recusado com `400/1`. A busca agora omite o filtro incompleto e conserva a referência exata, paginação limitada e verificação do recurso. O teste de regressão reproduziu a falha antes da correção; a consulta real corrigida retornou HTTP 200, sem recurso encontrado. Ausência na busca não autoriza repetir a cobrança.
+- Cartão hospedado aguarda a criação do comprador de teste, preparada no painel do provedor. Ainda não há autorização nem fatura aprovada para comprovar esse fluxo.
+- O callback usado no teste isolado de criação não possui receptor ativo. Entrega de webhook e gravação financeira de uma transação existente continuam pendentes de homologação. O teste não modificou o banco de produção.
+
+O verificador optativo abaixo usa o mesmo cliente do backend, aceita somente token `TEST-`, salva a intenção antes do POST e nunca repete uma criação com o mesmo nome de execução. `inspect` faz somente leituras. Os relatórios ficam em `test-results/mercado-pago-sandbox`, ignorados pelo Git e pelo deploy; não contêm credenciais, CPF, e-mail nem QR Code.
+
+```powershell
+pnpm exec tsx scripts/verify-mercado-pago-sandbox.ts --help
+pnpm exec tsx scripts/verify-mercado-pago-sandbox.ts pix/create --run pix-01 --amount-cents 4990
+pnpm exec tsx scripts/verify-mercado-pago-sandbox.ts card/create --run card-01 --amount-cents 4990
+pnpm exec tsx scripts/verify-mercado-pago-sandbox.ts inspect --run card-01
+```
+
+Defina somente no ambiente privado: `MERCADO_PAGO_TEST_ACCESS_TOKEN`, `MERCADO_PAGO_TEST_COLLECTOR_ID`, `MERCADO_PAGO_SANDBOX_PAYER_EMAIL`; para Pix, `MERCADO_PAGO_SANDBOX_CPF` e `MERCADO_PAGO_SANDBOX_NOTIFICATION_URL`; para cartão, `MERCADO_PAGO_SANDBOX_BACK_URL`. Use callbacks HTTPS de homologação separados da produção e comprador de teste oficial para o cartão hospedado. Não use dados de cartão real nesse ambiente. Esse script verifica o provedor; não substitui o fluxo navegador → servidor → banco → webhook.
+
+### Regressão automatizada
+
 ```powershell
 pnpm test
 pnpm test:billing:db
