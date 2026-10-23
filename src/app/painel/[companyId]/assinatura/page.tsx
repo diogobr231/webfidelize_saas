@@ -3,7 +3,8 @@ import { commercialPlans } from "@/lib/commercial";
 import { hasAccess } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/page-header";
 import { PlansComparison } from "@/components/plans-comparison";
-import { money } from "@/lib/catalog";
+import { money, niches } from "@/lib/catalog";
+import Link from "next/link";
 export default async function Subscription({
   params,
 }: {
@@ -39,6 +40,10 @@ export default async function Subscription({
       />
       {company.status === "pending_card" && (
         <section className="panel" aria-labelledby="trial-activation-title">
+          <p className="notice" role="status">
+            Conta criada e acesso realizado com sucesso. Falta ativar o período
+            de teste da empresa.
+          </p>
           <h2 id="trial-activation-title">Ativação do teste pendente</h2>
           <p>
             Sua empresa foi cadastrada. Para liberar os 7 dias de teste, é
@@ -73,6 +78,16 @@ export default async function Subscription({
           >
             Falar sobre a ativação
           </a>
+          {niches.some((niche) => niche.slug === company.niche) && (
+            <p>
+              <Link
+                className="button secondary"
+                href={`/demonstracao/${company.niche}`}
+              >
+                Explorar a demonstração enquanto aguardo
+              </Link>
+            </p>
+          )}
         </section>
       )}
       {company.status === "trialing" &&

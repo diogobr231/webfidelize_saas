@@ -325,3 +325,22 @@
     flex-shrink: 0;
   }
 }
+.admin-diagnostic-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 12px;
+}
+.admin-diagnostic-counts > div {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.admin-diagnostic-counts dt {
+  font-size: 13px;
+  color: var(--muted);
+}
+.admin-diagnostic-counts dd {
+  margin: 8px 0 0;
+  font-size: 25px;
+  font-weight: 700;
+}

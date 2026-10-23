@@ -165,6 +165,12 @@ export default async function Admin({
                     {companies?.map((c) => (
                       <tr key={c.id} id={`empresa-${c.id}`}>
                         <td data-label="Empresa">
+                          <Link
+                            className="button secondary"
+                            href={`/admin/empresas/${c.id}`}
+                          >
+                            Diagnóstico de acesso
+                          </Link>
                           <div className="admin-company-name">
                             <span
                               className="admin-company-avatar"
