@@ -93,9 +93,11 @@ export class BillingWorkflow {
     context: CheckoutContext,
     invoice?: ProviderAuthorizedPayment,
   ) {
-    if (context.method === "pix")
+    if (context.method === "pix") {
       validatePaymentForCheckout(payment, this.expected(context), "pix");
-    else {
+      if (context.provider_id && context.provider_id !== payment.id)
+        throw new BillingError("mismatch");
+    } else {
       // A recurring invoice (or an already stored payment resource) proves this
       // relationship. Mercado Pago can omit external_reference on card payments.
       validatePaymentForCheckout(
@@ -122,6 +124,26 @@ export class BillingWorkflow {
       (payment.status === "approved" && !payment.approvedAt)
     )
       throw new BillingError("invalid_response");
+    // A creation response can be lost, or its QR persistence can fail. Restore
+    // display data only after the same authoritative checks used by the ledger.
+    // The database keeps terminal checkouts terminal even if a webhook races us.
+    if (
+      context.method === "pix" &&
+      ["creating", "unknown", "pending"].includes(context.status) &&
+      ["pending", "in_process", "authorized"].includes(payment.status) &&
+      (!context.provider_id ||
+        (!context.qr_code && payment.qrCode) ||
+        (!context.qr_code_base64 && payment.qrCodeBase64) ||
+        (!context.expires_at && payment.expiresAt))
+    ) {
+      await this.gateway("checkout_created", {
+        checkout_id: context.id,
+        provider_id: payment.id,
+        qr_code: context.qr_code ?? payment.qrCode,
+        qr_code_base64: context.qr_code_base64 ?? payment.qrCodeBase64,
+        expires_at: context.expires_at ?? payment.expiresAt,
+      });
+    }
     await this.gateway("record_payment", {
       external_reference: context.id,
       provider_id: payment.id,
@@ -223,11 +245,10 @@ export class BillingWorkflow {
     let context = await this.context(checkoutId);
     if (!context) return;
     if (context.method === "pix") {
-      if (context.provider_id)
-        await this.recordPayment(
-          await this.provider.getPayment(context.provider_id),
-          context,
-        );
+      const payment = context.provider_id
+        ? await this.provider.getPayment(context.provider_id)
+        : await this.provider.findPixPayment(context.id, context.amount_cents);
+      if (payment) await this.recordPayment(payment, context);
       return;
     }
     const subscription = context.provider_id

@@ -87,6 +87,91 @@ function fakeProvider(result: unknown, status = 200) {
   }) as typeof fetch);
   return { client, calls };
 }
+
+test("Pix recovery searches one exact reference and refetches payment without any mutation", async () => {
+  const calls: { url: URL; method: string }[] = [];
+  const client = new MercadoPagoClient(config, (async (input, init) => {
+    const url = new URL(String(input));
+    calls.push({ url, method: init?.method || "GET" });
+    return Response.json(
+      url.pathname.endsWith("/search")
+        ? {
+            paging: { total: 1, offset: 0 },
+            results: [{ id: 987654, external_reference: checkoutId }],
+          }
+        : payment(),
+    );
+  }) as typeof fetch);
+  assert.equal((await client.findPixPayment(checkoutId, 4990))?.id, "987654");
+  assert.deepEqual(
+    calls.map((call) => [call.url.pathname, call.method]),
+    [
+      ["/v1/payments/search", "GET"],
+      ["/v1/payments/987654", "GET"],
+    ],
+  );
+  assert.equal(calls[0].url.searchParams.get("external_reference"), checkoutId);
+  assert.equal(calls[0].url.searchParams.get("limit"), "2");
+});
+
+test("Pix recovery never selects ambiguous, truncated or substituted search results", async () => {
+  for (const result of [
+    {
+      paging: { total: 2, offset: 0 },
+      results: [
+        { id: 1, external_reference: checkoutId },
+        { id: 2, external_reference: checkoutId },
+      ],
+    },
+    { paging: { total: 1, offset: 0 }, results: [] },
+    {
+      paging: { total: 1, offset: 1 },
+      results: [{ id: 987654, external_reference: checkoutId }],
+    },
+    {
+      paging: { total: 1, offset: 0 },
+      results: [{ id: 987654, external_reference: "other-company" }],
+    },
+  ]) {
+    const { client, calls } = fakeProvider(result);
+    await assert.rejects(client.findPixPayment(checkoutId, 4990), BillingError);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].method, "GET");
+  }
+  const { client, calls } = fakeProvider({
+    paging: { total: 0, offset: 0 },
+    results: [],
+  });
+  assert.equal(await client.findPixPayment(checkoutId, 4990), null);
+  assert.equal(calls.length, 1);
+});
+
+test("Pix recovery validates the fetched reference, collector, environment, currency, amount and method", async () => {
+  for (const patch of [
+    { external_reference: "22222222-2222-4222-8222-222222222222" },
+    { collector_id: 999999 },
+    { live_mode: true },
+    { currency_id: "USD" },
+    { transaction_amount: 89.9 },
+    { payment_method_id: "visa" },
+    { id: 123456 },
+  ]) {
+    const calls: string[] = [];
+    const client = new MercadoPagoClient(config, (async (input, init) => {
+      calls.push(init?.method || "GET");
+      return Response.json(
+        new URL(String(input)).pathname.endsWith("/search")
+          ? {
+              paging: { total: 1, offset: 0 },
+              results: [{ id: 987654, external_reference: checkoutId }],
+            }
+          : payment(patch),
+      );
+    }) as typeof fetch);
+    await assert.rejects(client.findPixPayment(checkoutId, 4990), BillingError);
+    assert.deepEqual(calls, ["GET", "GET"]);
+  }
+});
 const pixInput = {
   checkoutId,
   amountCents: 4990,

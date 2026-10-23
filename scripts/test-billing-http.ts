@@ -588,6 +588,59 @@ async function main() {
       "collector, environment, amount and checkout reference mismatch cannot be recorded as a paid company",
     );
 
+    phase = "recover lost Pix creation through rendered verification form";
+    reset();
+    state.pixFailure = true;
+    await request(route, copyForm(pixForm));
+    assert.equal(currentCheckout()?.status, "unknown");
+    assert.equal(currentCheckout()?.provider_id, null);
+    assert.equal(writes().length, 1);
+    const lostPixPage = await html();
+    assert.doesNotMatch(lostPixPage, /name="cpf"/);
+    const verifyLostPix = formFrom(lostPixPage, "Verificar pagamento");
+    await request(route, copyForm(verifyLostPix));
+    assert.equal(currentCheckout()?.provider_id, paymentId);
+    assert.equal(currentCheckout()?.qr_code, pixCode);
+    assert.equal(currentCheckout()?.qr_code_base64, pixImage);
+    assert.ok(currentCheckout()?.expires_at);
+    assert.deepEqual(
+      providerCalls
+        .filter((call) => call.method === "GET")
+        .map((call) => call.path),
+      ["/v1/payments/search", `/v1/payments/${paymentId}`],
+    );
+    assert.match(await html(), new RegExp(pixCode));
+    await request(route, copyForm(verifyLostPix));
+    assert.equal(
+      writes().length,
+      1,
+      "Recovery and repeated verification must never create another Pix",
+    );
+    assert.equal(state.access, false);
+    assert.equal(state.paidUntil, null);
+    pass(
+      "lost Pix response recovers original QR through verification using only provider GETs, without paid access",
+    );
+
+    phase = "Pix absence stays pending and late webhook restores QR";
+    reset();
+    state.checkout = checkout("pix", "unknown");
+    state.claimed = true;
+    state.pixSearchAvailable = false;
+    await request(route, copyForm(verifyLostPix));
+    assert.equal(currentCheckout()?.status, "unknown");
+    assert.equal(currentCheckout()?.provider_id, null);
+    assert.equal(operations("checkout_created").length, 0);
+    assert.equal(operations("record_payment").length, 0);
+    assert.equal(writes().length, 0);
+    assert.equal((await webhook("payment", paymentId)).status, 200);
+    assert.equal(currentCheckout()?.qr_code, pixCode);
+    assert.match(await html(), new RegExp(pixCode));
+    assert.equal(writes().length, 0);
+    pass(
+      "absent Pix search never recreates charge; a verified pending webhook restores missing QR metadata",
+    );
+
     phase = "unknown card creation is never blindly retried";
     reset();
     state.checkout = checkout("card", "pending");

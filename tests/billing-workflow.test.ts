@@ -104,6 +104,7 @@ function harness(method: "pix" | "card" = "card") {
     invoices: new Map([["765432", invoice()]]),
     searchResults: [] as ProviderAuthorizedPayment[],
     discovered: null as ProviderSubscription | null,
+    discoveredPix: null as ProviderPayment | null,
     reads: [] as string[],
     writes: [] as { operation: string; payload: Record<string, unknown> }[],
   };
@@ -119,6 +120,7 @@ function harness(method: "pix" | "card" = "card") {
     | "getAuthorizedPayment"
     | "searchAuthorizedPayments"
     | "findSubscription"
+    | "findPixPayment"
   > = {
     async getPayment(id) {
       state.reads.push(`payment:${id}`);
@@ -139,6 +141,10 @@ function harness(method: "pix" | "card" = "card") {
     async findSubscription(id) {
       state.reads.push(`find:${id}`);
       return structuredClone(state.discovered);
+    },
+    async findPixPayment(id, amountCents) {
+      state.reads.push(`find-pix:${id}:${amountCents}`);
+      return structuredClone(state.discoveredPix);
     },
   };
   const gateway: BillingGateway = async (operation, payload) => {
@@ -161,6 +167,104 @@ function harness(method: "pix" | "card" = "card") {
     ),
   };
 }
+
+test("lost Pix creation is recovered by reads and restores validated QR without another charge", async () => {
+  const { state, workflow } = harness("pix");
+  state.contexts.set(checkoutId, {
+    ...context("pix"),
+    status: "unknown",
+    provider_id: null,
+  });
+  state.discoveredPix = {
+    ...payment("pix"),
+    status: "pending",
+    approvedAt: null,
+    qrCode: "SYNTHETIC-NOT-PAYABLE",
+    expiresAt: "2026-10-24T12:00:00.000Z",
+  };
+  await workflow.checkout(checkoutId);
+  assert.deepEqual(state.reads, [`find-pix:${checkoutId}:4990`]);
+  assert.deepEqual(
+    state.writes.map((entry) => entry.operation),
+    ["checkout_created", "record_payment"],
+  );
+  assert.deepEqual(state.writes[0].payload, {
+    checkout_id: checkoutId,
+    provider_id: "987654",
+    qr_code: "SYNTHETIC-NOT-PAYABLE",
+    qr_code_base64: null,
+    expires_at: "2026-10-24T12:00:00.000Z",
+  });
+  assert.equal(state.writes[1].payload.status, "pending");
+});
+
+test("unknown Pix absence leaves attempt unchanged; no match cannot authorize a new creation", async () => {
+  const { state, workflow } = harness("pix");
+  state.contexts.set(checkoutId, {
+    ...context("pix"),
+    status: "unknown",
+    provider_id: null,
+  });
+  await workflow.checkout(checkoutId);
+  assert.deepEqual(state.reads, [`find-pix:${checkoutId}:4990`]);
+  assert.deepEqual(state.writes, []);
+});
+
+test("late Pix webhook or refresh restores QR but never overwrites terminal or mismatched checkout", async () => {
+  const { state, workflow } = harness("pix");
+  state.payments.set("987654", {
+    ...payment("pix"),
+    status: "pending",
+    approvedAt: null,
+    qrCode: "SYNTHETIC-NOT-PAYABLE",
+  });
+  await workflow.event("payment", "987654");
+  assert.equal(state.writes[0].operation, "checkout_created");
+  state.writes.length = 0;
+  state.contexts.set(checkoutId, { ...context("pix"), status: "completed" });
+  await workflow.checkout(checkoutId);
+  assert.deepEqual(
+    state.writes.map((entry) => entry.operation),
+    ["record_payment"],
+  );
+  state.writes.length = 0;
+  state.contexts.set(checkoutId, { ...context("pix"), provider_id: "123456" });
+  await assert.rejects(
+    workflow.recordPayment(
+      state.payments.get("987654")!,
+      state.contexts.get(checkoutId)!,
+    ),
+    BillingError,
+  );
+  assert.deepEqual(state.writes, []);
+});
+
+test("invalid recovered Pix never persists its QR or payment", async () => {
+  for (const patch of [
+    { amountCents: 8990 },
+    { collectorId: "999999" },
+    { liveMode: true },
+    { externalReference: otherCheckout },
+    { paymentMethodId: "visa" },
+    { updatedAt: null },
+  ]) {
+    const { state, workflow } = harness("pix");
+    state.contexts.set(checkoutId, {
+      ...context("pix"),
+      status: "unknown",
+      provider_id: null,
+    });
+    state.discoveredPix = {
+      ...payment("pix"),
+      status: "pending",
+      approvedAt: null,
+      qrCode: "SYNTHETIC-NOT-PAYABLE",
+      ...patch,
+    };
+    await assert.rejects(workflow.checkout(checkoutId), BillingError);
+    assert.deepEqual(state.writes, []);
+  }
+});
 
 test("billing workflow rejects a valid-looking context returned for another checkout", async () => {
   const { state, workflow } = harness();

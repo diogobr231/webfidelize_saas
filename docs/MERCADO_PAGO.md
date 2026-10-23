@@ -38,6 +38,8 @@ O webhook é `POST /api/webhooks/mercadopago`, na origem HTTPS publicada. Os tó
 
 Eventos e pagamentos são deduplicados no banco; a conciliação grava o resultado e o direito de acesso de maneira transacional. Falhas retornam erro para permitir nova entrega e mantêm o evento mínimo para reconciliação. A criação de cartão com resultado incerto não dispara outro POST automaticamente: a tentativa persistida é consultada e recuperada apenas quando a identidade pode ser comprovada.
 
+Se a resposta de criação de um Pix se perder, **Verificar pagamento** procura pela referência da tentativa e consulta novamente o recurso encontrado. Só uma correspondência exata de ambiente, recebedor, valor, moeda e modalidade permite recuperar o QR Code. Resultado ausente ou ambíguo não gera outra cobrança; um pagamento pendente não libera acesso pago.
+
 A documentação do Mercado Pago distingue as notificações do produto **Assinaturas** das configurações genéricas de Webhooks no painel. Homologue a criação da assinatura, a configuração da URL e os headers efetivamente entregues para cada tópico. Não considere uma simulação de painel ou um HTTP 200 isolado como prova de assinatura, cobrança ou renovação funcional.
 
 Um pagamento de produção aprovado e confirmado cria um **período pago finito de um mês de calendário**. A autorização do cartão não cria esse período. Estorno, inclusive parcial, e contestação revogam o período correspondente. A autorização de uso consulta o período vigente e não revogado: `status=active` ou uma data futura em `paid_until`, isoladamente, não bastam.

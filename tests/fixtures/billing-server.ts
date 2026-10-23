@@ -37,6 +37,8 @@ export async function startBillingFixture(publicOrigin: string) {
     payments: [] as BillingSnapshot["payments"],
     claimed: false,
     cardFailure: false,
+    pixFailure: false,
+    pixSearchAvailable: true,
     providerUnavailable: false,
     invoiceAvailable: false,
     subscriptionStatus: "pending",
@@ -69,6 +71,8 @@ export async function startBillingFixture(publicOrigin: string) {
       payments: [],
       claimed: false,
       cardFailure: false,
+      pixFailure: false,
+      pixSearchAvailable: true,
       providerUnavailable: false,
       invoiceAvailable: false,
       subscriptionStatus: "pending",
@@ -217,7 +221,27 @@ export async function startBillingFixture(publicOrigin: string) {
       if (state.providerUnavailable)
         return send(503, { message: "fixture provider unavailable" });
       if (path === "/v1/payments" && request.method === "POST")
-        return send(201, providerPayment());
+        return state.pixFailure
+          ? send(503, { message: "fixture lost Pix response" })
+          : send(201, providerPayment());
+      if (path === "/v1/payments/search" && request.method === "GET") {
+        if (
+          url.searchParams.get("external_reference") !== checkoutId ||
+          url.searchParams.get("limit") !== "2" ||
+          url.searchParams.get("offset") !== "0"
+        ) {
+          unexpected.push("unbounded or mismatched Pix search");
+          return send(400, {});
+        }
+        return send(200, {
+          results: state.pixSearchAvailable ? [providerPayment()] : [],
+          paging: {
+            total: state.pixSearchAvailable ? 1 : 0,
+            offset: 0,
+            limit: 2,
+          },
+        });
+      }
       if (path === "/preapproval" && request.method === "POST")
         return state.cardFailure
           ? send(503, { message: "fixture unknown outcome" })

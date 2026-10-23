@@ -296,7 +296,7 @@ export class MercadoPagoClient {
     query?: URLSearchParams,
   ): Promise<unknown> {
     if (
-      !/^(?:\/v1\/payments(?:\/[1-9][0-9]{0,19})?|\/preapproval(?:\/[a-zA-Z0-9_-]{1,128})?|\/authorized_payments\/(?:[1-9][0-9]{0,19}|search))$/.test(
+      !/^(?:\/v1\/payments(?:\/(?:[1-9][0-9]{0,19}|search))?|\/preapproval(?:\/[a-zA-Z0-9_-]{1,128})?|\/authorized_payments\/(?:[1-9][0-9]{0,19}|search))$/.test(
         path,
       )
     )
@@ -528,6 +528,59 @@ export class MercadoPagoClient {
     );
     if (payment.id !== id) return fail("mismatch");
     return payment;
+  }
+  /** Recover a lost creation response using reads only; absence never permits a POST. */
+  async findPixPayment(
+    checkoutId: string,
+    amountCents: number,
+  ): Promise<ProviderPayment | null> {
+    if (
+      !uuid.test(checkoutId) ||
+      !Number.isSafeInteger(amountCents) ||
+      amountCents <= 0
+    )
+      return fail();
+    const response = record(
+      await this.#request(
+        "GET",
+        "/v1/payments/search",
+        undefined,
+        undefined,
+        new URLSearchParams({
+          external_reference: checkoutId,
+          sort: "date_created",
+          criteria: "desc",
+          range: "date_created",
+          limit: "2",
+          offset: "0",
+        }),
+      ),
+    );
+    const paging = record(response.paging);
+    if (
+      !Array.isArray(response.results) ||
+      response.results.length > 2 ||
+      !Number.isSafeInteger(paging.total) ||
+      (paging.total as number) < 0 ||
+      paging.offset !== 0 ||
+      response.results.length !== Math.min(2, paging.total as number)
+    )
+      return fail("invalid_response");
+    // Never choose one of multiple payments or rely on a truncated search page.
+    if ((paging.total as number) > 1) return fail("mismatch");
+    if (!response.results.length) return null;
+    const candidate = record(response.results[0]);
+    if (candidate.external_reference !== checkoutId) return fail("mismatch");
+    const payment = await this.getPayment(numericId(candidate.id));
+    return validatePaymentForCheckout(
+      payment,
+      {
+        ...this.#config,
+        checkoutId,
+        amountCents,
+      },
+      "pix",
+    );
   }
   async getSubscription(id: string): Promise<ProviderSubscription> {
     id = safeProviderId(id);
