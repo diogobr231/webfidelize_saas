@@ -135,6 +135,8 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Os templates de confirmação, recuperação e alteração de senha incluem português e a logo da aplicação. O painel Supabase confirmou em 22/10/2026 que ainda usa modelos padrão e exige SMTP próprio para personalização; os arquivos locais não representam envio de produção configurado.
 - Testes: `pnpm test:classes:db`, `pnpm test:import:db`, `pnpm test:admin-diagnostics:db` e os testes de parser/recibos em `pnpm test`. Os testes SQL isolados não simulam concorrência real; a aceitação online de turmas tem opt-in separado em `scripts/test-classes-live.ts`.
 
+Validação da entrega em 22/10/2026: 166 testes unitários, 356 grupos SQL (incluindo as regressões anteriores), TypeScript e build passaram. Na URL publicada, passaram 8 grupos de turmas, 5 de importação, 27 de páginas públicas e 7 de autenticação. Três reservas simultâneas disputaram duas vagas: exatamente duas foram aceitas. Os testes de escrita usaram somente empresas DEMO e registraram os IDs criados para limpeza; os cadastros anteriores permaneceram iguais. Isso não comprova envio real de e-mail nem contratação por cartão, que continuam pendentes.
+
 ## Ainda pendente antes da primeira venda
 
 - Mercado Pago: implementar checkout de assinatura, webhook validado, idempotência persistida, conciliação e tratamento de inadimplência; depois homologar em sandbox. Também faltam aplicação/credenciais do provedor e endpoint HTTPS de homologação. **A pendência inclui desenvolvimento, não apenas configuração. Nenhuma cobrança foi habilitada.**

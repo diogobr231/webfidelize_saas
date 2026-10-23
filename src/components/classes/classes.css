@@ -109,20 +109,27 @@
   justify-content: center;
 }
 .class-form .class-checkbox {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
   gap: 12px;
   min-height: 44px;
   padding: 10px 0;
   font-weight: 400;
   cursor: pointer;
 }
-.class-checkbox input {
-  flex: 0 0 auto;
+.class-form .class-checkbox > input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  margin-top: 3px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 3px 0 0;
   accent-color: var(--cyan);
+}
+.class-checkbox > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .class-checkbox small {
   display: block;
