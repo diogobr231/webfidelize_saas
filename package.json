@@ -8,6 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
+    "test:billing:db": "tsx scripts/test-billing-db.ts",
+    "test:billing:http": "tsx scripts/test-billing-http.ts",
     "test:whatsapp:db": "tsx scripts/test-reminders-db.ts",
     "test:whatsapp:http": "tsx scripts/test-whatsapp-http.ts",
     "test:auth:isolated": "tsx scripts/test-auth-isolated.ts",

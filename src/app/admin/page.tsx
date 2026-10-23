@@ -116,12 +116,18 @@ export default async function Admin({
         <div className="admin-billing-note">
           <Icon name="shield" size={20} />
           <div>
-            <strong>Ativação paga em preparação</strong>
+            <strong>Pagamentos em homologação</strong>
             <p>
               Novas empresas recebem 7 dias grátis sem cartão, com prazo
-              controlado no backend. A ativação de assinaturas pagas depende da
-              conciliação Mercado Pago, ainda pendente; não é possível liberar
-              uma assinatura paga manualmente.
+              controlado no backend. Pix e cartão estão implementados e aguardam
+              a validação externa do Mercado Pago antes de habilitar cobranças.
+              Não é possível liberar uma assinatura paga manualmente.
+            </p>
+            <p>
+              Suspender ou cancelar o acesso de uma empresa não cancela a
+              renovação no Mercado Pago. O proprietário gerencia a recorrência
+              em Plano e assinatura; consulte o histórico no diagnóstico da
+              empresa antes de orientar uma regularização.
             </p>
           </div>
         </div>

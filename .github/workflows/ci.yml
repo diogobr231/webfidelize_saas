@@ -1,7 +1,7 @@
 name: Validate
 on:
   push:
-    branches: [main, 'codex/**']
+    branches: [main, "codex/**"]
   pull_request:
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:db
+      - run: pnpm test:billing:db
       - run: pnpm test:dashboard:db
       - run: pnpm test:help:db
       - run: pnpm test:team:db
@@ -43,5 +44,6 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm test:auth:isolated
+      - run: pnpm test:billing:http
       - run: pnpm test:whatsapp:http
       - run: pnpm test:team-insights:http

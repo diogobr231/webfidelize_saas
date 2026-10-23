@@ -4,6 +4,8 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { Brand } from "@/components/ui/brand";
 import { PageHeader } from "@/components/ui/page-header";
+import { snapshotSchema } from "@/lib/billing/schema";
+import { money } from "@/lib/catalog";
 import "../../admin.css";
 
 const schema = z.object({
@@ -69,12 +71,31 @@ export default async function CompanyDiagnostics({
   const { data: admin, error: authorizationError } =
     await db.rpc("is_super_admin");
   if (authorizationError || admin !== true) notFound();
-  const { data, error } = await db.rpc("admin_company_diagnostics", {
-    p_company: companyId,
-  });
+  const [{ data, error }, billingResult] = await Promise.all([
+    db.rpc("admin_company_diagnostics", { p_company: companyId }),
+    db.rpc("billing_snapshot", { p_company_id: companyId }),
+  ]);
   if (!error && data === null) notFound();
   const parsed = schema.safeParse(data);
   const result = !error && parsed.success ? parsed.data : null;
+  const billingParsed = snapshotSchema.safeParse(billingResult.data);
+  const billing =
+    !billingResult.error &&
+    billingParsed.success &&
+    billingParsed.data.company.id === companyId
+      ? billingParsed.data
+      : null;
+  const financialStatus: Record<string, string> = {
+    approved: "Pagamento aprovado",
+    pending: "Pendente",
+    in_process: "Em análise",
+    authorized: "Recorrência autorizada",
+    rejected: "Recusado",
+    cancelled: "Cancelado",
+    refunded: "Estornado",
+    charged_back: "Contestado",
+    paused: "Pausado",
+  };
   return (
     <main className="admin-shell">
       <nav className="admin-topbar" aria-label="Suporte à empresa">
@@ -114,6 +135,73 @@ export default async function CompanyDiagnostics({
               >
                 Gerenciar plano e situação
               </Link>
+            </section>
+            <section className="panel" aria-labelledby="company-billing-title">
+              <h2 id="company-billing-title">Assinatura e pagamentos</h2>
+              {!billing ? (
+                <p className="notice">
+                  Não foi possível consultar o histórico financeiro. Nenhum
+                  estado de pagamento será presumido.
+                </p>
+              ) : (
+                <>
+                  <p>
+                    {billing.company.access
+                      ? "Acesso vigente confirmado pelo banco."
+                      : "Sem período de acesso vigente."}
+                    {billing.company.paid_until
+                      ? ` Validade paga registrada: ${new Date(billing.company.paid_until).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`
+                      : " Ainda não há período pago confirmado."}
+                  </p>
+                  {billing.subscription && (
+                    <p>
+                      Cartão ·{" "}
+                      {financialStatus[billing.subscription.status] ||
+                        "Em verificação"}
+                      . A autorização da recorrência exige confirmação de cada
+                      pagamento.
+                      {billing.subscription.environment === "test" &&
+                        " Assinatura de teste, sem cobrança real."}
+                    </p>
+                  )}
+                  {billing.payments.length ? (
+                    <ul className="admin-billing-history">
+                      {billing.payments.map((payment) => (
+                        <li
+                          key={`${payment.environment}:${payment.provider_id}`}
+                        >
+                          <strong>
+                            {money(payment.amount_cents)} ·{" "}
+                            {payment.method === "pix" ? "Pix" : "Cartão"}
+                          </strong>
+                          {payment.environment === "test" && (
+                            <span>Teste · sem cobrança real</span>
+                          )}
+                          <span>
+                            {financialStatus[payment.status] ||
+                              "Em verificação"}
+                          </span>
+                          {payment.approved_at && (
+                            <time dateTime={payment.approved_at}>
+                              {new Date(payment.approved_at).toLocaleDateString(
+                                "pt-BR",
+                                { timeZone: "America/Sao_Paulo" },
+                              )}
+                            </time>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>Nenhum pagamento registrado para esta empresa.</p>
+                  )}
+                  <p className="hint">
+                    Consulta administrativa. Contratação e cancelamento da
+                    renovação são feitos pelo proprietário. Esta tela não cobra,
+                    não estorna valores e não libera acesso pago manualmente.
+                  </p>
+                </>
+              )}
             </section>
             <section className="panel">
               <h2>Acesso do proprietário</h2>

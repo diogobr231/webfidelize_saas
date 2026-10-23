@@ -1,10 +1,11 @@
 import { requireCompany } from "@/lib/auth";
 import { commercialPlans } from "@/lib/commercial";
-import { hasAccess } from "@/lib/permissions";
 import { PageHeader } from "@/components/ui/page-header";
-import { PlansComparison } from "@/components/plans-comparison";
+import { getBillingSnapshot } from "@/lib/billing/service";
+import { BillingForm } from "./billing-form";
 import { niches } from "@/lib/catalog";
 import Link from "next/link";
+import "./billing.css";
 export default async function Subscription({
   params,
 }: {
@@ -12,31 +13,33 @@ export default async function Subscription({
 }) {
   const { companyId } = await params;
   const { db, company, role } = await requireCompany(companyId, false, true);
-  const [plans, professionals] = await Promise.all([
+  const [plans, professionals, billing] = await Promise.all([
     commercialPlans(),
     db
       .from("professionals")
       .select("id", { head: true, count: "exact" })
       .eq("company_id", companyId)
       .is("archived_at", null),
+    role === "OWNER" ? getBillingSnapshot(companyId) : Promise.resolve(null),
   ]);
+  const now = new Date();
+  const trialActive = company.status === "trialing" && company.access_valid;
+  const access = company.access_valid;
   const current = plans?.find((p) => p.id === company.plan_id);
   const labels: Record<string, string> = {
     pending_card: "Ativação do teste pendente",
-    active: "Ativa",
+    active: access ? "Ativa" : "Alterações bloqueadas",
     past_due: "Pagamento pendente",
     suspended: "Suspensa",
     canceled: "Cancelada",
-    trialing: hasAccess(company.status, company.trial_ends_at)
-      ? "Teste gratuito"
-      : "Teste encerrado",
+    trialing: trialActive ? "Teste gratuito" : "Teste encerrado",
   };
   return (
     <>
       <PageHeader
         eyebrow="Plano e acesso"
         title="Sua assinatura, com clareza."
-        description="Consulte a situação atual da empresa e compare os planos. Alterações de acesso são confirmadas pelo backend."
+        description="Compare os planos, acompanhe seu período de acesso e consulte os pagamentos da sua empresa."
       />
       {company.status === "pending_card" && (
         <section className="panel" aria-labelledby="trial-activation-title">
@@ -85,7 +88,7 @@ export default async function Subscription({
           </p>
         )}
       <section
-        className="panel billing-current"
+        className="panel billing-overview"
         aria-label="Situação da assinatura"
       >
         <div>
@@ -101,32 +104,49 @@ export default async function Subscription({
           <p>Situação</p>
           <strong>{labels[company.status] || "Consulta indisponível"}</strong>
           <small>
-            {hasAccess(company.status, company.trial_ends_at)
+            {access
               ? "Acesso às funções do seu perfil liberado."
               : "Alterações bloqueadas. Seus dados permanecem disponíveis para consulta."}
           </small>
         </div>
         <div>
-          <p>Fim do teste desta empresa</p>
+          <p>
+            {company.paid_until
+              ? "Prazo pago registrado"
+              : "Fim do teste desta empresa"}
+          </p>
           <strong>
-            {company.trial_ends_at
-              ? new Date(company.trial_ends_at).toLocaleDateString("pt-BR", {
+            {company.paid_until || company.trial_ends_at
+              ? new Date(
+                  company.paid_until || company.trial_ends_at,
+                ).toLocaleString("pt-BR", {
                   timeZone: "America/Sao_Paulo",
+                  dateStyle: "short",
+                  timeStyle: "short",
                 })
               : "Ainda não iniciado"}
           </strong>
           <small>
             {company.status === "pending_card"
               ? "Fale com o suporte para verificar a ativação deste cadastro."
-              : "Reabrir esta tela não renova o teste."}
+              : company.paid_until
+                ? "Consulte a situação de acesso ao lado. Horário de Brasília."
+                : "Reabrir esta tela não renova o teste. Horário de Brasília."}
           </small>
         </div>
       </section>
-      <PlansComparison
+      <BillingForm
+        companyId={companyId}
         plans={plans}
-        current={company.plan_id}
-        authenticated
+        currentPlanId={company.plan_id}
+        professionalCount={
+          professionals.error ? null : (professionals.count ?? 0)
+        }
+        snapshot={billing}
         owner={role === "OWNER"}
+        trialActive={trialActive}
+        serverNow={now.getTime()}
+        isDemo={company.is_demo === true}
       />
     </>
   );
