@@ -4,6 +4,8 @@
 
 O fluxo de autenticação e os templates precisam ser publicados juntos. Pagamentos continuam fora desta etapa.
 
+Preparação seguinte em 23/10: os três templates foram alinhados à paleta clara navy/ciano e receberam nove testes automatizados do HTML e dos links. O Brevo Free foi escolhido para o início sem mensalidade (até 300 e-mails por dia; inclui identificação do provedor). Ainda falta concluir a conta do provedor, verificar o remetente, habilitar o transporte e homologar o recebimento. Nenhuma credencial SMTP foi configurada e estes templates **ainda não estão ativos no Supabase**. Sem domínio próprio autenticado, o Brevo pode substituir temporariamente o endereço do remetente por um domínio de envio dele; não prometer remetente `@webfidelize.com.br` antes da compra e verificação. [Plano gratuito](https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan), [remetentes e autenticação](https://help.brevo.com/hc/en-us/articles/14925263522578-Comply-with-Gmail-Yahoo-and-Microsoft-s-requirements-for-email-senders).
+
 ## O que será enviado
 
 | Finalidade no Supabase | Assunto sugerido                       | Arquivo                                                                |
