@@ -1005,3 +1005,15 @@
     animation: none !important;
   }
 }
+.booking-mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.booking-mode-switch .button {
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+}

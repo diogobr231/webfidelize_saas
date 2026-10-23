@@ -10,6 +10,7 @@ const entries = [
   { path: "", label: "Visão geral", icon: "layout" },
   { path: "/meu-dia", label: "Meu dia", icon: "user" },
   { path: "/agenda", label: "Agenda", icon: "calendar" },
+  { path: "/turmas", label: "Turmas e vagas", icon: "users" },
   { path: "/customers", label: "Clientes", icon: "users" },
   { path: "/services", label: "Serviços", icon: "briefcase" },
   { path: "/professionals", label: "Profissionais", icon: "user" },

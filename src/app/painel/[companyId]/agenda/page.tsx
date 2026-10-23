@@ -66,6 +66,19 @@ export default async function Agenda({
     .limit(500);
   if (selectedProfessional)
     query = query.eq("professional_id", selectedProfessional);
+  let classesQuery = db
+    .from("class_sessions")
+    .select(
+      "id,title,starts_at,ends_at,status,professional_id,capacity,services(name),professionals(name)",
+      { count: "exact" },
+    )
+    .eq("company_id", companyId)
+    .gte("starts_at", range.start)
+    .lt("starts_at", range.end)
+    .order("starts_at")
+    .limit(500);
+  if (selectedProfessional)
+    classesQuery = classesQuery.eq("professional_id", selectedProfessional);
   const blocksPage = blockPage(q.bloqueios_pagina);
   let blocksQuery = db
     .from("schedule_blocks")
@@ -90,6 +103,7 @@ export default async function Agenda({
     shifts,
     bookingProfessionals,
     blocks,
+    classes,
   ] = await Promise.all([
     query,
     managed
@@ -123,9 +137,11 @@ export default async function Agenda({
           .order("name")
       : Promise.resolve({ data: [], error: null }),
     blocksQuery,
+    classesQuery,
   ]);
   const failed = Boolean(
     appointments.error ||
+      classes.error ||
       professionals.error ||
       customers.error ||
       services.error ||
@@ -151,6 +167,19 @@ export default async function Agenda({
       professional_name: relatedName(item.professionals),
     }),
   );
+  for (const session of classes.data || [])
+    items.push({
+      id: session.id,
+      kind: "class",
+      starts_at: session.starts_at,
+      ends_at: session.ends_at,
+      status: session.status,
+      professional_id: session.professional_id,
+      customer_name: `Turma · ${session.title}`,
+      service_name: `${relatedName(session.services)} · limite de ${session.capacity} participantes`,
+      professional_name: relatedName(session.professionals),
+    });
+  items.sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at));
   const href = (target: string, mode = view) =>
     `/painel/${companyId}/agenda?${new URLSearchParams({ day: target, view: mode, ...(selectedProfessional ? { professional: selectedProfessional } : {}) })}`;
   return (
@@ -162,9 +191,23 @@ export default async function Agenda({
           <p>Horários, clientes e equipe em uma só visão. Fuso de São Paulo.</p>
         </div>
         {managed && (
-          <a className="button" href="#novo-agendamento">
-            ＋ Novo agendamento
-          </a>
+          <div className="agenda-heading-actions">
+            <Link
+              className="button secondary"
+              href={`/painel/${companyId}/agenda/importar`}
+            >
+              Importar agenda
+            </Link>
+            <Link
+              className="button secondary"
+              href={`/painel/${companyId}/turmas`}
+            >
+              Turmas e vagas
+            </Link>
+            <a className="button" href="#novo-agendamento">
+              ＋ Novo agendamento
+            </a>
+          </div>
         )}
       </header>
       {q.notice && notices[q.notice] && (
@@ -252,10 +295,10 @@ export default async function Agenda({
         </p>
       ) : (
         <>
-          {(appointments.count || 0) > 500 && (
+          {((appointments.count || 0) > 500 || (classes.count || 0) > 500) && (
             <p className="notice">
-              Exibindo os primeiros 500 atendimentos. Filtre um profissional ou
-              use a visão diária para ver os demais.
+              Exibindo até 500 atendimentos e 500 turmas. Filtre um profissional
+              ou use a visão diária para ver os demais.
             </p>
           )}
           <AgendaExperience

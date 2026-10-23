@@ -1,6 +1,19 @@
 .agenda-page {
   min-width: 0;
 }
+.agenda-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.agenda-heading-actions .button {
+  min-height: 44px;
+}
+.calendar-event.event-class {
+  background: #eef2ff;
+  border-left-color: #6366f1;
+  color: #3730a3;
+}
 .agenda-heading {
   display: flex;
   justify-content: space-between;

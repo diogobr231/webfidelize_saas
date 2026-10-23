@@ -142,6 +142,17 @@ export default async function Booking({
   const currentStep = confirmed ? 3 : selected && professional ? 2 : 1;
   return (
     <main className="booking-page" data-theme={theme}>
+      <div
+        className="booking-shell booking-mode-switch"
+        aria-label="Tipo de reserva"
+      >
+        <a className="button secondary" href="#horarios">
+          Atendimento individual
+        </a>
+        <Link className="button" href={`/agendar/${slug}/turmas`}>
+          Turmas e atividades em grupo →
+        </Link>
+      </div>
       <div className="booking-topbar">
         <div className="booking-shell booking-topbar-inner">
           <Link href={`/agendar/${slug}`} className="booking-business">

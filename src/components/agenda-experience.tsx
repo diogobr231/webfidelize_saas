@@ -15,6 +15,7 @@ import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export type CalendarAppointment = {
+  kind?: "appointment" | "class";
   id: string;
   starts_at: string;
   ends_at: string;
@@ -110,7 +111,7 @@ function AppointmentDialog({
         </button>
       </div>
       <h2 id="appointment-title">{item.customer_name}</h2>
-      {item.status === "scheduled" ? (
+      {item.kind !== "class" && item.status === "scheduled" ? (
         <p className={item.attendance_confirmed_at ? "notice" : "muted"}>
           {item.attendance_confirmed_at
             ? `Presença confirmada pelo cliente em ${new Date(item.attendance_confirmed_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}.`
@@ -130,7 +131,14 @@ function AppointmentDialog({
           {appointmentTime(item.starts_at)}–{appointmentTime(item.ends_at)}
         </span>
       </div>
-      {managed && item.status === "scheduled" ? (
+      {item.kind === "class" ? (
+        <Link
+          className="button"
+          href={`/painel/${companyId}/turmas/${item.id}`}
+        >
+          Abrir turma e participantes <Icon name="users" size={16} />
+        </Link>
+      ) : managed && item.status === "scheduled" ? (
         <>
           <details>
             <summary>Remarcar atendimento</summary>
@@ -295,15 +303,15 @@ export function AgendaExperience(props: Props) {
           <span className="agenda-stat-icon">
             <Icon name="calendar" size={18} />
           </span>
-          <strong>{live.length}</strong>
-          <span>atendimentos no período</span>
+          <strong>{live.filter((a) => a.kind !== "class").length}</strong>
+          <span>atendimentos individuais</span>
         </div>
         <div className="agenda-period-stat">
           <span className="agenda-stat-icon completed">
             <Icon name="check" size={18} />
           </span>
-          <strong>{live.filter((a) => a.status === "completed").length}</strong>
-          <span>concluídos</span>
+          <strong>{live.filter((a) => a.kind === "class").length}</strong>
+          <span>turmas no período</span>
         </div>
         <div className="agenda-legend">
           <span className="agenda-dot" aria-hidden="true" />
@@ -428,7 +436,7 @@ export function AgendaExperience(props: Props) {
                     ({ event, lane, lanes }) => (
                       <button
                         key={event.id}
-                        className={`calendar-event event-${event.status}`}
+                        className={`calendar-event event-${event.status}${event.kind === "class" ? " event-class" : ""}`}
                         style={{
                           top:
                             (minutes(event.starts_at) - startHour * 60) * 1.5,

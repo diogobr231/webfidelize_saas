@@ -104,11 +104,18 @@ export default async function MyDay({
     </section>
   );
   const header = (
-    <PageHeader
-      eyebrow="Sua rotina de atendimento"
-      title="Meu dia"
-      description="Seus atendimentos, confirmações e próximos passos. Horários no fuso de São Paulo."
-    />
+    <>
+      <PageHeader
+        eyebrow="Sua rotina de atendimento"
+        title="Meu dia"
+        description="Seus atendimentos, confirmações e próximos passos. Horários no fuso de São Paulo."
+      />
+      <p>
+        <Link className="button secondary" href={`${base}/turmas?day=${day}`}>
+          Ver turmas e participantes
+        </Link>
+      </p>
+    </>
   );
   if (role !== "EMPLOYEE")
     return (
