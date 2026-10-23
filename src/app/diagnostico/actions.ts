@@ -1,6 +1,8 @@
 "use server";
 import { salesInquirySchema, type SalesActionState } from "@/lib/sales";
 import { publicDatabase } from "@/lib/supabase/public";
+import { headers } from "next/headers";
+import { salesOriginHash } from "@/lib/sales-origin";
 
 export async function submitSalesInquiry(
   _previous: SalesActionState,
@@ -22,10 +24,21 @@ export async function submitSalesInquiry(
   void website;
   void consent;
   try {
+    const sourceHash = salesOriginHash(
+      await headers(),
+      secret,
+      process.env.VERCEL === "1",
+    );
+    if (!sourceHash)
+      return {
+        error:
+          "Não foi possível validar este envio. Tente novamente ou fale conosco pelo WhatsApp.",
+      };
     const { data, error } = await publicDatabase().rpc("sales_capture", {
       p_gateway_secret: secret,
       p_request_id: request_id,
       p_input: { ...fields, consent: true },
+      p_source_hash: sourceHash,
     });
     if (error || data !== true)
       return {
