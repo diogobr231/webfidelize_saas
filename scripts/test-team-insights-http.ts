@@ -90,6 +90,9 @@ async function main() {
     role: "OWNER",
     plan: "profissional",
     companyStatus: "active",
+    paidUntil: new Date(Date.now() + 86_400_000).toISOString(),
+    accessValid: true,
+    accessFailure: false,
     linked: true,
     appointmentStatus: "scheduled",
     futureAppointment: false,
@@ -145,6 +148,19 @@ async function main() {
       >;
       calls.push({ name, body });
       if (name === "is_super_admin") return send(200, false);
+      if (name === "company_access_state") {
+        if (body.p_company_id !== companyId || state.accessFailure)
+          return send(400, {
+            code: "P0001",
+            message: "Controlled access read denial",
+          });
+        return send(
+          200,
+          state.accessValid &&
+            state.companyStatus === "active" &&
+            Date.parse(state.paidUntil) > Date.now(),
+        );
+      }
       if (state.failed)
         return send(400, {
           code: "P0001",
@@ -236,6 +252,7 @@ async function main() {
         niche: "salao",
         plan_id: state.plan,
         status: state.companyStatus,
+        paid_until: state.paidUntil,
         trial_ends_at: null,
         trial_card_required: true,
         is_demo: true,
@@ -596,6 +613,16 @@ async function main() {
       "assinatura",
     );
     state.companyStatus = "active";
+    state.paidUntil = new Date(Date.now() - 86_400_000).toISOString();
+    assert.equal(
+      (await location(await request(personal, complete))).searchParams.get(
+        "erro",
+      ),
+      "assinatura",
+      "Stored active status cannot bypass expiration of a paid period",
+    );
+    assert.equal(callCount("complete_my_appointment"), completedCalls);
+    state.paidUntil = new Date(Date.now() + 86_400_000).toISOString();
     complete.delete("confirm_action");
     assert.equal(
       (await location(await request(personal, complete))).searchParams.get(
@@ -607,6 +634,36 @@ async function main() {
     assert.equal(callCount("complete_my_appointment"), completedCalls);
     pass(
       "server action rechecks role, company activation and explicit completion confirmation",
+    );
+
+    phase = "refunded gap and access lookup outage";
+    state.appointmentStatus = "scheduled";
+    for (const failure of [false, true]) {
+      state.accessValid = failure;
+      state.accessFailure = failure;
+      const gap = await (await request(personal)).text();
+      assert.ok(!gap.includes("Salvar minha preferência"));
+      assert.ok(!gap.includes('name="appointment_id"'));
+      assert.ok(
+        gap.includes("Cliente QA sintético"),
+        "Read access must preserve existing appointments",
+      );
+      assert.equal(
+        (await location(await request(personal, complete))).searchParams.get(
+          "erro",
+        ),
+        "assinatura",
+      );
+      assert.equal(callCount("complete_my_appointment"), completedCalls);
+    }
+    state.accessValid = true;
+    state.accessFailure = false;
+    for (const call of calls.filter(
+      (call) => call.name === "company_access_state",
+    ))
+      assert.deepEqual(call.body, { p_company_id: companyId });
+    pass(
+      "future paid deadline cannot bypass a refunded gap or failed authoritative access lookup; read access remains available",
     );
 
     phase = "backend denials and unlinked staff";

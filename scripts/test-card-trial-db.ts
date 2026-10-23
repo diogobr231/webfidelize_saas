@@ -656,8 +656,10 @@ const pendingBefore = await scalar<Record<string, unknown>>(
 const migrationStarted = Number(
   await scalar("select extract(epoch from now())::double precision"),
 );
-for (const migration of migrations.slice(noCardIndex))
-  await db.exec(migration.sql);
+// This historical transition test intentionally includes synthetic active legacy
+// rows. Test the no-card migration itself; later billing has its own full-chain
+// suite and requires an audited zero-paid baseline before installing its ledger.
+await db.exec(migrations[noCardIndex].sql);
 const migrationEnded = Number(
   await scalar("select extract(epoch from now())::double precision"),
 );

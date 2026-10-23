@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { hasAccess } from "@/lib/permissions";
 import {
   addDays,
   agendaRange,
@@ -37,7 +36,7 @@ export default async function MyDay({
   const now = new Date();
   const day = validDay(query.day) ? query.day : saoPauloDay(now);
   const base = `/painel/${companyId}`;
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const [preferenceResult, professional] = await Promise.all([
     db.rpc("get_my_whatsapp_staff_preferences", { p_company: companyId }),
     role === "EMPLOYEE"

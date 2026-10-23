@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { appointmentTime, saoPauloDay } from "@/lib/scheduling";
 import {
   classPage,
@@ -57,7 +57,7 @@ export default async function ClassDetail({
     professionals: unknown;
   };
   const managed = canManage(role);
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const scheduled = session.status === "scheduled";
   const started = Date.parse(session.starts_at) <= Date.now();
   const ended = Date.parse(session.ends_at) <= Date.now();

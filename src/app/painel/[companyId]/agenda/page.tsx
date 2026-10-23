@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { addDays, agendaRange, saoPauloDay, validDay } from "@/lib/scheduling";
 import { BLOCKS_PAGE_SIZE, blockPage } from "@/lib/schedule-blocks";
 import { ScheduleBlockList } from "@/components/scheduling-blocks/block-list";
@@ -41,8 +41,7 @@ export default async function Agenda({
         ? "week"
         : "day";
   const range = agendaRange(day, view);
-  const managed =
-    canManage(role) && hasAccess(company.status, company.trial_ends_at);
+  const managed = canManage(role) && company.access_valid;
   const professionals = await db
     .from("professionals")
     .select("id,name,archived_at")

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { money } from "@/lib/catalog";
 import { appointmentStatus } from "@/lib/scheduling";
 import { recordFilters, recordPagination } from "@/lib/record-list";
@@ -62,7 +62,7 @@ export default async function RecordDetails({
   const label = businessLabels[section];
   const archived = Boolean(record.archived_at);
   const managed = canManage(role);
-  const writable = managed && hasAccess(company.status, company.trial_ends_at);
+  const writable = managed && company.access_valid;
   const base = `/painel/${companyId}/${section}`;
   const permalink = `${base}/${recordId}`;
   const requestedPage = recordFilters(query).page;

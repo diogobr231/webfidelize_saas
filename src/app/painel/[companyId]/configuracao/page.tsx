@@ -2,7 +2,6 @@ import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { requireCompany } from "@/lib/auth";
-import { hasAccess } from "@/lib/permissions";
 import { niches, money } from "@/lib/catalog";
 import { setupProgress, setupStep, setupDestination } from "@/lib/onboarding";
 import { OnboardingFrame } from "@/components/onboarding/frame";
@@ -78,7 +77,7 @@ export default async function Setup({
   const professionalCount = professionals.count ?? 0;
   const progress = setupProgress(true, serviceCount, professionalCount);
   const current = setupStep(query.etapa, progress.next);
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const room = professionalCount < plan.data.staff_limit;
   const canSchedule =
     serviceCount > 0 && professionalCount > 0 && (shifts.count ?? 0) > 0;

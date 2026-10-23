@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import {
   addDays,
   agendaRange,
@@ -37,7 +37,7 @@ export default async function ClassesPage({
   const last = addDays(day, 6);
   const page = classPage(query.pagina);
   const managed = canManage(role);
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const [sessions, services, professionals] = await Promise.all([
     db
       .from("class_sessions")

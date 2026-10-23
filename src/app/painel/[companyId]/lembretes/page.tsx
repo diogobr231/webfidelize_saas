@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { z } from "zod";
 import { requireCompany } from "@/lib/auth";
-import { hasAccess } from "@/lib/permissions";
 import {
   getStaffWhatsAppConnectionStatus,
   getWhatsAppConnectionStatus,
@@ -139,7 +138,7 @@ export default async function Reminders({
               enabled={data?.enabled ?? false}
               offsets={data?.offsets_minutes ?? [1440]}
               limit={data?.monthly_limit ?? 100}
-              writable={hasAccess(company.status, company.trial_ends_at)}
+              writable={company.access_valid}
               action={saveReminders.bind(null, companyId)}
               permalink={`/painel/${companyId}/lembretes`}
             />
@@ -222,7 +221,7 @@ export default async function Reminders({
               newAppointmentEnabled={
                 data?.staff_new_appointment_enabled ?? false
               }
-              writable={hasAccess(company.status, company.trial_ends_at)}
+              writable={company.access_valid}
               action={saveStaffReminders.bind(null, companyId)}
               permalink={`/painel/${companyId}/lembretes`}
             />

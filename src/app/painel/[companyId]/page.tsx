@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { saoPauloDay, appointmentTime } from "@/lib/scheduling";
 import {
   dashboardGrowth,
@@ -87,7 +87,7 @@ export default async function Dashboard({
       managed ? count("professionals") : Promise.resolve(null),
       managed ? count("availability") : Promise.resolve(null),
     ]);
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const published = Boolean(company.booking_enabled && company.booking_slug);
   const publicUrl = published
     ? new URL(
