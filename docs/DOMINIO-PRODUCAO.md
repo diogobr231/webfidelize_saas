@@ -27,4 +27,6 @@ Preservar os nameservers `nsa1` a `nsa4.squarespacedns.com`, o MX `1 smtp.google
 5. Validar cadastro, confirmação, recuperação de senha, convite, login OWNER/EMPLOYEE/SUPER_ADMIN, reservas, recibos e SEO. Não reutilizar códigos de confirmação nem registrar tokens em evidências.
 6. Manter o endereço `vercel.app` funcional para callbacks, recibos, notificações e retornos de pagamento antigos. Não aplicar redirecionamento global a webhooks ou callbacks PKCE.
 
+A compatibilidade é optativa: quando o novo domínio estiver operacional, definir `APP_URL=https://webfidelize.com` e `AUTH_LEGACY_ORIGINS=https://webfidelize-saas.vercel.app`. Sem essa segunda variável, o comportamento atual permanece. Cadastro, login e recuperação iniciam no domínio canônico; callbacks já emitidos continuam na origem permitida onde o navegador guarda o verificador PKCE. Aceitar somente origens exatas, nunca curingas. Os testes de publicação exigem `TEST_DEPLOYMENT_URL` com uma dessas duas origens exatas.
+
 O SMTP e a homologação financeira são configurações independentes do domínio. A conexão DNS, sozinha, não comprova envio de e-mail ou recebimento de pagamentos.

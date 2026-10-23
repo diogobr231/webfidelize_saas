@@ -5,13 +5,13 @@ import {
   authPageUrl,
   parseEmailConfirmation,
 } from "@/lib/auth-flow";
-import { getAuthOrigin } from "@/lib/auth-origin";
+import { authCallbackOrigin } from "@/lib/auth-origin";
 import { isRecoverySession } from "@/lib/auth-recovery";
 
 export async function GET(request: NextRequest) {
   let origin: string;
   try {
-    origin = getAuthOrigin();
+    origin = authCallbackOrigin(request.headers);
   } catch {
     return new NextResponse(
       "O acesso por e-mail ainda precisa ser configurado.",

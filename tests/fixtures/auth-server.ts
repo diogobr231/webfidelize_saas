@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { generateKeyPairSync, randomUUID, sign } from "node:crypto";
+import { createHash, generateKeyPairSync, randomUUID, sign } from "node:crypto";
 import type { AddressInfo } from "node:net";
 
 export const confirmationHash = "ab".repeat(28);
@@ -37,6 +37,17 @@ export async function startFakeAuth(issuerOrigin: string) {
     recoveryCalls: 0,
     resendCalls: 0,
     jwksCalls: 0,
+    pkceCalls: 0,
+    pkceSuccesses: 0,
+    emailRequests: [] as {
+      path: string;
+      redirectTo: string | null;
+      challenge: string | null;
+    }[],
+    pkceCodes: new Map<
+      string,
+      { challenge: string; method: "otp" | "recovery" }
+    >(),
     password: fakePassword,
     usedTokens: new Set<string>(),
     company: null as null | Record<string, unknown>,
@@ -134,6 +145,12 @@ export async function startFakeAuth(issuerOrigin: string) {
       if (url.pathname.endsWith("signup")) state.signupCalls++;
       if (url.pathname.endsWith("recover")) state.recoveryCalls++;
       if (url.pathname.endsWith("resend")) state.resendCalls++;
+      state.emailRequests.push({
+        path: url.pathname,
+        redirectTo: url.searchParams.get("redirect_to"),
+        challenge:
+          typeof body.code_challenge === "string" ? body.code_challenge : null,
+      });
       if (state.fault === "smtp") return fail(500, "unexpected_failure");
       if (state.fault === "limit")
         return fail(429, "over_email_send_rate_limit");
@@ -164,15 +181,23 @@ export async function startFakeAuth(issuerOrigin: string) {
         return send(200, session("password"));
       }
       if (url.searchParams.get("grant_type") === "pkce") {
+        state.pkceCalls++;
         if (
           typeof body.code_verifier !== "string" ||
           body.code_verifier.length < 43
         )
           return fail(400, "bad_code_verifier");
-        if (body.auth_code === "legacy-recovery")
-          return send(200, session("recovery"));
-        if (body.auth_code === "legacy-signup")
-          return send(200, session("otp"));
+        const registered = state.pkceCodes.get(String(body.auth_code));
+        if (registered) {
+          const challenge = createHash("sha256")
+            .update(body.code_verifier)
+            .digest("base64url");
+          if (challenge !== registered.challenge)
+            return fail(400, "bad_code_verifier");
+          state.pkceCodes.delete(String(body.auth_code));
+          state.pkceSuccesses++;
+          return send(200, session(registered.method));
+        }
       }
       return fail(400, "invalid_grant");
     }
@@ -264,6 +289,19 @@ export async function startFakeAuth(issuerOrigin: string) {
     state,
     session,
     user,
+    // Models a code delivered by Auth after a real SDK PKCE request. No fixed
+    // aliases or verifier-length-only success path may bypass the challenge.
+    issuePkceCode(
+      method: "otp" | "recovery",
+      requestIndex = state.emailRequests.length - 1,
+    ) {
+      const challenge = state.emailRequests[requestIndex]?.challenge;
+      if (!challenge || !/^[A-Za-z0-9_-]{43}$/.test(challenge))
+        throw new Error("The fixture needs a preceding PKCE email request");
+      const code = `fixture-${randomUUID()}`;
+      state.pkceCodes.set(code, { challenge, method });
+      return code;
+    },
     close: () =>
       new Promise<void>((resolve, reject) => {
         server.closeAllConnections();

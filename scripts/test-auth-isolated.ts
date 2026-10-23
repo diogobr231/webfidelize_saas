@@ -99,6 +99,7 @@ async function main() {
       env: {
         ...process.env,
         APP_URL: base,
+        AUTH_LEGACY_ORIGINS: "",
         AUTH_FLOW_SECRET: proofSecret,
         TEST_AUTH_BACKEND_URL: backend.origin,
         NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
@@ -622,12 +623,13 @@ async function main() {
     phase = "legacy PKCE recovery";
     const legacyBrowser: Browser = new Map();
     await request(legacyBrowser, "/recuperar", recover); // Stores the SDK's PKCE verifier in this test browser.
+    const legacyRecoveryCode = backend.issuePkceCode("recovery");
     assert.equal(
       (
         await destination(
           await request(
             legacyBrowser,
-            "/auth/callback?code=legacy-recovery&next=/painel",
+            `/auth/callback?code=${legacyRecoveryCode}&next=/painel`,
           ),
         )
       ).pathname,
@@ -640,12 +642,13 @@ async function main() {
     assert.equal(legacyBrowser.has("wf-recovery-proof"), false);
     const ordinaryPkce: Browser = new Map();
     await request(ordinaryPkce, "/recuperar", recover);
+    const ordinaryCode = backend.issuePkceCode("otp");
     assert.equal(
       (
         await destination(
           await request(
             ordinaryPkce,
-            "/auth/callback?code=legacy-signup&next=/nova-senha",
+            `/auth/callback?code=${ordinaryCode}&next=/nova-senha`,
           ),
         )
       ).searchParams.get("erro"),

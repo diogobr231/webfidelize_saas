@@ -2,11 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { addDays, saoPauloDay } from "../src/lib/scheduling";
 import { teamInsightsSchema } from "../src/lib/team-insights";
+import { authorizedDeploymentOrigin } from "./deployment-origin";
 
 // Explicit production smoke: only these existing DEMO accounts and the authorized
 // platform owner. No business writes, reset emails, invites, payments or messages.
 // Cookies and password remain in memory; only local test sessions are signed out.
-const origin = "https://webfidelize-saas.vercel.app";
+const origin = authorizedDeploymentOrigin(process.env.TEST_DEPLOYMENT_URL);
 // Optional process-only override: rotating the platform owner's password must
 // not require changing any of the six existing DEMO account passwords.
 const requestedAdminPassword = process.env.TEST_ADMIN_PASSWORD;

@@ -1,7 +1,34 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { authCookieOptions } from "./lib/supabase/cookie-options";
+import { authDomainPolicy, authEntryRedirect } from "./lib/auth-domains";
 export async function proxy(request: NextRequest) {
+  if (process.env.AUTH_LEGACY_ORIGINS?.trim()) {
+    try {
+      const target = authEntryRedirect(
+        request.headers.get("host"),
+        request.nextUrl.pathname,
+        request.nextUrl.searchParams,
+        authDomainPolicy(
+          process.env.APP_URL,
+          process.env.AUTH_LEGACY_ORIGINS,
+          process.env.VERCEL_ENV === "production",
+        ),
+      );
+      if (target) {
+        // Never forward passwords or a stale Server Action POST to another host.
+        const moved = NextResponse.redirect(target, 303);
+        moved.headers.set("Cache-Control", "private, no-store");
+        moved.headers.set("Referrer-Policy", "no-referrer");
+        return moved;
+      }
+    } catch {
+      return new NextResponse("O acesso por e-mail precisa ser configurado.", {
+        status: 503,
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+  }
   let response = NextResponse.next({ request });
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||

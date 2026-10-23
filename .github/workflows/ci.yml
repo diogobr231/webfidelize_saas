@@ -44,6 +44,7 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm test:auth:isolated
+      - run: pnpm test:auth:domains
       - run: pnpm test:billing:http
       - run: pnpm test:whatsapp:http
       - run: pnpm test:team-insights:http

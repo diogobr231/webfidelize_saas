@@ -13,6 +13,7 @@
     "test:whatsapp:db": "tsx scripts/test-reminders-db.ts",
     "test:whatsapp:http": "tsx scripts/test-whatsapp-http.ts",
     "test:auth:isolated": "tsx scripts/test-auth-isolated.ts",
+    "test:auth:domains": "tsx scripts/test-auth-domains-http.ts",
     "test:sales:db": "tsx scripts/test-sales-db.ts",
     "test:admin-operations:db": "tsx scripts/test-admin-operations-db.ts",
     "test:admin-operations": "tsx scripts/test-admin-operations-live.ts",

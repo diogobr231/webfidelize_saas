@@ -1,16 +1,14 @@
 import assert from "node:assert/strict";
+import { authorizedDeploymentOrigin } from "./deployment-origin";
 
 /** Read-only smoke test for the production origin explicitly authorized here. */
-const authorizedOrigin = "https://webfidelize-saas.vercel.app";
+const authorizedOrigin = authorizedDeploymentOrigin(
+  process.env.TEST_DEPLOYMENT_URL,
+);
 assert.equal(
   process.env.TEST_DEPLOYMENT_LIVE,
   "1",
   "Defina TEST_DEPLOYMENT_LIVE=1 para autorizar os GETs de verificação.",
-);
-assert.equal(
-  process.env.TEST_DEPLOYMENT_URL,
-  authorizedOrigin,
-  "TEST_DEPLOYMENT_URL deve ser exatamente a origem de produção autorizada.",
 );
 
 const demoSlugs = [
