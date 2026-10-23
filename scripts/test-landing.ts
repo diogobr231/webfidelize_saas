@@ -872,6 +872,7 @@ assert(
 );
 pass("URL inexistente responde 404 com marca, noindex e caminhos de retorno");
 
+const demoCoverPaths = new Set<string>();
 for (const slug of [
   "salao",
   "pet-shop",
@@ -891,10 +892,102 @@ for (const slug of [
   );
   const demo = await (await get("/demonstracao/" + slug)).text();
   assert.match(metadata(demo, "robots"), /noindex/);
-  assert.match(readableText(demo), /não criam reservas, contas ou cobranças/);
-  assert.match(readableText(demo), /Criar agendamento de exemplo/);
+  const demoMarkup = resolvedHtmlFragments(demo);
+  const demoText = readableText(demoMarkup);
+  assert.match(demoText, /nenhuma reserva, conta ou cobrança é criada/);
+  assert.match(demoText, /Marca ilustrativa/i);
+  assert.match(
+    demoText,
+    /Imagem ilustrativa\. Sua empresa usa sua própria foto\./i,
+  );
+  const tabs = [
+    ...demoMarkup.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/gi),
+  ]
+    .map((match): Record<string, string> => ({
+      ...attributes(match[1]),
+      text: readableText(match[2]),
+    }))
+    .filter((button) => button.role === "tab");
+  assert.deepEqual(
+    tabs.map((tab) => tab.text),
+    ["Página de agendamento", "Agenda", "Ficha do cliente"],
+    `A demonstração de ${slug} deve preservar agenda e ficha ao apresentar a página pública.`,
+  );
+  const selectedTabs = tabs.filter((tab) => tab["aria-selected"] === "true");
+  assert.equal(selectedTabs.length, 1);
+  assert.equal(selectedTabs[0].text, "Página de agendamento");
+  const selectedPanel = [...demoMarkup.matchAll(/<[a-z][\w-]*\b([^>]*)>/gi)]
+    .map((match) => attributes(match[1]))
+    .find((element) => element.id === selectedTabs[0]["aria-controls"]);
+  assert(
+    selectedPanel,
+    `A página de ${slug} deve entregar o conteúdo da aba inicial no HTML.`,
+  );
+  assert.equal(selectedPanel.role, "tabpanel");
+  assert.equal(selectedPanel["aria-labelledby"], selectedTabs[0].id);
+  const cover = [...demoMarkup.matchAll(/<img\b[^>]*>/gi)]
+    .map(([tag]) => attributes(tag))
+    .find((image) => /Recepção ilustrativa/.test(image.alt || ""));
+  assert(
+    cover?.src,
+    `A demonstração de ${slug} precisa entregar a imagem do espaço com descrição acessível.`,
+  );
+  const coverUrl = new URL(localAssetPath(cover.src), base);
+  const originalCover =
+    coverUrl.pathname === "/_next/image"
+      ? coverUrl.searchParams.get("url")
+      : cover.src;
+  assert(
+    originalCover,
+    "A imagem otimizada precisa apontar para uma imagem local existente.",
+  );
+  demoCoverPaths.add(localAssetPath(originalCover));
+  const bookingForm = [
+    ...demoMarkup.matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi),
+  ].find(
+    (form) =>
+      attributes(form[1])["aria-label"] === "Experimentar uma reserva online",
+  );
+  assert(
+    bookingForm,
+    `A demonstração de ${slug} deve permitir experimentar uma reserva.`,
+  );
+  assert.equal(
+    attributes(bookingForm[1]).action,
+    undefined,
+    "A simulação não deve enviar reservas a um endpoint.",
+  );
+  const bookingText = readableText(bookingForm[2]);
+  for (const label of [
+    "Cliente de exemplo",
+    "Profissional de exemplo",
+    "Escolha um serviço",
+    "Horário de exemplo",
+    "Confirmar agendamento de exemplo",
+  ])
+    assert(
+      bookingText.includes(label),
+      `Controle de reserva ausente em ${slug}: ${label}.`,
+    );
   assert.doesNotMatch(demo, /name="(?:password|email|phone)"/);
 }
+for (const path of demoCoverPaths) {
+  const coverResponse = await get(path);
+  assert.match(
+    coverResponse.headers.get("content-type") || "",
+    /^image\/png\b/i,
+  );
+  const png = Buffer.from(await coverResponse.arrayBuffer());
+  assert(
+    png.length >= 33,
+    "A foto ilustrativa precisa ser um arquivo PNG completo.",
+  );
+  assert(png.readUInt32BE(16) > 0 && png.readUInt32BE(20) > 0);
+  assertPng(png, png.readUInt32BE(16), png.readUInt32BE(20));
+}
+pass(
+  "Os oito segmentos apresentam página de agendamento com marca e imagem ilustrativas, controles acessíveis e sem envio real",
+);
 await get("/segmentos/nao-existe", 404);
 await get("/demonstracao/nao-existe", 404);
 const discovery = await (await get("/demonstracao")).text();

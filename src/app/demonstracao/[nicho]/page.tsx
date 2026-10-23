@@ -37,14 +37,21 @@ export default async function Demo({
         <span className="experience-eyebrow">
           DEMONSTRAÇÃO · {n.name.toUpperCase()}
         </span>
-        <h1>Veja sua rotina ganhar forma.</h1>
+        <h1>Seu espaço. Sua marca. Seu jeito de receber.</h1>
         <p>
-          Explore com exemplos. As alterações ficam apenas nesta página, somem
-          ao recarregar e não criam reservas, contas ou cobranças.
+          Veja como seu cliente conhece seu espaço e agenda pelo seu link.
+          Depois, acompanhe o resultado na agenda e na ficha do cliente. Tudo
+          aqui é ilustrativo e desaparece ao recarregar: nenhuma reserva, conta
+          ou cobrança é criada.
         </p>
       </header>
       {!n.available ? <p className="demo-feedback">{n.limitation}</p> : null}
-      <InteractiveDemo key={n.slug} services={n.services} />
+      <InteractiveDemo
+        key={n.slug}
+        services={n.services}
+        segmentSlug={n.slug}
+        segmentName={n.name}
+      />
       <section className="experience-next">
         <div>
           <h2>Faz sentido para o seu negócio?</h2>

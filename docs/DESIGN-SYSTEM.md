@@ -94,4 +94,10 @@ Cabeçalhos e ações compartilhados permitem quebra de linha para nomes longos.
 
 ## Manutenção
 
+### Imagem da demonstração
+
+`public/demo/espaco-ilustrativo.png` é uma imagem ilustrativa de recepção comercial, gerada com a ferramenta integrada ImageGen em 23/10/2026. Não representa uma empresa cliente. A demonstração identifica a imagem como ilustrativa; a página real continua usando a foto e a logo autorizadas da própria empresa. O arquivo original tem 1536 × 1024 px e deve ser entregue pela otimização de imagens do Next.js para reduzir o tráfego no celular.
+
+Prompt utilizado: “Use case: photorealistic-natural. Asset type: wide cover photograph for a Brazilian SaaS online booking demonstration, 1536x1024 landscape. Create an inviting small-business reception space, contemporary and realistic: light oak reception desk, white and warm off-white walls, two comfortable navy fabric chairs, a small indoor plant, soft natural daylight from large windows, a subtle cyan design accent. Neutral reception suitable for many service businesses, with no equipment specific to one niche. Eye-level architectural interior photography, clean balanced composition, believable materials, welcoming rather than luxury-hotel scale. No people, no writing, no logos, no watermark, no frames or UI. This will be explicitly labeled as an illustrative AI-generated space in the demo, never as a real customer business.”
+
 Uma mudança visual deve preservar os contratos dos fluxos: destinos dos links, nomes e IDs dos campos, ações no servidor, estados de erro, idempotência e autorização. Na configuração guiada, mantenha as ações vinculadas no Server Component, os permalinks e a abertura do formulário adicional quando houver erro. A revisão do layout deve incluir desktop, celular, teclado e movimento reduzido; registre as verificações efetivamente executadas no relatório do incremento.
