@@ -8,6 +8,8 @@ Preparação seguinte em 23/10: os três templates foram alinhados à paleta cla
 
 ## O que será enviado
 
+Conexão do provedor em 23/10: o proprietário concluiu o login Google e o perfil do Brevo. O painel confirmou a cota Free de 300 e-mails/dia. A verificação por e-mail foi aceita, mas o Brevo exigiu também a verificação do telefone antes da emissão da chave SMTP. A chave ainda não foi disponibilizada, o remetente e a entrega transacional ainda precisam ser verificados. O Custom SMTP do Supabase permanece desligado para preservar o transporte anterior; nenhum template remoto ou segredo de produção foi substituído nesta etapa. O endpoint público de saúde do Auth respondeu HTTP 200 às 08:13 BRT.
+
 | Finalidade no Supabase | Assunto sugerido                       | Arquivo                                                                |
 | ---------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
 | Confirm sign up        | Confirme seu e-mail na Web Fidelize    | [`confirmation.html`](../supabase/templates/confirmation.html)         |

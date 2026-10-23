@@ -194,7 +194,7 @@ for (const slug of segmentSlugs) {
         assert(html.includes(`href="/entrar/${slug}"`));
       } else {
         assert.match(html, /name="robots"[^>]*content="noindex/);
-        assert.match(readableText(html), /Criar agendamento de exemplo/);
+        assert.match(readableText(html), /Confirmar agendamento de exemplo/);
         assert.doesNotMatch(html, /name="(?:password|email|phone)"/);
       }
     }
