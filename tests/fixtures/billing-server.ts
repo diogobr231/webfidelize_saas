@@ -225,7 +225,11 @@ export async function startBillingFixture(publicOrigin: string) {
       if (path === `/v1/payments/${paymentId}` && request.method === "GET")
         return send(200, providerPayment());
       if (path === `/preapproval/${subscriptionId}`) {
-        if (request.method === "PUT") state.subscriptionStatus = "cancelled";
+        if (request.method === "PUT") {
+          if (body.status !== "canceled")
+            return send(400, { message: "invalid subscription status" });
+          state.subscriptionStatus = "canceled";
+        }
         return send(200, providerSubscription());
       }
       if (path === `/authorized_payments/${invoiceId}`)

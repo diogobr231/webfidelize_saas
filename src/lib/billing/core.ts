@@ -430,9 +430,11 @@ export class MercadoPagoClient {
       new URL(checkoutUrl).searchParams.get("preapproval_id") !== id
     )
       return fail("mismatch");
+    const status = text(p.status, 40);
     return {
       id,
-      status: text(p.status, 40),
+      // Mercado Pago uses "canceled"; retain the existing persisted terminal state.
+      status: status === "canceled" ? "cancelled" : status,
       amountCents: moneyToCents(recurring.transaction_amount),
       currency: "BRL",
       collectorId: this.#config.collectorId,
@@ -681,7 +683,7 @@ export class MercadoPagoClient {
   async cancelSubscription(id: string): Promise<ProviderSubscription> {
     id = safeProviderId(id);
     const raw = await this.#request("PUT", `/preapproval/${id}`, {
-      status: "cancelled",
+      status: "canceled",
     });
     try {
       const subscription = this.#subscription(raw);

@@ -347,14 +347,46 @@ test("subscription invoice only supplies links; actual payment still requires au
   assert.equal(Object.hasOwn(invoice, "paymentStatus"), false);
 });
 test("cancel subscription validates provider acknowledgement without retry", async () => {
-  const { client, calls } = fakeProvider(subscription({ status: "cancelled" }));
+  const { client, calls } = fakeProvider(subscription({ status: "canceled" }));
   assert.equal(
     (await client.cancelSubscription(subscriptionId)).status,
     "cancelled",
   );
   assert.equal(calls.length, 1);
   assert.equal(calls[0].method, "PUT");
-  assert.deepEqual(calls[0].body, { status: "cancelled" });
+  assert.deepEqual(calls[0].body, { status: "canceled" });
+});
+
+test("subscription cancellation normalizes API and legacy statuses for reconciliation", async () => {
+  for (const status of ["canceled", "cancelled"]) {
+    const { client, calls } = fakeProvider(subscription({ status }));
+    const result = await client.getSubscription(subscriptionId);
+    assert.equal(result.status, "cancelled");
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].method, "GET");
+    assert.equal(calls[0].body, null);
+  }
+  for (const status of ["pending", "authorized", "paused"]) {
+    const { client } = fakeProvider(subscription({ status }));
+    assert.equal((await client.getSubscription(subscriptionId)).status, status);
+  }
+});
+
+test("cancellation requires a matching terminal acknowledgement and never retries ambiguity", async () => {
+  for (const patch of [
+    { status: "authorized" },
+    { status: "pending" },
+    { status: "canceled", id: "another-subscription", init_point: null },
+  ]) {
+    const { client, calls } = fakeProvider(subscription(patch));
+    await assert.rejects(
+      client.cancelSubscription(subscriptionId),
+      (error: unknown) =>
+        error instanceof BillingError && error.outcome === "unknown",
+    );
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0].body, { status: "canceled" });
+  }
 });
 
 test("invoice search is bounded, read-only and rejects invoices outside requested filters", async () => {

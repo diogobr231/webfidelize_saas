@@ -674,7 +674,19 @@ async function main() {
     );
     cancelForm.set("confirm_action", "yes");
     await request(route, cancelForm);
-    assert.equal(state.subscriptionStatus, "cancelled");
+    assert.equal(state.subscriptionStatus, "canceled");
+    assert.equal(state.subscription?.status, "cancelled");
+    assert.deepEqual(providerCalls.at(-1)?.body, { status: "canceled" });
+    assert.doesNotMatch(await html(), /Cancelar renovação automática/);
+    const completedCancelPuts = providerCalls.filter(
+      (call) => call.method === "PUT",
+    ).length;
+    await request(route, copyForm(cancelForm));
+    assert.equal(
+      providerCalls.filter((call) => call.method === "PUT").length,
+      completedCancelPuts,
+      "A repeated cancellation reads the terminal API state without another mutation",
+    );
     assert.equal((await fetch(`${base}/api/billing/reconcile`)).status, 401);
     const cron = await fetch(`${base}/api/billing/reconcile`, {
       headers: { Authorization: `Bearer ${cronSecret}` },
