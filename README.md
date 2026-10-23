@@ -8,7 +8,9 @@ Revisão mais recente: [segurança e estabilidade em 22/10/2026](docs/AUDITORIA-
 
 Incremento operacional posterior: [edição, arquivamento e bloqueios de agenda](docs/STATUS-OPERACOES.md), com migração aplicada, testes de regressão e evidências dos fluxos DEMO.
 
-Preparação de acesso por e-mail: [configuração, testes e pendências de produção](docs/EMAIL-PRODUCAO.md). O domínio desejado ainda não foi comprado; SMTP e recebimento de e-mails reais continuam pendentes. Pagamentos permanecem para a última etapa.
+Preparação de acesso por e-mail: [configuração, testes e pendências de produção](docs/EMAIL-PRODUCAO.md). Em 23/10, a confirmação real chegou à caixa autorizada e concluiu o acesso após corrigir os callbacks de produção. SMTP próprio para atender novos destinatários públicos e aplicar os templates da marca continua pendente. Pagamentos permanecem para a última etapa.
+
+**Publicado em 23/10/2026:** novos cadastros de empresa iniciam 7 dias no Essencial sem cartão, com expiração calculada e validada pelo PostgreSQL. Migração `20261023104309_no_card_trial`: liberou uma empresa que nunca havia iniciado o teste e preservou os outros nove prazos. Login geral, por segmento e cadastro têm botão acessível para mostrar/ocultar senha. Validação: 166 testes unitários, 367 grupos PostgreSQL, 41 grupos HTTP isolados, build e [CI](https://github.com/diogobr231/webfidelize_saas/actions/runs/39941199352) aprovados; 34 grupos de produção, conta nova com e-mail real → confirmação → empresa → serviço → profissional → painel, e revisão em 320/390/768/1280 px. A conta e os registros temporários foram removidos após encerrar as sessões. Versão de aplicação `774081f`, publicada em [webfidelize-saas.vercel.app](https://webfidelize-saas.vercel.app). Mercado Pago não ativado: credenciais ausentes no ambiente e acesso ao provedor solicitou login.
 
 Situação consolidada mais recente: [revisão para o primeiro piloto](docs/STATUS-PILOTO.md), de 21/10/2026, incluindo testes por segmento, perfis e limites comerciais.
 
