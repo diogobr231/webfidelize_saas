@@ -550,7 +550,8 @@ export class MercadoPagoClient {
           external_reference: checkoutId,
           sort: "date_created",
           criteria: "desc",
-          range: "date_created",
+          // Date filters require begin_date/end_date. Reference lookup must
+          // not send an incomplete range or hide an older unknown attempt.
           limit: "2",
           offset: "0",
         }),

@@ -93,6 +93,17 @@ test("Pix recovery searches one exact reference and refetches payment without an
   const client = new MercadoPagoClient(config, (async (input, init) => {
     const url = new URL(String(input));
     calls.push({ url, method: init?.method || "GET" });
+    // The real Payments API rejects range without both date boundaries (400/1).
+    if (
+      url.pathname.endsWith("/search") &&
+      url.searchParams.has("range") &&
+      (!url.searchParams.has("begin_date") || !url.searchParams.has("end_date"))
+    ) {
+      return Response.json(
+        { error: "bad_request", cause: [{ code: 1 }] },
+        { status: 400 },
+      );
+    }
     return Response.json(
       url.pathname.endsWith("/search")
         ? {
