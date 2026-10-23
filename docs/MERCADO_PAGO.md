@@ -1,6 +1,8 @@
 # Mercado Pago — assinaturas da Web Fidelize
 
-**23/10/2026: integração implementada, contratação real desativada.** Faltam concluir a verificação de telefone da conta, configurar o segredo do webhook e homologar o provedor real. Nenhuma transação financeira real foi realizada nesta entrega. Testes locais não comprovam recebimentos no Mercado Pago.
+**23/10/2026: integração implementada, contratação real desativada.** A verificação de telefone foi concluída e as credenciais de produção e o webhook foram configurados. Falta homologar Pix e cartão com o provedor. Nenhuma transação financeira real foi realizada nesta entrega. Testes locais não comprovam recebimentos no Mercado Pago.
+
+**Validação publicada:** `BILLING_MODE=live` recebe notificações, com `private.billing_config.enabled=false` bloqueando novas contratações. O simulador oficial entregou um evento com HMAC válido, persistido antes da consulta ao provedor. O ID sintético inexistente retornou 404 na API e 503 no webhook; somente esse evento descartável foi removido após o teste. Isso comprova transporte e verificação de assinatura, não aprovação financeira. Publicação `3ceb416`; 27 grupos públicos e 7 grupos autenticados passaram.
 
 ## Regras comerciais preservadas
 
