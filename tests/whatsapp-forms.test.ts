@@ -4,6 +4,7 @@ import {
   parseMyStaffWhatsAppPreference,
   parseReminderSettings,
   parseStaffReminderSettings,
+  reminderOffsetLabel,
 } from "../src/lib/whatsapp-forms";
 
 function values(offsets: string[], limit: string | null = "100") {
@@ -22,6 +23,17 @@ test("reminder settings accept chosen offsets and a deliberate zero consumption 
     offsets: [1440, 120],
     limit: 0,
   });
+});
+
+test("reminder offsets use familiar units, including non-round legacy values", () => {
+  assert.equal(reminderOffsetLabel(30), "30 min antes");
+  assert.equal(reminderOffsetLabel(60), "1 hora antes");
+  assert.equal(reminderOffsetLabel(120), "2 horas antes");
+  assert.equal(reminderOffsetLabel(90), "1 hora e 30 min antes");
+  assert.equal(reminderOffsetLabel(1400), "23 horas e 20 min antes");
+  assert.equal(reminderOffsetLabel(1440), "1 dia antes");
+  assert.equal(reminderOffsetLabel(2880), "2 dias antes");
+  assert.equal(reminderOffsetLabel(1500), "1 dia e 1 hora antes");
 });
 
 test("reminder settings reject duplicate, excessive, fractional and out-of-range offsets", () => {

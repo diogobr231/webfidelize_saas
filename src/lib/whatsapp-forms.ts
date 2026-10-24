@@ -79,6 +79,10 @@ export function parseReminderSettings(form: FormData) {
     });
 }
 
+export const reminderOffsetChoices: readonly number[] = [
+  30, 60, 90, 120, 180, 240, 360, 480, 720, 1440, 2880, 4320, 10080,
+];
+
 export const reminderStatuses: Record<string, string> = {
   queued: "Na fila de envio",
   claimed: "Preparando envio",
@@ -94,7 +98,16 @@ export const reminderStatuses: Record<string, string> = {
 };
 
 export function reminderOffsetLabel(minutes: number) {
-  if (minutes % 1440 === 0) return `${minutes / 1440} dia(s) antes`;
-  if (minutes % 60 === 0) return `${minutes / 60} hora(s) antes`;
-  return `${minutes} minutos antes`;
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (days === 0 && hours === 0) return `${minutes} min antes`;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} ${days === 1 ? "dia" : "dias"}`);
+  if (hours > 0) parts.push(`${hours} ${hours === 1 ? "hora" : "horas"}`);
+  if (remainingMinutes > 0) parts.push(`${remainingMinutes} min`);
+
+  return `${parts.join(" e ")} antes`;
 }

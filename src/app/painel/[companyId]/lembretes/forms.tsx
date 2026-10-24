@@ -2,7 +2,11 @@
 
 import { useActionState, useState } from "react";
 import { PendingButton } from "@/components/pending-button";
-import type { WhatsAppFormState } from "@/lib/whatsapp-forms";
+import {
+  reminderOffsetChoices,
+  reminderOffsetLabel,
+  type WhatsAppFormState,
+} from "@/lib/whatsapp-forms";
 
 type Action = (
   previous: WhatsAppFormState,
@@ -64,28 +68,41 @@ export function ReminderSettingsForm({
           </p>
         </div>
         <div className="reminder-offsets">
-          {[0, 1, 2].map((index) => (
-            <label key={index}>
-              Lembrete {index + 1}
-              {index > 0 ? " (opcional)" : ""}
-              <input
-                name="offset_minutes"
-                type="number"
-                inputMode="numeric"
-                min={30}
-                max={10080}
-                step={1}
-                defaultValue={offsets[index] ?? ""}
-                required={index === 0}
-                aria-describedby="reminder-offset-help"
-              />
-              <span>minutos antes</span>
-            </label>
-          ))}
+          {[0, 1, 2].map((index) => {
+            const currentOffset = offsets[index];
+            return (
+              <label key={index}>
+                Lembrete {index + 1}
+                {index > 0 ? " (opcional)" : ""}
+                <select
+                  name="offset_minutes"
+                  defaultValue={
+                    currentOffset === undefined ? "" : String(currentOffset)
+                  }
+                  required={index === 0}
+                  aria-describedby="reminder-offset-help"
+                >
+                  <option value="">Não configurar este aviso</option>
+                  {currentOffset !== undefined &&
+                  !reminderOffsetChoices.includes(currentOffset) ? (
+                    <option value={currentOffset}>
+                      Atual · {reminderOffsetLabel(currentOffset)}
+                    </option>
+                  ) : null}
+                  {reminderOffsetChoices.map((minutes) => (
+                    <option key={minutes} value={minutes}>
+                      {reminderOffsetLabel(minutes)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            );
+          })}
         </div>
         <p id="reminder-offset-help" className="reminder-help">
-          Exemplos: 120 = 2 horas; 1.440 = 24 horas. Mínimo 30 minutos e máximo
-          10.080 minutos (7 dias). Não repita a mesma antecedência.
+          Escolha uma antecedência comum, de 30 minutos até 7 dias. As opções
+          personalizadas que já estavam salvas continuam disponíveis. Não
+          repita a mesma antecedência.
         </p>
         <label className="reminder-limit">
           Seu limite mensal de mensagens
