@@ -42,6 +42,7 @@ export async function savePersonalization(
       "name",
       "description",
       "address",
+      "maps_url",
       "phone",
       "theme",
       "density",

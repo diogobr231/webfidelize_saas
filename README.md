@@ -1,5 +1,7 @@
 # Web Fidelize
 
+**Padrão obrigatório de trabalho:** leia [AGENTS.md](AGENTS.md) e [Issues, PRs e releases](docs/WORKFLOW.md). Toda correção, melhoria ou nova função deve ter uma issue; o PR deve mencionar a issue na descrição. Deploys devem ser rastreáveis ao PR e à revisão validada. Essas instruções valem para qualquer agente/modelo.
+
 Central IA exclusiva do SUPER_ADMIN: [funcionamento, limites e configuração](docs/CENTRAL-IA.md). Integrada ao funil, suporte e tarefas, com fila e revisão de rascunhos. Geração real depende da liberação da conta AI Gateway. A integração de pagamentos está implementada, mas a contratação real permanece desativada até homologar a conta e as notificações do Mercado Pago.
 
 SaaS B2B multiempresa em reconstrução. Next.js App Router, TypeScript, Tailwind e Supabase. **Ainda não liberado para clientes pagantes.**
@@ -20,7 +22,7 @@ Lembretes por WhatsApp: [configuração e operação](docs/WHATSAPP.md). Inclui 
 
 O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a landing clara em azul-marinho e ciano, a logo oficial, os temas das áreas de trabalho, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
 
-As páginas `/segmentos/[nicho]` apresentam benefícios e escopo dos oito segmentos, com o mesmo destaque. `/demonstracao` permite escolher qualquer segmento e experimentar agenda e ficha do cliente sem login, com exemplos apenas na memória do navegador. Recarregar apaga as alterações; nenhum agendamento real é criado. Os módulos específicos ainda planejados são identificados nas páginas. O formulário `/diagnostico` oferece os planos do catálogo e “Outros”; registros antigos de investimento continuam legíveis no admin.
+As páginas `/segmentos/[nicho]` apresentam benefícios e escopo dos oito segmentos, com o mesmo destaque. `/demonstracao` permite escolher qualquer segmento e experimentar agenda e ficha do cliente sem login, com exemplos apenas na memória do navegador. Recarregar apaga as alterações; nenhum agendamento real é criado. A demonstração é ilustrativa e identifica os limites de cada fluxo. O formulário `/diagnostico` oferece os planos do catálogo e “Outros”; registros antigos de investimento continuam legíveis no admin.
 
 O [painel de operação interna](docs/ADMIN-OPERACOES.md) centraliza métricas reais e tarefas de acompanhamento em `/admin`, com regras e histórico em `/admin/automacoes`. A política temporária de 23/10/2026 libera sete dias grátis sem cartão ao criar a empresa, com expiração no PostgreSQL. Nenhuma cobrança é iniciada automaticamente durante o teste; a contratação exige ação do OWNER após o término e a integração devidamente habilitada.
 
@@ -152,7 +154,15 @@ Validação da entrega em 22/10/2026: 166 testes unitários, 356 grupos SQL (inc
 - Homologação de entrega real de confirmação, recuperação e convites, após domínio, SMTP e implantação. A validação isolada de Auth e a integração de equipe com contas DEMO não comprovam recebimento em caixas reais.
 - SMTP de produção, termos e privacidade, rotina de backup e teste de restauração.
 
-Restaurante/comandas, pets/tutores, tarefas, rotas, chatbot, site adicional, IA e créditos são expansão futura. As entradas por nicho não significam que seus módulos específicos já existem.
+Chatbot, site adicional, publicação de redes sociais e créditos de IA continuam fora da entrega. A ficha clínica para clínicas permanece deliberadamente excluída do MVP.
+
+## Operações por segmento
+
+O incremento atual adiciona `/painel/[companyId]/operacoes` para OWNER e MANAGER: restaurante (mesas, comandas, etapas de pedidos, tempo desde a abertura e caixa manual), fornecedores/entregas (pedidos e estados de entrega), logística (entregadores, rotas e links do Google Maps), pet shop (pet/tutor, atendimentos não clínicos e saldo de estoque com histórico de ajustes), escritório (tarefas, processos e links HTTPS para documentos), salão (comissões registradas manualmente, caixa e estoque) e academia (fichas textuais, presença e validade de plano). As gravações são limitadas ao segmento e à empresa no PostgreSQL, com transições controladas e permissões também verificadas no servidor.
+
+O endereço comercial e os endereços de entregas aceitam busca de CEP sob ação explícita do usuário, com sugestão de rua, bairro, cidade e UF. A pessoa confere e completa o número; a busca não confirma a cobertura de uma região.
+
+Limites explícitos desta etapa: não há prontuário clínico, integração com PDV/maquininha, cobrança automática de mensalidades, integração de catraca, cálculo automático de comissões, roteirização/posição em tempo real ou armazenamento de arquivos de escritório. A demonstração pública continua fictícia e não simula os registros operacionais. As migrações `20261024022451_company_booking_maps.sql` e `20261024023238_industry_operations.sql` precisam estar aplicadas no projeto Supabase correto antes de publicar esta versão.
 
 ## Banco e migrações
 

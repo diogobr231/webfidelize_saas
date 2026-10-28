@@ -67,7 +67,7 @@ export default async function CompanyLayout({
         </div>
       </header>
       <div className="workspace-grid">
-        <WorkspaceNav companyId={companyId} role={role} />
+        <WorkspaceNav companyId={companyId} role={role} niche={company.niche} />
         <div id="workspace-content" className="workspace-content">
           {company.is_demo && (
             <p className="notice">

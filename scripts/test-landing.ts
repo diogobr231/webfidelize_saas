@@ -894,7 +894,9 @@ for (const slug of [
   assert.match(metadata(demo, "robots"), /noindex/);
   const demoMarkup = resolvedHtmlFragments(demo);
   const demoText = readableText(demoMarkup);
-  assert.match(demoText, /nenhuma reserva, conta ou cobrança é criada/);
+  assert.match(demoText, /resultados ficam temporariamente no navegador/i);
+  assert.match(demoText, /não criam reservas reais nem alteram os dados de uma empresa/i);
+  assert.match(demoText, /Nenhuma reserva real ou cobrança é feita nesta demonstração/i);
   assert.match(demoText, /Marca ilustrativa/i);
   assert.match(
     demoText,

@@ -443,6 +443,56 @@
   line-height: 1.7;
   color: #52677a;
 }
+.auth-niche-features {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px solid #dce7ef;
+  border-radius: 13px;
+  background: #f5fafc;
+}
+.auth-niche-features h2 {
+  margin: 0;
+  color: #0a2940;
+  font-size: 13px;
+}
+.auth-niche-features ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.auth-niche-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #304b5c;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.auth-niche-features li svg {
+  flex: none;
+  margin-top: 1px;
+  color: #00758c;
+}
+.auth-niche-features p {
+  margin: 0;
+  color: #52677a;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.auth-niche-features > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 36px;
+  color: #00738a;
+  font-size: 12px;
+  font-weight: 650;
+}
 .auth-panel-footer {
   display: flex;
   gap: 7px;

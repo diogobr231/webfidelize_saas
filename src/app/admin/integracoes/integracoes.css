@@ -1,0 +1,219 @@
+.integrations-heading h1 {
+  font-size: clamp(28px, 4vw, 38px);
+  margin: 10px 0;
+  letter-spacing: -0.04em;
+}
+.integrations-heading p {
+  color: #60645f;
+  line-height: 1.6;
+}
+.integration-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0 !important;
+}
+.integration-steps a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #dfdfd8;
+  border-radius: 10px;
+  background: #fff;
+  color: #3f4842;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 650;
+}
+.integration-steps a span {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  background: #efefe9;
+  border-radius: 50%;
+  font-size: 12px;
+}
+.integration-disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px 18px;
+  background: #f3f2ed;
+  border: 1px solid #e2e0d6;
+  border-radius: 12px;
+  color: #56584f;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.integration-disclosure svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.integration-section {
+  margin-top: 34px;
+  scroll-margin-top: 18px;
+}
+.integration-section h2 {
+  font-size: 21px;
+  margin: 0 0 16px;
+}
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.integration-card {
+  min-width: 0;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e0e1da;
+  border-radius: 15px;
+  box-shadow: 0 3px 12px #2e372b04;
+  scroll-margin-top: 20px;
+}
+.integration-card header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.integration-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 43px;
+  height: 43px;
+  border: 1px solid #e2e1d8;
+  border-radius: 12px;
+  background: #f5f4ee;
+  color: #57624f;
+}
+.integration-card h3 {
+  font-size: 17px;
+  margin: 0 0 5px;
+}
+.integration-card header p {
+  margin: 0;
+  font-size: 13px;
+  color: #64675e;
+  line-height: 1.5;
+}
+.integration-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: #fbf0d8;
+  color: #75581f;
+  font-size: 12px;
+  font-weight: 650;
+}
+.integration-state.is-ready {
+  background: #eaf1e7;
+  color: #3a6039;
+}
+.integration-state.is-paused {
+  background: #f0eeeb;
+  color: #666057;
+}
+.integration-cost {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 13px;
+  color: #585e53;
+  margin: 16px 0;
+  line-height: 1.6;
+}
+.integration-cost svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.integration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.integration-actions .button {
+  font-size: 12px;
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+}
+.integration-card details {
+  border-top: 1px solid #e9e8e2;
+  margin-top: 18px;
+  padding-top: 12px;
+}
+.integration-card summary,
+.integration-footnote summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.6;
+  min-height: 44px;
+  align-content: center;
+}
+.integration-card summary svg,
+.integration-footnote summary svg {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.integration-card ul {
+  padding-left: 19px;
+  color: #62665d;
+  font-size: 13px;
+  line-height: 1.75;
+  margin: 10px 0;
+}
+.integration-card li + li {
+  margin-top: 10px;
+}
+.integration-references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.integration-references a,
+.integration-footnote a {
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.integration-footnote {
+  margin-top: 26px;
+  border: 1px solid #dedfd7;
+  border-radius: 12px;
+  padding: 14px 19px;
+  background: #faf9f6;
+}
+.integration-footnote p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #62665d;
+  max-width: 850px;
+}
+.integrations-page :is(a, summary):focus-visible {
+  outline: 3px solid #536c47;
+  outline-offset: 4px;
+}
+@media (max-width: 700px) {
+  .integration-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .integration-card {
+    padding: 18px;
+  }
+  .integration-actions .button {
+    flex: 1 1 160px;
+  }
+  .integration-steps a {
+    flex: 1 1 150px;
+  }
+}

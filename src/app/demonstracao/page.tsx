@@ -48,8 +48,9 @@ export default function Demonstration() {
         <div>
           <h2>Sua operação tem uma necessidade diferente?</h2>
           <p>
-            Conte o que precisa organizar. Módulos específicos de restaurante,
-            fornecedores, logística e academia estão em planejamento.
+            A demonstração pública apresenta uma agenda ilustrativa. Os fluxos
+            administrativos variam conforme o segmento e ficam no painel da
+            empresa; escolha um segmento para conhecer o escopo disponível.
           </p>
           <Link href="/diagnostico">Descreva o que você busca</Link>
         </div>

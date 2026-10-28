@@ -17,6 +17,8 @@ export default async function Companies({
     db.from("memberships").select("company_id,role").eq("user_id", user.id),
     db.rpc("is_super_admin"),
   ]);
+  if (!adminResult.error && adminResult.data === true && p.empresas === "1")
+    redirect("/admin/espacos");
   const { data: companies, error } = memberships.data?.length
     ? await db
         .from("companies")

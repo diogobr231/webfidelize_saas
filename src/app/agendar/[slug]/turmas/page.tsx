@@ -25,6 +25,7 @@ import {
 } from "@/lib/classes";
 import { readClassReceipt } from "@/lib/class-receipt";
 import { PublicClassReservationForm } from "@/components/classes/public-reservation-form";
+import { isGoogleMapsUrl } from "@/lib/company-personalization";
 import { reserveClass } from "./actions";
 import "../booking.css";
 import "@/components/classes/classes.css";
@@ -40,6 +41,7 @@ const catalogSchema = z.object({
   is_demo: z.boolean(),
   description: z.string().optional(),
   address: z.string().optional(),
+  maps_url: z.string().optional(),
   phone: z.string().optional(),
   theme: z.string().optional(),
   logo_path: z.string().nullable().optional(),
@@ -173,6 +175,17 @@ export default async function PublicClassesPage({
                   <Icon name="building" size={15} />
                   {catalog.address}
                 </span>
+              )}
+              {catalog.maps_url && isGoogleMapsUrl(catalog.maps_url) && (
+                <a
+                  href={catalog.maps_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name="map-pin" size={15} />
+                  Ver no Google Maps
+                  <Icon name="arrow-up-right" size={14} />
+                </a>
               )}
               {contact && (
                 <a href={contact} target="_blank" rel="noopener noreferrer">

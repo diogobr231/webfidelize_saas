@@ -13,6 +13,11 @@ import {
 import { money } from "@/lib/catalog";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  bookingDetailLabels,
+  bookingDetailOptions,
+} from "@/lib/booking-intake";
+import { isGoogleMapsUrl } from "@/lib/company-personalization";
 
 export type CalendarAppointment = {
   kind?: "appointment" | "class";
@@ -25,6 +30,7 @@ export type CalendarAppointment = {
   service_name: string;
   professional_name: string;
   attendance_confirmed_at?: string | null;
+  booking_details?: Record<string, string> | null;
 };
 type Option = { id: string; name: string; archived_at?: string | null };
 type Props = {
@@ -131,6 +137,29 @@ function AppointmentDialog({
           {appointmentTime(item.starts_at)}–{appointmentTime(item.ends_at)}
         </span>
       </div>
+      {item.booking_details && Object.keys(item.booking_details).length ? (
+        <dl className="appointment-booking-details">
+          {Object.entries(item.booking_details).map(([key, raw]) => {
+            const value = bookingDetailOptions[key]?.[raw] ?? raw;
+            const mapsUrl = key === "delivery_location" && isGoogleMapsUrl(raw);
+            return bookingDetailLabels[key] ? (
+              <div key={key}>
+                <dt>{bookingDetailLabels[key]}</dt>
+                <dd>
+                  {mapsUrl ? (
+                    <a href={raw} target="_blank" rel="noopener noreferrer">
+                      Abrir localização no Maps
+                      <Icon name="arrow-up-right" size={14} />
+                    </a>
+                  ) : (
+                    value
+                  )}
+                </dd>
+              </div>
+            ) : null;
+          })}
+        </dl>
+      ) : null}
       {item.kind === "class" ? (
         <Link
           className="button"

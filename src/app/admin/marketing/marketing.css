@@ -1,0 +1,554 @@
+.mk-page {
+  --mk-ink: #0b3041;
+  --mk-muted: #58717b;
+  --mk-line: #dce9ec;
+  --mk-teal: #007d89;
+  color: var(--mk-ink);
+  min-width: 0;
+}
+.mk-page > .workspace-skip-link {
+  position: absolute;
+  left: 16px;
+  top: -80px;
+  z-index: 100;
+  padding: 12px 18px;
+  background: white;
+  border: 2px solid #007d89;
+  border-radius: 8px;
+}
+.mk-page > .workspace-skip-link:focus {
+  top: 8px;
+}
+.mk-page *,
+.mk-page *::before,
+.mk-page *::after {
+  box-sizing: border-box;
+}
+.mk-page .admin-topbar-actions {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.mk-page .admin-content > nav.mk-actions {
+  margin: 0 0 24px;
+  gap: 10px;
+}
+.mk-page .admin-content > nav.mk-actions > a {
+  padding: 9px 12px;
+  border: 1px solid #d6e7eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #236674;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.mk-page .admin-content > .mk-feedback {
+  margin-bottom: 18px;
+}
+.mk-page #integracoes,
+.mk-page .admin-content > details.mk-panel {
+  margin-top: 25px;
+}
+.mk-page #editor > .mk-actions {
+  margin: 23px 0;
+}
+.mk-page #editor > .mk-note,
+.mk-page #editor > .mk-preview {
+  margin-top: 20px;
+}
+.mk-card h3,
+.mk-note h3,
+.mk-preview h3 {
+  font-size: 17px;
+  line-height: 1.4;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+.mk-card a,
+.mk-note a,
+.mk-preview a {
+  overflow-wrap: anywhere;
+}
+.mk-note summary,
+.mk-panel > summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.mk-action-fields label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.mk-action-fields input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  accent-color: #007d89;
+}
+.mk-note > .mk-action-form {
+  margin: 18px 0;
+}
+.mk-preview > .mk-actions,
+.mk-preview > .mk-copy {
+  margin-top: 18px;
+}
+.mk-url {
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.mk-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 0;
+}
+.mk-hero h1 {
+  margin: 9px 0 12px;
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -0.045em;
+  line-height: 1.13;
+}
+.mk-hero p,
+.mk-section-heading p {
+  color: var(--mk-muted);
+  line-height: 1.7;
+  max-width: 780px;
+}
+.mk-hero-actions,
+.mk-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mk-grid,
+.mk-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.mk-layout {
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.4fr);
+}
+.mk-panel,
+.mk-card,
+.mk-reply-builder {
+  background: #fff;
+  border: 1px solid var(--mk-line, #dce9ec);
+  border-radius: 18px;
+  padding: clamp(20px, 3vw, 30px);
+  min-width: 0;
+  box-shadow: 0 3px 10px #0b304105;
+}
+.mk-panel h2,
+.mk-card h2,
+.mk-reply-builder h2 {
+  margin: 8px 0 12px;
+  font-size: 23px;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+.mk-panel > p,
+.mk-card > p {
+  color: var(--mk-muted, #58717b);
+  line-height: 1.65;
+}
+.mk-notice,
+.mk-note,
+.mk-integration-note {
+  padding: 18px 21px;
+  background: #edf8fa;
+  border: 1px solid #cce8ed;
+  border-radius: 12px;
+  line-height: 1.65;
+  color: #315c69;
+}
+.mk-note p,
+.mk-notice p,
+.mk-integration-note p {
+  margin: 5px 0;
+}
+.mk-hint {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--mk-muted, #58717b);
+  margin: -6px 0 2px;
+}
+.mk-form,
+.mk-form-fields {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.mk-form-fields,
+.mk-action-fields {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.mk-form label,
+.mk-reply-builder label,
+.mk-copy-fallback {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--mk-ink, #0b3041);
+  min-width: 0;
+}
+.mk-form input:not([type="hidden"]),
+.mk-form textarea,
+.mk-form select,
+.mk-reply-builder select,
+.mk-reply-builder textarea,
+.mk-copy-fallback textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid #d6e5e9;
+  border-radius: 10px;
+  padding: 12px 13px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: #123d4d;
+  background: #fff;
+  line-height: 1.55;
+  min-height: 46px;
+}
+.mk-form textarea,
+.mk-reply-builder textarea,
+.mk-copy-fallback textarea {
+  resize: vertical;
+}
+.mk-form input::placeholder,
+.mk-form textarea::placeholder {
+  color: #718792;
+  opacity: 1;
+}
+.mk-form input:focus-visible,
+.mk-form textarea:focus-visible,
+.mk-form select:focus-visible,
+.mk-reply-builder select:focus-visible,
+.mk-reply-builder textarea:focus-visible,
+.mk-copy-fallback textarea:focus-visible,
+.mk-page button:focus-visible,
+.mk-page a:focus-visible {
+  outline: 3px solid #72cbd4;
+  outline-offset: 3px;
+  border-color: #138b98;
+}
+.mk-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+.mk-field-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.mk-model-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 17px;
+  border: 1px solid #cfe8ea;
+  border-radius: 12px;
+  background: #f2fafb;
+}
+.mk-model-bar strong {
+  font-size: 13px;
+}
+.mk-model-bar p {
+  margin: 5px 0 0;
+  color: #57737e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.mk-model-bar .button {
+  flex-shrink: 0;
+}
+.mk-model-notice {
+  margin: -8px 0 0;
+  color: #236976;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.mk-model-notice:empty,
+.mk-copy-feedback:empty {
+  display: none;
+}
+.mk-submit {
+  justify-self: start;
+}
+.mk-page .button,
+.mk-form .button,
+.mk-copy .button,
+.mk-action-form .button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.mk-form button:disabled,
+.mk-copy button:disabled,
+.mk-action-form button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.mk-form :disabled,
+.mk-action-form :disabled {
+  opacity: 0.72;
+}
+.mk-feedback {
+  border: 1px solid #c8e6da;
+  background: #f0faf5;
+  color: #23644b;
+  border-radius: 10px;
+  padding: 13px 15px;
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.mk-feedback-error {
+  background: #fff3f4;
+  color: #8e3f4c;
+  border-color: #efd4d9;
+}
+.mk-action-form {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+.mk-action-fields {
+  width: 100%;
+}
+.mk-action-fields:empty {
+  display: none;
+}
+.mk-copy {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  min-width: 0;
+}
+.mk-copy-feedback {
+  margin: 0;
+  color: #496d7b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.mk-copy-fallback {
+  width: 100%;
+}
+.mk-copy-fallback textarea,
+.mk-reply-output textarea {
+  background: #f7fbfc;
+}
+.mk-reply-builder {
+  margin-top: 25px;
+  display: grid;
+  gap: 20px;
+}
+.mk-section-heading h2 {
+  margin-top: 8px;
+}
+.mk-section-heading p {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+.mk-campaign-list {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+.mk-campaign-item,
+.mk-campaign-link {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #e1ebee;
+  border-radius: 12px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.mk-campaign-item:hover,
+.mk-campaign-link:hover {
+  border-color: #8acbd2;
+  background: #f7fcfc;
+}
+.mk-campaign-item h3,
+.mk-campaign-link h3 {
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.45;
+}
+.mk-campaign-item p,
+.mk-campaign-link p {
+  font-size: 12px;
+  color: #5b7782;
+  line-height: 1.55;
+  margin: 0;
+}
+.mk-campaign-item[aria-current="page"],
+.mk-campaign-link[aria-current="page"] {
+  border-color: #278d99;
+  box-shadow: 0 0 0 2px #278d9912;
+}
+.mk-badge,
+.mk-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  background: #edf4f6;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #486d7a;
+}
+.mk-status-approved {
+  color: #1f725b;
+  background: #e9f7f0;
+}
+.mk-status-review {
+  color: #826029;
+  background: #fff6df;
+}
+.mk-status-archived {
+  color: #6a7780;
+  background: #f0f3f5;
+}
+.mk-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.mk-metrics > div,
+.mk-metric {
+  border: 1px solid #dce9ec;
+  border-radius: 13px;
+  padding: 19px;
+  background: #fff;
+}
+.mk-metrics strong,
+.mk-metric strong {
+  display: block;
+  font-size: 26px;
+  letter-spacing: -0.045em;
+  margin: 7px 0;
+}
+.mk-metrics span,
+.mk-metric span {
+  font-size: 12px;
+  color: #57727d;
+}
+.mk-preview {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+  border: 1px solid #e0ecef;
+  border-radius: 12px;
+  background: #f8fbfc;
+  padding: 20px;
+}
+.mk-link {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: #007d89;
+  line-height: 1.6;
+}
+.mk-empty {
+  text-align: center;
+  padding: 38px 20px;
+  color: #5e7984;
+  line-height: 1.7;
+}
+.mk-empty strong {
+  display: block;
+  color: #153e4f;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.mk-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+@media (max-width: 1000px) {
+  .mk-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .mk-hero,
+  .mk-model-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mk-grid,
+  .mk-field-grid,
+  .mk-field-grid-three,
+  .mk-metrics {
+    grid-template-columns: 1fr;
+  }
+  .mk-panel,
+  .mk-card,
+  .mk-reply-builder {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+  .mk-page .button,
+  .mk-form .button,
+  .mk-copy .button,
+  .mk-action-form .button {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+  .mk-model-bar .button,
+  .mk-form > .mk-submit,
+  .mk-copy,
+  .mk-copy > .button {
+    width: 100%;
+  }
+  .mk-form input:not([type="hidden"]),
+  .mk-form textarea,
+  .mk-form select,
+  .mk-reply-builder select,
+  .mk-reply-builder textarea {
+    font-size: 16px;
+  }
+  .mk-preview {
+    padding: 16px;
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-page *,
+  .mk-page *::before,
+  .mk-page *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

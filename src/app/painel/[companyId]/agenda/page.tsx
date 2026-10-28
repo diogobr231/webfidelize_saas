@@ -55,7 +55,7 @@ export default async function Agenda({
   let query = db
     .from("appointments")
     .select(
-      "id,starts_at,ends_at,status,professional_id,attendance_confirmed_at,customers(name),services(name),professionals(name)",
+      "id,starts_at,ends_at,status,professional_id,attendance_confirmed_at,booking_details,customers(name),services(name),professionals(name)",
       { count: "exact" },
     )
     .eq("company_id", companyId)

@@ -5,6 +5,8 @@ import { authorizedDeploymentOrigin } from "./deployment-origin";
 const authorizedOrigin = authorizedDeploymentOrigin(
   process.env.TEST_DEPLOYMENT_URL,
 );
+const demoBookingAvailable = process.env.TEST_DEMO_BOOKING_AVAILABLE ?? "1";
+assert(["0", "1"].includes(demoBookingAvailable));
 assert.equal(
   process.env.TEST_DEPLOYMENT_LIVE,
   "1",
@@ -28,6 +30,11 @@ const protectedPaths = [
   "/admin/comercial",
   "/admin/automacoes",
   "/admin/ia",
+  "/admin/marketing",
+  "/admin/espacos",
+  "/admin/integracoes",
+  "/admin/marketing/55555555-5555-4555-8555-555555555555/arte",
+  "/admin/marketing/55555555-5555-4555-8555-555555555555/exportar",
   "/painel",
 ] as const;
 const allowedPaths = new Set<string>([
@@ -236,6 +243,18 @@ for (const slug of demoSlugs) {
   const path = `/agendar/${slug}`;
   await verify(`agendamento ${slug}`, async () => {
     const response = await get(path);
+    if (demoBookingAvailable === "0") {
+      assert([200, 404].includes(response.status));
+      requireSecurityHeaders(response, path);
+      const html = await response.text();
+      // Streamed Next.js notFound can retain HTTP 200. Both responses must
+      // show the unavailable page and expose no reservation form.
+      assert.match(html, /Página não encontrada/);
+      if (response.status === 200)
+        assert.match(html, /NEXT_HTTP_ERROR_FALLBACK;404/);
+      assert.doesNotMatch(html, /name="(?:service|professional|customer_name|phone)"/);
+      return;
+    }
     assert.equal(
       response.status,
       200,

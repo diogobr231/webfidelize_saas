@@ -1,0 +1,299 @@
+[
+  {
+    "key": "workflow",
+    "title": "[Melhoria] Padronizar issues, branches, PRs e rastreabilidade dos deploys",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nA solicitação de 27/10/2026 estabelece issue para cada correção, melhoria e nova função; PRs devem mencionar as issues.\n\n**Prioridade:** Alta\n\n**Área:** AGENTS.md; README.md; .github/PULL_REQUEST_TEMPLATE.md\n\n## Critérios de conclusão\n\nDocumentar regras aplicáveis a qualquer agente/modelo; incluir templates; registrar validação, migrações, preview e rollback no PR; verificar a configuração Git/Vercel antes de automatizar produção.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:workflow -->",
+    "state": "open",
+    "number": 1,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/1"
+  },
+  {
+    "key": "baseline",
+    "title": "[Melhoria] Regularizar em PR a versão já publicada e sincronizar a base de releases",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nHá commits anteriores e alterações locais já publicadas na Vercel que ainda não constam em origin/main. A regularização deve preservar esse histórico e os arquivos existentes.\n\n**Prioridade:** Alta\n\n**Área:** Branch codex/card-required-trial; docs/ADMIN-CONSOLE.md; docs/MARKETING.md\n\n## Critérios de conclusão\n\nAbrir PR de regularização claramente identificado; inventariar módulos e migrações já aplicadas; executar CI; revisar a base/branch de produção antes de configurar releases por merge. Não reaplicar migrações nem promover versão antiga.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:baseline -->",
+    "state": "open",
+    "number": 2,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/2"
+  },
+  {
+    "key": "billing",
+    "title": "[Correção] Homologar Pix, cartão, webhooks e cancelamento antes de habilitar cobranças",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nA integração Mercado Pago existe; testes isolados não comprovam pagamentos externos. O estado atual deve ser rechecado antes da homologação.\n\n**Prioridade:** Alta\n\n**Área:** docs/MERCADO_PAGO.md; src/lib/billing; scripts/test-deployment-auth.ts\n\n## Critérios de conclusão\n\nValidar em ambiente apropriado pagamento aprovado/pendente/recusado, webhook, duplicidade e reconciliação; confirmar cancelamento e expiração; registrar evidências sanitizadas e autorização antes de qualquer transação real. Só habilitar produção após critérios aprovados.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:billing -->",
+    "state": "open",
+    "number": 3,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/3"
+  },
+  {
+    "key": "smtp",
+    "title": "[Correção] Homologar SMTP de acesso e convites para novos clientes",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nSMTP Auth no Supabase e transporte de convites são configurações independentes. Recebimento por um destinatário não comprova entrega pública.\n\n**Prioridade:** Alta\n\n**Área:** docs/EMAIL-PRODUCAO.md; src/lib/team-mail.ts\n\n## Critérios de conclusão\n\nVerificar remetente/domínio e limites do provedor; testar cadastro, confirmação, recuperação e convite com destinatários autorizados; conferir spam, callbacks, erros e ausência de segredos em logs.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:smtp -->",
+    "state": "open",
+    "number": 4,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/4"
+  },
+  {
+    "key": "tenant",
+    "title": "[Correção] Completar auditoria de escrita e isolamento com duas empresas de teste vigentes",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nOs DEMOs usados na auditoria tinham acesso expirado; os testes isolados e de leitura não substituem todos os fluxos de escrita reais.\n\n**Prioridade:** Alta\n\n**Área:** src/lib/auth.ts; supabase/migrations; docs/STATUS-PILOTO.md\n\n## Critérios de conclusão\n\nUsar empresas fictícias com acesso vigente e papéis distintos; verificar CRUD/persistência, URLs e APIs cruzadas; testar negação de ações do proprietário ao colaborador. Não alterar dados de clientes nem contornar login.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:tenant -->",
+    "state": "open",
+    "number": 5,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/5"
+  },
+  {
+    "key": "privacy",
+    "title": "[Melhoria] Publicar informações de privacidade, termos e suporte para a oferta comercial",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nA auditoria comercial apontou informações públicas de privacidade/termos e suporte a conferir antes de vender.\n\n**Prioridade:** Alta\n\n**Área:** Landing, cadastro e rodapé; docs/STATUS-PILOTO.md\n\n## Critérios de conclusão\n\nInventariar dados/provedores/retenção e canais reais; preparar conteúdo para revisão do responsável; publicar links acessíveis nas telas relevantes; conferir coerência com funcionalidades e oferta, sem inventar garantias.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:privacy -->",
+    "state": "open",
+    "number": 6,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/6"
+  },
+  {
+    "key": "backup",
+    "title": "[Melhoria] Verificar backups e comprovar restauração em ambiente isolado",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nPresença de banco configurado não comprova recuperação após perda de dados.\n\n**Prioridade:** Alta\n\n**Área:** Supabase; docs/ADMIN-CONSOLE.md\n\n## Critérios de conclusão\n\nConfirmar cobertura/retensão do plano efetivo; executar restauração controlada em ambiente separado; documentar procedimento, responsáveis e objetivos de recuperação sem apagar produção.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:backup -->",
+    "state": "open",
+    "number": 7,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/7"
+  },
+  {
+    "key": "password",
+    "title": "[Correção] Tratar aviso de proteção contra senhas comprometidas no Supabase Auth",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nO advisor consultado em 26/10/2026 indicava auth_leaked_password_protection desativada; revalidar antes de mudar a configuração.\n\n**Prioridade:** Alta\n\n**Área:** Supabase Auth; auditoria de segurança\n\n## Critérios de conclusão\n\nVerificar disponibilidade no plano e configuração atual; habilitar a proteção adequada sem enfraquecer autenticação; testar cadastro/alteração em contas de teste e registrar evidência sem senhas.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:password -->",
+    "state": "open",
+    "number": 8,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/8"
+  },
+  {
+    "key": "ai",
+    "title": "[Correção] Homologar geração real por IA e limites de consumo",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nCentral IA e Marketing têm integração e testes sintéticos; conta, créditos e geração real precisam de homologação própria.\n\n**Prioridade:** Alta\n\n**Área:** src/lib/admin-ai; src/lib/marketing-server.ts; docs/CENTRAL-IA.md\n\n## Critérios de conclusão\n\nConferir liberação da conta/modelo/saldo; executar tentativa autorizada com dados fictícios; verificar saída, consumo, falhas, timeout e preservação de edições. Confirmar teto financeiro no provedor além das quotas de tentativas.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:ai -->",
+    "state": "open",
+    "number": 9,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/9"
+  },
+  {
+    "key": "whatsapp",
+    "title": "[Nova função] Ativar e homologar lembretes oficiais do WhatsApp em piloto autorizado",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nCódigo, cotas e modelos de consentimento existem; conexão oficial, modelos aprovados, agendador e entrega precisam ser comprovados.\n\n**Prioridade:** Alta\n\n**Área:** docs/WHATSAPP.md; src/lib/whatsapp\n\n## Critérios de conclusão\n\nConfigurar conta e rotina de servidor; validar consentimento, entrega e PARAR com destinatário autorizado; testar quotas, falhas e resultados desconhecidos sem reenvio duplicado. Não enviar mensagens a clientes sem autorização.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:whatsapp -->",
+    "state": "open",
+    "number": 10,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/10"
+  },
+  {
+    "key": "meta",
+    "title": "[Nova função] Conectar contas oficiais Instagram e Facebook ao backend administrativo",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nA Central de Marketing não possui OAuth/conexão permanente Meta. Um plugin na conversa não conecta automaticamente o SaaS.\n\n**Prioridade:** Alta\n\n**Área:** src/app/admin/marketing; src/app/admin/integracoes; docs/MARKETING.md\n\n## Critérios de conclusão\n\nDefinir contas e escopos mínimos; implementar conexão/revogação e armazenamento seguro de tokens; validar callbacks/estado/expiração e acesso SUPER_ADMIN. Não expor segredos nem ampliar acessos sem autorização específica.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:meta -->",
+    "state": "open",
+    "number": 11,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/11"
+  },
+  {
+    "key": "publish",
+    "title": "[Nova função] Publicar e agendar conteúdos revisados nas redes sociais",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nA entrega atual prepara textos/artes e exporta kits; não publica externamente.\n\n**Prioridade:** Média\n\n**Área:** src/app/admin/marketing; dependência da issue de conexão Meta\n\n## Critérios de conclusão\n\nImplementar prévia, aprovação, fuso e fila idempotente; persistir IDs/estados reais; tratar erros e cancelamento de agendamento; homologar em conta autorizada sem marcar publicação como concluída sem confirmação.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:publish -->",
+    "state": "open",
+    "number": 12,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/12"
+  },
+  {
+    "key": "ads",
+    "title": "[Nova função] Gerenciar campanhas pagas com orçamento e aprovação explícitos",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nOrçamento atual é apenas planejamento; nenhum botão compra mídia.\n\n**Prioridade:** Média\n\n**Área:** src/app/admin/marketing; Meta Marketing API\n\n## Critérios de conclusão\n\nDefinir conta de anúncios, público, criativo, duração e teto; criar fluxo revisável antes de ativar gasto; consultar status real e oferecer pausa; testar em ambiente permitido e exigir autorização de investimento. Não contratar nem gastar automaticamente.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:ads -->",
+    "state": "open",
+    "number": 13,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/13"
+  },
+  {
+    "key": "replies",
+    "title": "[Nova função] Automatizar directs e comentários com revisão e encaminhamento humano",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nAtualmente há modelos para revisar/copiar, sem leitura ou envio nas redes.\n\n**Prioridade:** Média\n\n**Área:** src/components/marketing/forms.tsx; APIs oficiais Meta\n\n## Critérios de conclusão\n\nConectar webhooks autenticados e permissões necessárias; definir respostas/links autorizados, limites e regras atuais da plataforma; prevenir duplicatas/loops; oferecer pausa e atendimento humano; homologar com destinatários de teste autorizados.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:replies -->",
+    "state": "open",
+    "number": 14,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/14"
+  },
+  {
+    "key": "metrics",
+    "title": "[Nova função] Medir origem, conversões e resultados das campanhas",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nLinks UTM existem, mas não há atribuição de conversões ou painel de retorno comprovado.\n\n**Prioridade:** Média\n\n**Área:** src/lib/marketing.ts; docs/MARKETING.md\n\n## Critérios de conclusão\n\nDefinir eventos e consentimento aplicáveis; vincular origem a cadastro/ativação sem expor dados; apresentar métricas reais com período/fonte; avaliar Meta, Windsor ou Metricool sem contratação obrigatória ou dados simulados.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:metrics -->",
+    "state": "open",
+    "number": 15,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/15"
+  },
+  {
+    "key": "adminqa",
+    "title": "[Melhoria] Concluir validação com perfil real SUPER_ADMIN e revisar fluxos do admin",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nNovo admin foi testado com autenticação fictícia e negações reais em DEMOs; revisão visual com o perfil real ficou pendente.\n\n**Prioridade:** Média\n\n**Área:** docs/ADMIN-CONSOLE.md; /admin/espacos; /admin/integracoes\n\n## Critérios de conclusão\n\nConferir o perfil real pelo login normal; testar navegação e gestão em desktop/celular com dados identificados como teste; revisar redundâncias, estados vazios, acessibilidade e próximos passos; registrar evidências sem dados de clientes.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:adminqa -->",
+    "state": "open",
+    "number": 16,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/16"
+  },
+  {
+    "key": "art",
+    "title": "[Correção] Evitar transbordamento de títulos longos nas artes de marketing",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nA quebra de linha do SVG é por contagem de caracteres; glifos largos podem exceder o quadro.\n\n**Prioridade:** Média\n\n**Área:** src/lib/marketing-art.ts; tests/marketing-art.test.ts\n\n## Critérios de conclusão\n\nAjustar composição/medição ou limites visuais; conferir títulos/CTAs máximos, palavras longas, acentos e glifos largos em SVG/PNG; manter conteúdo escapado e sem recursos externos.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:art -->",
+    "state": "open",
+    "number": 17,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/17"
+  },
+  {
+    "key": "scale",
+    "title": "[Melhoria] Planejar capacidade de WhatsApp acima de 100 conexões oficiais",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nListagens administrativas agora são paginadas; o parser de conexões ainda tem limite de 100.\n\n**Prioridade:** Média\n\n**Área:** src/lib/whatsapp/core.ts; docs/WHATSAPP.md; docs/ADMIN-CONSOLE.md\n\n## Critérios de conclusão\n\nMedir demanda e limites reais de processamento/provedor; definir armazenamento e paginação seguros; migrar sem expor tokens; testar quotas/filas e impedir promessa comercial acima da capacidade homologada.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:scale -->",
+    "state": "open",
+    "number": 18,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/18"
+  },
+  {
+    "key": "hosting",
+    "title": "[Melhoria] Confirmar plano comercial, consumo e alertas dos fornecedores",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nA tela de integrações informa custos, mas não consulta planos contratados, saldo ou backups. A adequação comercial precisa ser confirmada.\n\n**Prioridade:** Alta\n\n**Área:** /admin/integracoes; docs/ADMIN-CONSOLE.md\n\n## Critérios de conclusão\n\nConfirmar planos efetivos Vercel/Supabase/e-mail; conferir requisitos atuais de uso comercial; definir alertas de consumo e orçamento de IA/mídia; registrar limites operacionais. Não contratar ou recarregar sem decisão do proprietário.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:hosting -->",
+    "state": "open",
+    "number": 19,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/19"
+  },
+  {
+    "key": "release",
+    "title": "[Melhoria] Configurar proteção de branch e release de produção vinculada ao PR",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nA adoção de PRs exige verificar branch de produção, Git integration e checks obrigatórios após regularizar a base publicada.\n\n**Prioridade:** Alta\n\n**Área:** Configurações GitHub/Vercel; .github/workflows/ci.yml\n\n## Critérios de conclusão\n\nInspecionar sem expor tokens; definir checks/revisão para merge e previews; configurar produção após merge aprovado e commit identificado; registrar rollback e migrações; impedir deploy direto sem referência à issue/PR, com exceção documentada para incidente.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:release -->",
+    "state": "open",
+    "number": 20,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/20"
+  },
+  {
+    "key": "motion",
+    "title": "[Melhoria] Padronizar movimento, skeletons e feedback de carregamento em toda a interface",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nSolicitação de 27/10/2026: aplicar Design Motion Principles de Kyle Zantos em todo o sistema. O endereço informado foi localizado como kylezantos/design-motion-principles.\n\n**Prioridade:** Alta\n\n**Área:** src/app; src/components; docs/DESIGN-SYSTEM.md\n\n## Critérios de conclusão\n\nAplicar a skill e inventariar cobertura por área; definir tokens de duração/easing, skeletons, entradas/saídas e progresso real; respeitar reduced-motion, foco e desempenho. Validar desktop/celular e não atrasar ações com animações artificiais.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:motion -->",
+    "state": "open",
+    "number": 21,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/21"
+  },
+  {
+    "key": "motionadmin",
+    "title": "[Melhoria] Completar estados de carregamento e transições das áreas administrativas",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nO admin possui alguns loading.tsx, mas a cobertura precisa ser verificada em espaços, integrações, marketing e formulários.\n\n**Prioridade:** Média\n\n**Área:** src/app/admin; src/components/admin\n\n## Critérios de conclusão\n\nCobrir navegação, listas/filtros, formulários, erros, downloads e estados vazios; manter controles acessíveis e mostrar conclusão/falha reais sem porcentagens fictícias.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:motionadmin -->",
+    "state": "open",
+    "number": 22,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/22"
+  },
+  {
+    "key": "motionworkspace",
+    "title": "[Melhoria] Completar feedback e transições no painel das empresas",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nSolicitação abrange a interface inteira, inclusive módulos por segmento, agenda, clientes, equipe e relatórios.\n\n**Prioridade:** Média\n\n**Área:** src/app/painel; src/components/workspace-nav.tsx\n\n## Critérios de conclusão\n\nValidar carregamento, entrada/saída, salvar/arquivar e navegação em cada módulo; preservar dados/foco e não animar repetidamente interações de alta frequência; respeitar movimento reduzido.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:motionworkspace -->",
+    "state": "open",
+    "number": 23,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/23"
+  },
+  {
+    "key": "motionpublic",
+    "title": "[Melhoria] Revisar skeletons e transições de páginas públicas e autenticação",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nCadastro, login, recuperação, demonstrações e planos precisam seguir o mesmo padrão sem impedir acesso.\n\n**Prioridade:** Média\n\n**Área:** src/app/entrar; src/app/cadastro; src/app/recuperar; páginas públicas\n\n## Critérios de conclusão\n\nCobrir carregamento e feedback de submissão sem expor informações de conta; garantir conteúdo acessível sem JavaScript; conferir navegação por teclado, hidratação e layout estável.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:motionpublic -->",
+    "state": "open",
+    "number": 24,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/24"
+  },
+  {
+    "key": "motionbooking",
+    "title": "[Melhoria] Revisar carregamento e progresso dos fluxos de agendamento",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nAgendamento público, turmas e confirmação possuem etapas e estados assíncronos que precisam de cobertura.\n\n**Prioridade:** Média\n\n**Área:** src/app/agendar; src/app/confirmar; src/components/booking\n\n## Critérios de conclusão\n\nIndicar etapa atual e estados pendentes reais; preservar seleção em erros; não simular progresso financeiro/reserva; conferir celular, concorrência e movimento reduzido.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:motionbooking -->",
+    "state": "open",
+    "number": 25,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/25"
+  },
+  {
+    "key": "lazy",
+    "title": "[Melhoria] Carregar sob demanda recursos pesados e imagens fora da tela",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nLazy loading deve reduzir custo inicial sem atrasar conteúdo essencial nem prejudicar acessibilidade/SEO.\n\n**Prioridade:** Média\n\n**Área:** src/components; imagens, módulos opcionais e exportações\n\n## Critérios de conclusão\n\nMedir recursos iniciais; aplicar importação dinâmica ou loading lazy somente onde útil; reservar dimensões, manter LCP prioritário e evitar suspense desnecessário em controles simples.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:lazy -->",
+    "state": "open",
+    "number": 26,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/26"
+  },
+  {
+    "key": "motionqa",
+    "title": "[Melhoria] Validar cobertura de movimento, acessibilidade e desempenho por rota",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nCobertura global exige evidências por área; CSS compartilhado sozinho não comprova todos os fluxos.\n\n**Prioridade:** Média\n\n**Área:** docs/DESIGN-SYSTEM.md; matriz de rotas e testes\n\n## Critérios de conclusão\n\nRegistrar rotas/estados testados e pendentes; verificar reduced-motion, teclado, feedback de status, ausência de overflow/CLS e transições canceladas; não declarar aprovação global sem testes.\n\n## Execução e rastreabilidade\n\n- Criar branch específica e PR mencionando esta issue na descrição.\n- Registrar escopo, testes, limitações e efeitos em produção no PR.\n- Usar dados fictícios e preservar usuários ativos; testes sintéticos não comprovam homologação externa.\n\nBacklog consolidado em 27/10/2026. Esta issue não declara a tarefa concluída.\n\n<!-- webfidelize-backlog:motionqa -->",
+    "state": "open",
+    "number": 27,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/27"
+  },
+  {
+    "key": "observability",
+    "title": "[Nova função] Instrumentar erros, traces e métricas com OpenTelemetry e provedores observáveis",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nSolicitação de 27/10/2026: Sentry, Datadog, New Relic e OpenTelemetry. Conexão externa depende de contas e credenciais autorizadas.\n\n**Prioridade:** Alta\n\n**Área:** Next.js instrumentation; servidor, navegador e rotinas\n\n## Critérios de conclusão\n\nImplementar instrumentação compatível, redaction de dados e configuração opt-in; diferenciar SDK configurado de ingestão confirmada; documentar exportação para provedores e validar com eventos fictícios sem dados de clientes.\n\n## Execução e rastreabilidade\n\nCriar branch e PR mencionando esta issue; registrar testes, limitações e efeitos em produção. Usar dados fictícios e preservar usuários ativos.\n\n<!-- webfidelize-backlog:observability -->",
+    "state": "open",
+    "number": 28,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/28"
+  },
+  {
+    "key": "biome",
+    "title": "[Melhoria] Adotar Biome e lint de código no CI sem regressões",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nSolicitação de qualidade/lint; projeto já usa TypeScript e Prettier.\n\n**Prioridade:** Alta\n\n**Área:** package.json; configuração Biome; CI\n\n## Critérios de conclusão\n\nDefinir regras e escopo versionados; executar lint e corrigir problemas reais; evitar reformatação massiva sem propósito; tornar verificação repetível no PR.\n\n## Execução e rastreabilidade\n\nCriar branch e PR mencionando esta issue; registrar testes, limitações e efeitos em produção. Usar dados fictícios e preservar usuários ativos.\n\n<!-- webfidelize-backlog:biome -->",
+    "state": "open",
+    "number": 29,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/29"
+  },
+  {
+    "key": "architecture",
+    "title": "[Melhoria] Validar contratos de arquitetura e dependências não utilizadas",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nSolicitação menciona arch-contract e knip; confirmar identidade da ferramenta ambígua antes de instalar.\n\n**Prioridade:** Média\n\n**Área:** src/lib; src/components; src/app; CI\n\n## Critérios de conclusão\n\nDocumentar camadas e fronteiras servidor/cliente; verificar dependências/importações com Knip e contratos; tratar falsos positivos de rotas/framework sem ignorar falhas de segurança.\n\n## Execução e rastreabilidade\n\nCriar branch e PR mencionando esta issue; registrar testes, limitações e efeitos em produção. Usar dados fictícios e preservar usuários ativos.\n\n<!-- webfidelize-backlog:architecture -->",
+    "state": "open",
+    "number": 30,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/30"
+  },
+  {
+    "key": "conventions",
+    "title": "[Melhoria] Padronizar commits e lint de estilos com ferramentas confirmadas",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nSolicitação escreveu Comilint e styke; confirmação de nomes/links pendente. Possíveis referências são Commitlint e Stylelint.\n\n**Prioridade:** Média\n\n**Área:** package.json; estilos; CI\n\n## Critérios de conclusão\n\nConfirmar ferramentas; definir regras úteis e escopo; validar commits/estilos em PR sem expor segredos ou instalar pacote homônimo não verificado.\n\n## Execução e rastreabilidade\n\nCriar branch e PR mencionando esta issue; registrar testes, limitações e efeitos em produção. Usar dados fictícios e preservar usuários ativos.\n\n<!-- webfidelize-backlog:conventions -->",
+    "state": "open",
+    "number": 31,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/31"
+  },
+  {
+    "key": "coverage",
+    "title": "[Melhoria] Publicar cobertura dos testes unitários e integração no Codecov",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nJá existem testes unitários, PostgreSQL descartável e HTTP isolado; publicação de cobertura não está comprovada.\n\n**Prioridade:** Média\n\n**Área:** tests; scripts/test-*-db.ts; scripts/test-*-http.ts; .github/workflows\n\n## Critérios de conclusão\n\nGerar relatório reprodutível; definir cobertura incluída/excluída e patamar baseado em dados; integrar Codecov com credencial/identidade autorizada e verificar upload real sem declarar cobertura fictícia.\n\n## Execução e rastreabilidade\n\nCriar branch e PR mencionando esta issue; registrar testes, limitações e efeitos em produção. Usar dados fictícios e preservar usuários ativos.\n\n<!-- webfidelize-backlog:coverage -->",
+    "state": "open",
+    "number": 32,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/32"
+  },
+  {
+    "key": "e2e",
+    "title": "[Nova função] Executar testes end-to-end Playwright no CI com dados isolados",
+    "priority": "Alta",
+    "body": "## Objetivo e evidência\n\nSolicitação inclui E2E Playwright; navegação manual e testes HTTP não substituem testes completos automatizados de navegador.\n\n**Prioridade:** Alta\n\n**Área:** Playwright; fixtures locais; CI\n\n## Critérios de conclusão\n\nCobrir cadastro/login e fluxos críticos permitidos com fixture/ambiente de teste; verificar isolamento, estados de carregamento, teclado, reduced-motion e mobile; bloquear provedores externos e não escrever em contas de clientes.\n\n## Execução e rastreabilidade\n\nCriar branch e PR mencionando esta issue; registrar testes, limitações e efeitos em produção. Usar dados fictícios e preservar usuários ativos.\n\n<!-- webfidelize-backlog:e2e -->",
+    "state": "open",
+    "number": 33,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/33"
+  }
+]

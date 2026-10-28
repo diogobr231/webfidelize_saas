@@ -18,6 +18,8 @@
     "test:admin-operations:db": "tsx scripts/test-admin-operations-db.ts",
     "test:admin-operations": "tsx scripts/test-admin-operations-live.ts",
     "test:ai:db": "tsx scripts/test-admin-ai-db.ts",
+    "test:marketing:db": "tsx scripts/test-marketing-db.ts",
+    "test:marketing:http": "tsx scripts/test-marketing-http.ts",
     "test:ai:live": "tsx scripts/test-admin-ai-live.ts",
     "test:sales": "tsx scripts/test-sales-live.ts",
     "test:db": "tsx scripts/test-db.ts",

@@ -60,6 +60,7 @@ export default async function Personalization({
             name: company.name,
             booking_description: company.booking_description,
             booking_address: company.booking_address,
+            booking_maps_url: company.booking_maps_url,
             booking_phone: company.booking_phone,
             booking_theme: company.booking_theme,
             display_density: company.display_density,

@@ -21,9 +21,11 @@ const entries = [
 export function WorkspaceNav({
   companyId,
   role,
+  niche,
 }: {
   companyId: string;
   role: Role;
+  niche: string;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -46,6 +48,24 @@ export function WorkspaceNav({
           ? "Meus horários"
           : entry.label,
     })),
+    ...(canManage(role) &&
+    [
+      "restaurante",
+      "fornecedores",
+      "logistica",
+      "pet-shop",
+      "escritorio",
+      "salao",
+      "academia",
+    ].includes(niche)
+      ? [
+          {
+            path: "/operacoes",
+            label: "Operações do negócio",
+            icon: "layout" as const,
+          },
+        ]
+      : []),
     ...(role === "OWNER"
       ? [
           {

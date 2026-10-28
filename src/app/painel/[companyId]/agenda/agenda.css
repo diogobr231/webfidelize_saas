@@ -520,6 +520,30 @@
   letter-spacing: -0.8px;
   color: var(--text);
 }
+.appointment-booking-details {
+  display: grid;
+  gap: 10px;
+  margin: -8px 0 20px;
+  padding: 0 4px;
+}
+.appointment-booking-details div {
+  display: grid;
+  gap: 3px;
+}
+.appointment-booking-details dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+.appointment-booking-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+.appointment-booking-details a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 .appointment-dialog details {
   border-top: 1px solid var(--line);
   padding: 18px 0;

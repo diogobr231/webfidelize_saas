@@ -567,7 +567,9 @@ await check("owner publishes only explicit public profile fields", async () => {
     "description",
     "is_demo",
     "logo_path",
+    "maps_url",
     "name",
+    "niche",
     "phone",
     "professionals",
     "services",
@@ -580,6 +582,8 @@ await check("owner publishes only explicit public profile fields", async () => {
   assert.equal(catalog.address, profileValues[2]);
   assert.equal(catalog.phone, profileValues[3]);
   assert.equal(catalog.theme, "violet");
+  assert.equal(catalog.maps_url, "");
+  assert.equal(catalog.niche, "salao");
   assert.ok(!JSON.stringify(catalog).includes("11999990001"));
   assert.ok(!JSON.stringify(catalog).includes("Visitante TESTE"));
 });

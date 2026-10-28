@@ -10,6 +10,7 @@ import {
   coverPathBelongsToCompany,
   rasterDimensions,
   validateCoverBytes,
+  isGoogleMapsUrl,
 } from "../src/lib/company-personalization";
 
 test("personalization validates presets and commercial details", () => {
@@ -17,6 +18,7 @@ test("personalization validates presets and commercial details", () => {
     name: "Empresa de teste",
     description: "Atendimento",
     address: "Rua de teste",
+    maps_url: "https://maps.app.goo.gl/AbCd123",
     phone: "(18) 99769-5445",
     theme: "teal",
     density: "comfortable",
@@ -24,11 +26,15 @@ test("personalization validates presets and commercial details", () => {
   };
   const parsed = personalizationSchema.parse(valid);
   assert.equal(parsed.phone, "18997695445");
+  assert.equal(parsed.maps_url, "https://maps.app.goo.gl/AbCd123");
   for (const change of [
     { theme: "url(javascript:alert(1))" },
     { density: "hidden" },
     { agenda_view: "month" },
     { phone: "texto" },
+    { maps_url: "javascript:alert(1)" },
+    { maps_url: "https://attacker.example/map" },
+    { maps_url: "http://maps.google.com/?q=1" },
     { name: "x" },
     { description: "x".repeat(241) },
   ]) {
@@ -37,6 +43,23 @@ test("personalization validates presets and commercial details", () => {
       false,
     );
   }
+});
+
+test("Google Maps links require the HTTPS Google Maps hosts and path", () => {
+  for (const url of [
+    "https://maps.app.goo.gl/a1b2",
+    "https://maps.google.com/?q=Rua+Central",
+    "https://www.google.com/maps/place/Empresa",
+  ])
+    assert.equal(isGoogleMapsUrl(url), true);
+  for (const url of [
+    "http://maps.google.com/?q=Rua",
+    "https://google.com/maps/place/Empresa",
+    "https://www.google.com/search?q=maps",
+    "https://maps.app.goo.gl.attacker.example/a1b2",
+    "https://user@maps.google.com/?q=Rua",
+  ])
+    assert.equal(isGoogleMapsUrl(url), false);
 });
 
 function coverPng(width: number, height: number, length = 32) {

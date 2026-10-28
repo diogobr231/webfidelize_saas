@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { niches } from "@/lib/catalog";
 import { segmentBySlug } from "@/lib/segments";
 import { Brand } from "@/components/ui/brand";
+import { Icon } from "@/components/ui/icon";
 import { InteractiveDemo } from "@/components/landing/interactive-demo";
 import "../experience.css";
 export function generateStaticParams() {
@@ -37,15 +38,37 @@ export default async function Demo({
         <span className="experience-eyebrow">
           DEMONSTRAÇÃO · {n.name.toUpperCase()}
         </span>
-        <h1>Seu espaço. Sua marca. Seu jeito de receber.</h1>
+        <h1>{n.headline}</h1>
         <p>
-          Veja como seu cliente conhece seu espaço e agenda pelo seu link.
-          Depois, acompanhe o resultado na agenda e na ficha do cliente. Tudo
-          aqui é ilustrativo e desaparece ao recarregar: nenhuma reserva, conta
-          ou cobrança é criada.
+          {n.description} A demonstração abaixo usa exemplos fictícios para
+          mostrar a experiência de agendamento, agenda e ficha do cliente.
         </p>
       </header>
-      {!n.available ? <p className="demo-feedback">{n.limitation}</p> : null}
+      <section
+        className="demo-capabilities"
+        aria-labelledby="demo-capabilities-title"
+      >
+        <div className="demo-capabilities-heading">
+          <span className="experience-eyebrow">RECURSOS DO SEGMENTO</span>
+          <h2 id="demo-capabilities-title">O que você organiza no painel</h2>
+        </div>
+        <ul>
+          {n.features.map((feature) => (
+            <li key={feature}>
+              <Icon name="check" size={17} />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="demo-capabilities-note">
+          <p>{n.limitation}</p>
+          <p>
+            Na demonstração interativa, teste apenas o agendamento com dados de
+            exemplo. Os resultados ficam temporariamente no navegador; não criam
+            reservas reais nem alteram os dados de uma empresa.
+          </p>
+        </div>
+      </section>
       <InteractiveDemo
         key={n.slug}
         services={n.services}

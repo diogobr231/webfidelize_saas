@@ -10,8 +10,13 @@ const content = {
       "Avaliação de exemplo",
       "Atendimento de exemplo",
     ],
+    features: [
+      "Turmas com limite de vagas e inscrições online",
+      "Presença dos participantes e agenda individual",
+      "Fichas de treino em texto e validade dos planos dos alunos",
+    ],
     limitation:
-      "Turmas e reservas estão disponíveis no painel. A demonstração interativa apresenta atendimentos individuais; fichas de treino, catracas e mensalidades de alunos não estão incluídas.",
+      "Não há integração com catraca nem cobrança automática de mensalidades.",
   },
   salao: {
     headline:
@@ -19,15 +24,25 @@ const content = {
     description:
       "Organize os atendimentos do salão, da manicure e de cada profissional. Compartilhe uma página de reservas com a identidade do seu espaço.",
     services: ["Manicure", "Corte de cabelo", "Escova"],
-    limitation: "Comissões, caixa e estoque não fazem parte do módulo atual.",
+    features: [
+      "Agenda individual por profissional e reservas online",
+      "Comissões e movimentos de caixa registrados manualmente",
+      "Controle de quantidade do estoque",
+    ],
+    limitation:
+      "Comissões e movimentações são manuais; não há integração com maquininha ou contabilidade.",
   },
   "pet-shop": {
     headline: "Uma agenda organizada para quem cuida dos pets.",
     description:
       "Reúna os horários de atendimento, os contatos dos clientes e os serviços do seu pet shop. Deixe o próximo agendamento começar pelo seu link.",
     services: ["Banho", "Tosa", "Atendimento de orientação"],
-    limitation:
-      "Cadastro individual de pets, prontuário veterinário e estoque ainda não estão disponíveis.",
+    features: [
+      "Cadastro de pets e tutores ligado aos atendimentos",
+      "Serviços, agenda e histórico de atendimentos",
+      "Controle de quantidade do estoque",
+    ],
+    limitation: "Não inclui diagnóstico nem prontuário clínico veterinário.",
   },
   clinica: {
     headline: "Recepção organizada. Mais clareza para cada atendimento.",
@@ -38,16 +53,63 @@ const content = {
       "Retorno de exemplo",
       "Avaliação de exemplo",
     ],
-    limitation:
-      "A plataforma organiza a recepção e os horários. Não inclui prontuário, diagnóstico ou informações clínicas.",
+    features: [
+      "Agenda por profissional e página de agendamento",
+      "Recepção com serviços, clientes e histórico de horários",
+      "Acesso da equipe conforme as permissões da empresa",
+    ],
+    limitation: "Não inclui prontuário, diagnóstico nem informações clínicas.",
   },
   escritorio: {
     headline: "Seus clientes e compromissos, no mesmo lugar.",
     description:
       "Organize reuniões e atendimentos, consulte o histórico e dê à sua equipe uma visão clara dos próximos compromissos.",
     services: ["Reunião inicial", "Atendimento", "Acompanhamento"],
+    features: [
+      "Agenda de compromissos e histórico de clientes",
+      "Tarefas com etapas e processos acompanháveis",
+      "Links HTTPS para documentos armazenados no serviço escolhido pela empresa",
+    ],
     limitation:
-      "Gestão de tarefas, documentos e processos específicos não está incluída no módulo atual.",
+      "A Web Fidelize guarda links HTTPS de documentos, não os arquivos. O armazenamento fica no serviço escolhido pela empresa.",
+  },
+  restaurante: {
+    headline: "Mesas, comandas e pedidos com etapas mais claras.",
+    description:
+      "Registre mesas e capacidade, acompanhe as etapas dos pedidos e lance movimentações de caixa em um painel da empresa.",
+    services: ["Pedido no salão", "Retirada", "Atendimento"],
+    features: [
+      "Cadastro de mesas e capacidade",
+      "Comandas com etapa do pedido, tempo de abertura e impressão",
+      "Movimentações de caixa registradas manualmente",
+    ],
+    limitation:
+      "O caixa é manual. Não há integração com PDV ou maquininha nem reserva automática de mesas pela página pública.",
+  },
+  fornecedores: {
+    headline: "Pedidos e entregas com etapas acompanháveis.",
+    description:
+      "Organize pedidos para fornecedores, acompanhe o recebimento e compartilhe entregas com localização do Google Maps.",
+    services: ["Entrega", "Retirada", "Atendimento"],
+    features: [
+      "Pedidos a fornecedores do pedido ao recebimento",
+      "Entregas com etapas de acompanhamento",
+      "Endereços e localização compartilhados por link do Google Maps",
+    ],
+    limitation:
+      "A localização usa links do Google Maps; não há cálculo automático de rotas.",
+  },
+  logistica: {
+    headline: "Entregadores, rotas e entregas em um só fluxo.",
+    description:
+      "Cadastre entregadores, organize rotas e acompanhe cada entrega até a conclusão, com links para o Google Maps.",
+    services: ["Coleta", "Entrega local", "Rota agendada"],
+    features: [
+      "Cadastro de entregadores e disponibilidade",
+      "Rotas e entregas com etapas de acompanhamento",
+      "Links de localização do Google Maps",
+    ],
+    limitation: "Não otimiza rotas nem transmite localização em tempo real.",
   },
 } as const;
 export function segmentBySlug(slug: string) {
@@ -64,9 +126,13 @@ export function segmentBySlug(slug: string) {
           "Reunião de exemplo",
           "Orientação de exemplo",
         ],
+        features: [
+          "Agenda individual, clientes e serviços",
+          "Página de agendamento com a identidade da empresa",
+          "Equipe e permissões conforme o plano contratado",
+        ],
         limitation:
-          niche.description +
-          " A demonstração apresenta somente o núcleo de agendamentos, sem simular esses módulos.",
+          "Módulos especializados para esse segmento estão em planejamento. A demonstração cobre o núcleo de agenda, clientes e serviços.",
       };
   return { ...niche, ...details, available };
 }

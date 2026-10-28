@@ -16,6 +16,8 @@ import {
 import { ReserveForm } from "@/components/booking/reserve-form";
 import { BookingAnchor } from "@/components/booking/booking-anchor";
 import { Icon } from "@/components/ui/icon";
+import { bookingCopy } from "@/lib/booking-copy";
+import { isGoogleMapsUrl } from "@/lib/company-personalization";
 import "./booking.css";
 
 export const dynamic = "force-dynamic";
@@ -24,8 +26,10 @@ type Catalog = {
   name: string;
   slug: string;
   is_demo: boolean;
+  niche?: string;
   description?: string;
   address?: string;
+  maps_url?: string;
   phone?: string;
   theme?: string;
   logo_path?: string | null;
@@ -85,6 +89,7 @@ export default async function Booking({
     );
   }
   const catalog = data as Catalog;
+  const presentation = bookingCopy(catalog.niche || "");
   const [logo, cover] = await Promise.all([
     signedPublicLogo(db, catalog.logo_path),
     signedPublicCover(db, catalog.cover_path),
@@ -208,24 +213,25 @@ export default async function Booking({
       <div className="booking-shell">
         <header className="booking-hero">
           <div className="booking-hero-copy">
-            <span className="booking-eyebrow">
-              SEU PRÓXIMO HORÁRIO, SEM COMPLICAÇÃO
-            </span>
-            <h1>
-              Reserve um tempo
-              <br />
-              para você.
-            </h1>
-            <p>
-              {catalog.description ||
-                `Escolha seu serviço e encontre o melhor horário com ${catalog.name}. É simples, rápido e sem precisar instalar um aplicativo.`}
-            </p>
+            <span className="booking-eyebrow">AGENDAMENTO ONLINE</span>
+            <h1>{presentation.headline}</h1>
+            <p>{catalog.description || presentation.description}</p>
             <div className="booking-details">
               {catalog.address ? (
                 <span>
                   <Icon name="building" size={15} />
                   {catalog.address}
                 </span>
+              ) : null}
+              {catalog.maps_url && isGoogleMapsUrl(catalog.maps_url) ? (
+                <a
+                  href={catalog.maps_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name="map-pin" size={15} />
+                  Ver no Google Maps <Icon name="arrow-up-right" size={14} />
+                </a>
               ) : null}
               {contact ? (
                 <a href={contact} target="_blank" rel="noopener noreferrer">
@@ -300,12 +306,16 @@ export default async function Booking({
             <strong>
               {q.erro === "configuracao"
                 ? "Reservas temporariamente indisponíveis."
-                : "Não conseguimos concluir sua reserva."}
+                : q.erro === "campos"
+                  ? "Confira os dados do formulário."
+                  : "Não conseguimos concluir sua reserva."}
             </strong>
             <span>
               {q.erro === "configuracao"
                 ? "Tente novamente mais tarde ou fale com a empresa."
-                : "Confira seus dados e consulte os horários novamente. O horário pode ter sido ocupado ou o limite de tentativas pode ter sido atingido."}
+                : q.erro === "campos"
+                  ? "Confira o endereço, os dados do pet ou os campos obrigatórios e tente novamente."
+                  : "Consulte os horários novamente. O horário pode ter sido ocupado ou o limite de tentativas pode ter sido atingido."}
             </span>
           </div>
         ) : null}
@@ -453,8 +463,8 @@ export default async function Booking({
                 <div className="booking-section-heading">
                   <span className="booking-step-number">1</span>
                   <div>
-                    <h2>Como podemos cuidar do seu dia?</h2>
-                    <p>Escolha o serviço, o profissional e a data desejada.</p>
+                    <h2>{presentation.servicePrompt}</h2>
+                    <p>Escolha o profissional e a data desejada.</p>
                   </div>
                 </div>
                 <form
@@ -564,6 +574,7 @@ export default async function Booking({
                     day={validDay}
                     slots={slots}
                     requestId={randomUUID()}
+                    niche={catalog.niche || ""}
                   />
                 )
               ) : null}

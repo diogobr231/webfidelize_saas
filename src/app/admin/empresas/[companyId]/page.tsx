@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
-import { Brand } from "@/components/ui/brand";
+import { AdminNavigation } from "@/components/admin/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { snapshotSchema } from "@/lib/billing/schema";
 import { money } from "@/lib/catalog";
@@ -98,12 +98,7 @@ export default async function CompanyDiagnostics({
   };
   return (
     <main className="admin-shell">
-      <nav className="admin-topbar" aria-label="Suporte à empresa">
-        <Brand href="/admin" />
-        <Link className="button secondary" href="/admin">
-          ← Empresas
-        </Link>
-      </nav>
+      <AdminNavigation current="spaces" />
       <div className="admin-content">
         <PageHeader
           eyebrow="Diagnóstico de acesso"

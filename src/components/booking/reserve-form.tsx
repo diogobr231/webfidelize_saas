@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { money } from "@/lib/catalog";
 import { reserve } from "@/app/agendar/[slug]/actions";
 import { Icon } from "@/components/ui/icon";
+import { CepAddressInput } from "@/components/cep-address-input";
 
 function ConfirmButton() {
   const { pending } = useFormStatus();
@@ -31,6 +32,7 @@ export function ReserveForm({
   day,
   slots,
   requestId,
+  niche,
 }: {
   slug: string;
   service: { id: string; name: string; duration: number; price_cents: number };
@@ -38,6 +40,7 @@ export function ReserveForm({
   day: string;
   slots: { starts_at: string }[];
   requestId: string;
+  niche: string;
 }) {
   const [start, setStart] = useState("");
   const time = (value: string) =>
@@ -124,6 +127,80 @@ export function ReserveForm({
             />
           </div>
         </div>
+        {niche === "fornecedores" || niche === "logistica" ? (
+          <div className="booking-fields booking-niche-fields">
+            <CepAddressInput
+              id="delivery_location"
+              name="delivery_location"
+              label="Endereço ou link do Google Maps (opcional)"
+              maxLength={500}
+              placeholder="Rua, número, bairro ou link do Maps"
+              helper="Use a busca por CEP ou cole um link do Maps. Confira número, complemento e se a empresa atende a região. Só a empresa verá este dado."
+            />
+          </div>
+        ) : null}
+        {niche === "pet-shop" ? (
+          <div className="booking-fields booking-niche-fields">
+            <div>
+              <label htmlFor="pet_name">Nome do pet</label>
+              <input
+                id="pet_name"
+                name="pet_name"
+                minLength={2}
+                maxLength={80}
+                autoComplete="off"
+                placeholder="Como ele se chama?"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="pet_species">Espécie</label>
+              <select
+                id="pet_species"
+                name="pet_species"
+                required
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Selecione
+                </option>
+                <option value="dog">Cão</option>
+                <option value="cat">Gato</option>
+                <option value="other">Outro</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="pet_size">
+                Porte <span>(opcional)</span>
+              </label>
+              <select id="pet_size" name="pet_size" defaultValue="">
+                <option value="">Não informar</option>
+                <option value="small">Pequeno</option>
+                <option value="medium">Médio</option>
+                <option value="large">Grande</option>
+              </select>
+            </div>
+            <small>
+              Dados básicos para organizar o atendimento. Não inclua informações
+              de saúde.
+            </small>
+          </div>
+        ) : null}
+        {niche === "escritorio" ? (
+          <div className="booking-fields booking-niche-fields">
+            <div>
+              <label htmlFor="meeting_topic">
+                Assunto da reunião <span>(opcional)</span>
+              </label>
+              <input
+                id="meeting_topic"
+                name="meeting_topic"
+                maxLength={120}
+                placeholder="Ex.: conversa inicial"
+              />
+            </div>
+          </div>
+        ) : null}
         <div className="booking-honeypot" aria-hidden="true">
           <label htmlFor="website">Deixe em branco</label>
           <input

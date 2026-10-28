@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
-import { Brand } from "@/components/ui/brand";
+import { AdminNavigation } from "@/components/admin/navigation";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { niches } from "@/lib/catalog";
 import { manageCompany } from "./actions";
@@ -33,7 +33,7 @@ export default async function Admin({
           "id,name,niche,status,trial_ends_at,plan_id,trial_card_required",
         )
         .order("created_at", { ascending: false })
-        .limit(100),
+        .limit(12),
       db.rpc("admin_operations_summary"),
       commercialPlans(),
       selectedId.success
@@ -60,32 +60,7 @@ export default async function Admin({
   const summary = parsedSummary?.success ? parsedSummary.data : null;
   return (
     <main className="admin-shell">
-      <nav className="admin-topbar" aria-label="Administração da plataforma">
-        <Brand href="/painel" />
-        <div className="admin-topbar-actions">
-          <Link className="button secondary" href="/admin/ia">
-            <Icon name="sparkles" size={16} /> Central IA
-          </Link>
-          <Link className="button secondary" href="/admin/automacoes">
-            Automações e tarefas
-          </Link>
-          <Link className="button secondary" href="/admin/whatsapp">
-            WhatsApp e cotas
-          </Link>
-          <Link className="button secondary" href="/admin/comercial">
-            Central comercial
-          </Link>
-          <Link className="button secondary" href="/admin/ajuda">
-            Ajuda e solicitações
-          </Link>
-          <span className="admin-access">
-            <Icon name="shield" size={14} /> SUPER_ADMIN
-          </span>
-          <Link className="button secondary" href="/painel?empresas=1">
-            Ver espaços <Icon name="arrow-up-right" size={16} />
-          </Link>
-        </div>
-      </nav>
+      <AdminNavigation current="overview" />
       <div className="admin-content">
         {feedback.erro && (
           <p role="alert" className="notice error">
@@ -101,8 +76,8 @@ export default async function Admin({
         )}
         <PageHeader
           eyebrow="Central de gestão"
-          title="Sua empresa, em uma visão."
-          description="Acompanhe as empresas da plataforma, as oportunidades comerciais e o atendimento. Organize os próximos passos com automações internas."
+          title="Sua plataforma, em uma visão."
+          description="Gerencie empresas, vendas e atendimento."
         />
         <OperationsOverview summary={summary} plans={plans} />
         {selectedId.success &&
@@ -116,19 +91,27 @@ export default async function Admin({
         <div className="admin-billing-note">
           <Icon name="shield" size={20} />
           <div>
-            <strong>Pagamentos em homologação</strong>
-            <p>
-              Novas empresas recebem 7 dias grátis sem cartão, com prazo
-              controlado no backend. Pix e cartão estão implementados e aguardam
-              a validação externa do Mercado Pago antes de habilitar cobranças.
-              Não é possível liberar uma assinatura paga manualmente.
-            </p>
-            <p>
-              Suspender ou cancelar o acesso de uma empresa não cancela a
-              renovação no Mercado Pago. O proprietário gerencia a recorrência
-              em Plano e assinatura; consulte o histórico no diagnóstico da
-              empresa antes de orientar uma regularização.
-            </p>
+            <strong>Recebimentos: homologação pendente</strong>
+            <p>Configure e valide os pagamentos antes de liberar cobranças.</p>
+            <Link href="/admin/integracoes#payments" className="ops-text-link">
+              <Icon name="settings" size={15} /> Ver requisitos e taxas
+            </Link>
+            <details>
+              <summary>Teste gratuito e renovação</summary>
+              <p>
+                Novas empresas recebem 7 dias grátis sem cartão, com prazo
+                controlado no backend. Pix e cartão estão implementados e
+                aguardam a validação externa do Mercado Pago antes de habilitar
+                cobranças. Não é possível liberar uma assinatura paga
+                manualmente.
+              </p>
+              <p>
+                Suspender ou cancelar o acesso de uma empresa não cancela a
+                renovação no Mercado Pago. O proprietário gerencia a recorrência
+                em Plano e assinatura; consulte o histórico no diagnóstico da
+                empresa antes de orientar uma regularização.
+              </p>
+            </details>
           </div>
         </div>
         {error ? (
@@ -139,18 +122,18 @@ export default async function Admin({
           <section className="panel admin-companies" id="empresas">
             <div className="admin-section-heading">
               <div>
-                <h2>Todos os espaços</h2>
+                <h2>Empresas recentes</h2>
                 <p>
-                  Até 100 empresas mais recentes da plataforma
+                  Até 12 empresas recentes
                   {selectedResult.data
                     ? ", além da empresa selecionada, quando necessário"
                     : ""}
                   .
                 </p>
               </div>
-              <span className="admin-count">
-                {companies?.length ?? 0} nesta lista
-              </span>
+              <Link className="button secondary" href="/admin/espacos">
+                <Icon name="building" size={16} /> Ver todas
+              </Link>
             </div>
             {companies?.length ? (
               <div className="table-wrap">

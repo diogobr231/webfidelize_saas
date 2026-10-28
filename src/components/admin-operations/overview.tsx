@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Icon, type IconName } from "@/components/ui/icon";
+import { Icon } from "@/components/ui/icon";
 import { money } from "@/lib/catalog";
 import type { CommercialPlan } from "@/lib/commercial";
 import { operationDate, type OperationsSummary } from "@/lib/admin-operations";
@@ -38,55 +38,6 @@ export function OperationsOverview({
   summary: OperationsSummary | null;
   plans: CommercialPlan[] | null;
 }) {
-  const shortcuts: {
-    href: string;
-    title: string;
-    description: string;
-    icon: IconName;
-  }[] = [
-    {
-      href: "/admin/ia",
-      title: "Central IA",
-      description: "Análises e rascunhos para sua revisão",
-      icon: "sparkles",
-    },
-    {
-      href: "/admin/automacoes",
-      title: "Automações e tarefas",
-      description: "Prazos, prioridades e execução",
-      icon: "sparkles",
-    },
-    {
-      href: "/admin/comercial",
-      title: "Vendas e oportunidades",
-      description: "Contatos, propostas e próximos passos",
-      icon: "briefcase",
-    },
-    {
-      href: "/admin/comercial/ofertas",
-      title: "Ofertas e implantação",
-      description: "Serviços comerciais da Web Fidelize",
-      icon: "layout",
-    },
-    {
-      href: "/admin#empresas",
-      title: "Empresas e acesso",
-      description: "Planos, equipes e períodos de teste",
-      icon: "building",
-    },
-    {
-      href: "/admin/ajuda",
-      title: "Atendimento e conteúdo",
-      description: "Solicitações, tutoriais e ajuda",
-      icon: "help",
-    },
-    {
-      href: "/admin/whatsapp",
-      title: "WhatsApp e consumo",
-      description: "Configuração e cotas por empresa",
-      icon: "phone",
-    },
-  ];
   return (
     <section className="ops-overview" aria-labelledby="ops-overview-title">
       <div className="ops-section-heading">
@@ -195,22 +146,6 @@ export function OperationsOverview({
           página para tentar novamente.
         </p>
       )}
-      <nav className="ops-shortcuts" aria-label="Áreas de gestão">
-        {shortcuts.map((item) => (
-          <Link href={item.href} key={item.href}>
-            <span className="ops-shortcut-icon">
-              <Icon name={item.icon} />
-            </span>
-            <strong>{item.title}</strong>
-            <span>{item.description}</span>
-            <Icon
-              className="ops-shortcut-arrow"
-              name="arrow-up-right"
-              size={17}
-            />
-          </Link>
-        ))}
-      </nav>
       <section className="panel ops-plans" aria-labelledby="ops-plans-title">
         <div>
           <h3 id="ops-plans-title">Catálogo atual de planos</h3>

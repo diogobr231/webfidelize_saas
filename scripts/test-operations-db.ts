@@ -937,6 +937,78 @@ await check(
   },
 );
 await check(
+  "delivery booking stores a validated Maps location privately and retries cannot overwrite it",
+  async () => {
+    await db.exec("reset role");
+    await db.query("update companies set niche='logistica' where id=$1", [
+      company,
+    ]);
+    const available = await db.query<{ starts_at: string }>(
+      "select starts_at::text from public_slots('operations-demo',$1,$2,$3) order by starts_at limit 1",
+      [service, professional, day],
+    );
+    assert.ok(available.rows[0]?.starts_at, "test fixture needs a free slot");
+    const request = randomUUID();
+    const submit =
+      "select submit_public_booking_with_details('operations-demo',$1,$2,$3,'Cliente de entrega','11999990003',$4,$5,$6,$7::jsonb)";
+    const location = "https://maps.app.goo.gl/AbCd123";
+    const args = [
+      service,
+      professional,
+      available.rows[0].starts_at,
+      request,
+      gateway,
+      "d".repeat(64),
+      JSON.stringify({ delivery_location: location }),
+    ];
+    await as(null);
+    const created = String(await scalar(submit, args));
+    await as(owner);
+    assert.deepEqual(
+      await scalar("select booking_details from appointments where id=$1", [
+        created,
+      ]),
+      { delivery_location: location },
+    );
+    const receipt = (await scalar(
+      "select public_booking_receipt('operations-demo',$1,$2)",
+      [request, gateway],
+    )) as Record<string, unknown>;
+    assert.equal("booking_details" in receipt, false);
+    await as(null);
+    const retry = [...args];
+    retry[6] = JSON.stringify({ delivery_location: "Rua diferente, 20" });
+    assert.equal(await scalar(submit, retry), created);
+    await denied(
+      submit,
+      [
+        service,
+        professional,
+        available.rows[0].starts_at,
+        randomUUID(),
+        gateway,
+        "e".repeat(64),
+        JSON.stringify({ delivery_location: "https://attacker.example/x" }),
+      ],
+      /invalid booking details/,
+    );
+    await as(owner);
+    assert.deepEqual(
+      await scalar("select booking_details from appointments where id=$1", [
+        created,
+      ]),
+      { delivery_location: location },
+    );
+    await db.query("select manage_appointment($1,$2,'cancel',null)", [
+      company,
+      created,
+    ]);
+    await db.exec("reset role");
+    await db.query("update companies set niche='salao' where id=$1", [company]);
+    await as(owner);
+  },
+);
+await check(
   "removing a block reopens slots without changing existing appointments",
   async () => {
     const snapshot = await scalar(
@@ -1079,6 +1151,479 @@ await check(
       await scalar("select plan_id from companies where id=$1", [company]),
       "essencial",
     );
+  },
+);
+await check(
+  "industry operations are manager-only, tenant scoped and enforce restaurant order transitions",
+  async () => {
+    await db.exec("reset role");
+    await db.query(
+      "update companies set niche='restaurante',status='trialing',trial_ends_at=now()+interval '7 days' where id=$1",
+      [company],
+    );
+    await as(owner);
+    const create =
+      "select create_industry_operation($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)";
+    const table = String(
+      await scalar(create, [
+        company,
+        "restaurant_table",
+        "Mesa 7",
+        "",
+        "available",
+        "",
+        "",
+        4,
+        "",
+        null,
+        null,
+        "",
+        null,
+      ]),
+    );
+    const order = String(
+      await scalar(create, [
+        company,
+        "restaurant_order",
+        "Comanda 19",
+        "2 cafés e 1 pão",
+        "open",
+        "",
+        "",
+        null,
+        "",
+        1250,
+        new Date(Date.now() + 86400000).toISOString(),
+        "",
+        table,
+      ]),
+    );
+    const cashIn = String(
+      await scalar(create, [
+        company,
+        "restaurant_cash",
+        "Almoço",
+        "Venda registrada",
+        "recorded",
+        "entrada",
+        "",
+        null,
+        "",
+        5000,
+        null,
+        "",
+        null,
+      ]),
+    );
+    const cashOut = String(
+      await scalar(create, [
+        company,
+        "restaurant_cash",
+        "Fornecedor",
+        "Compra de insumos",
+        "recorded",
+        "saida",
+        "",
+        null,
+        "",
+        1000,
+        null,
+        "",
+        null,
+      ]),
+    );
+    assert.ok(table && order);
+    assert.equal(
+      await scalar("select status from industry_operations where id=$1", [
+        table,
+      ]),
+      "occupied",
+    );
+    await denied(
+      create,
+      [
+        company,
+        "restaurant_order",
+        "Comanda 20",
+        "",
+        "open",
+        "",
+        "",
+        null,
+        "",
+        1000,
+        new Date(Date.now() + 86400000).toISOString(),
+        "",
+        table,
+      ],
+      /related record unavailable/,
+    );
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,1,'preparing')",
+        [company, order],
+      ),
+      2,
+    );
+    await denied(
+      "select change_industry_operation_status($1,$2,2,'paid')",
+      [company, order],
+      /invalid operation transition/,
+    );
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,2,'cancelled')",
+        [company, order],
+      ),
+      3,
+    );
+    assert.equal(
+      await scalar("select status from industry_operations where id=$1", [
+        table,
+      ]),
+      "available",
+    );
+    assert.equal(
+      await scalar("select status from industry_operations where id=$1", [
+        order,
+      ]),
+      "cancelled",
+    );
+    const initialSummary = (await scalar(
+      "select industry_operations_summary($1)",
+      [company],
+    )) as Record<string, number>;
+    assert.equal(initialSummary.cash_in_cents, 5000);
+    assert.equal(initialSummary.cash_out_cents, 1000);
+    assert.equal(initialSummary.cash_net_cents, 4000);
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,1,'voided')",
+        [company, cashIn],
+      ),
+      2,
+    );
+    const correctedSummary = (await scalar(
+      "select industry_operations_summary($1)",
+      [company],
+    )) as Record<string, number>;
+    assert.equal(correctedSummary.cash_in_cents, 0);
+    assert.equal(correctedSummary.cash_net_cents, -1000);
+    assert.equal(
+      await scalar("select status from industry_operations where id=$1", [
+        cashOut,
+      ]),
+      "recorded",
+    );
+    await denied(
+      create,
+      [
+        company,
+        "pet_profile",
+        "Pet",
+        "",
+        "active",
+        "Tutor",
+        "",
+        null,
+        "",
+        null,
+        null,
+        "",
+        null,
+      ],
+      /operation kind unavailable/,
+    );
+    await db.exec("reset role");
+    await db.query("update companies set niche='salao' where id=$1", [company]);
+  },
+);
+await check(
+  "industry operations protect cross-tenant data, direct writes and Maps locations",
+  async () => {
+    await db.exec("reset role");
+    await db.query(
+      "update companies set niche='logistica',status='trialing',trial_ends_at=now()+interval '7 days' where id=$1",
+      [company],
+    );
+    await as(owner);
+    const create =
+      "select create_industry_operation($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)";
+    const driver = String(
+      await scalar(create, [
+        company,
+        "logistics_driver",
+        "Carlos",
+        "",
+        "available",
+        "Moto",
+        "11987654321",
+        null,
+        "",
+        null,
+        null,
+        "",
+        null,
+      ]),
+    );
+    const route = String(
+      await scalar(create, [
+        company,
+        "logistics_route",
+        "Rota manhã",
+        "Centro e bairro",
+        "planned",
+        "",
+        "",
+        null,
+        "",
+        null,
+        new Date(Date.now() + 86400000).toISOString(),
+        "",
+        driver,
+      ]),
+    );
+    const delivery = String(
+      await scalar(create, [
+        company,
+        "logistics_delivery",
+        "Entrega 28",
+        "Caixa azul",
+        "pending",
+        "Cliente",
+        "11987654321",
+        null,
+        "",
+        null,
+        new Date(Date.now() + 86400000).toISOString(),
+        "https://maps.app.goo.gl/xyz123",
+        route,
+      ]),
+    );
+    assert.equal(
+      await scalar("select status from industry_operations where id=$1", [
+        driver,
+      ]),
+      "on_route",
+    );
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,1,'in_progress')",
+        [company, route],
+      ),
+      2,
+    );
+    await denied(
+      "select change_industry_operation_status($1,$2,2,'completed')",
+      [company, route],
+      /route has open deliveries/,
+    );
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,1,'in_transit')",
+        [company, delivery],
+      ),
+      2,
+    );
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,2,'delivered')",
+        [company, delivery],
+      ),
+      3,
+    );
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,2,'completed')",
+        [company, route],
+      ),
+      3,
+    );
+    assert.equal(
+      await scalar("select status from industry_operations where id=$1", [
+        driver,
+      ]),
+      "available",
+    );
+    assert.equal(
+      await scalar("select count(*) from industry_operations where id=$1", [
+        delivery,
+      ]),
+      1,
+    );
+    await denied(
+      create,
+      [
+        company,
+        "logistics_delivery",
+        "Entrega inválida",
+        "",
+        "pending",
+        "Cliente",
+        "11987654321",
+        null,
+        "",
+        null,
+        new Date(Date.now() + 86400000).toISOString(),
+        "https://attacker.example/path",
+        null,
+      ],
+      /invalid Maps link/,
+    );
+    await denied(
+      "insert into industry_operations(company_id,kind,name,details,status) values($1,'logistics_driver','Entregador','','available')",
+      [company],
+      /permission denied/,
+    );
+    await as(other);
+    assert.equal(
+      await scalar("select count(*) from industry_operations where id=$1", [
+        delivery,
+      ]),
+      0,
+    );
+    await denied(
+      create,
+      [
+        company,
+        "logistics_driver",
+        "Outro",
+        "",
+        "available",
+        "Moto",
+        "11987654321",
+        null,
+        "",
+        null,
+        null,
+        "",
+        null,
+      ],
+      /not authorized/,
+    );
+    await denied(
+      "select industry_operations_summary($1)",
+      [company],
+      /not authorized/,
+    );
+    await db.exec("reset role");
+    await db.query("update companies set niche='salao' where id=$1", [company]);
+    await as(owner);
+  },
+);
+await check(
+  "salon cash and commission summaries follow valid manual status changes",
+  async () => {
+    await db.exec("reset role");
+    await db.query(
+      "update companies set niche='salao',status='trialing',trial_ends_at=now()+interval '7 days' where id=$1",
+      [company],
+    );
+    await as(owner);
+    const commission = String(
+      await scalar(
+        "select create_industry_operation($1,'salon_commission','Escova','Serviço de salão','pending','Daniela','',null,'',3500,null,'',null)",
+        [company],
+      ),
+    );
+    const cash = String(
+      await scalar(
+        "select create_industry_operation($1,'salon_cash','Venda de produto','','recorded','entrada','',null,'',5000,null,'',null)",
+        [company],
+      ),
+    );
+    const pending = (await scalar("select industry_operations_summary($1)", [
+      company,
+    ])) as Record<string, number>;
+    assert.equal(pending.commission_pending_cents, 3500);
+    assert.equal(pending.commission_paid_cents, 0);
+    assert.equal(
+      await scalar("select change_industry_operation_status($1,$2,1,'paid')", [
+        company,
+        commission,
+      ]),
+      2,
+    );
+    const paid = (await scalar("select industry_operations_summary($1)", [
+      company,
+    ])) as Record<string, number>;
+    assert.equal(paid.commission_pending_cents, 0);
+    assert.equal(paid.commission_paid_cents, 3500);
+    assert.equal(paid.cash_in_cents, 5000);
+    assert.equal(
+      await scalar(
+        "select change_industry_operation_status($1,$2,1,'voided')",
+        [company, cash],
+      ),
+      2,
+    );
+    const voided = (await scalar("select industry_operations_summary($1)", [
+      company,
+    ])) as Record<string, number>;
+    assert.equal(voided.cash_in_cents, 0);
+  },
+);
+await check(
+  "industry inventory adjustments are versioned, audited and cannot overdraw stock",
+  async () => {
+    await db.exec("reset role");
+    await db.query(
+      "update companies set niche='pet-shop',status='trialing',trial_ends_at=now()+interval '7 days' where id=$1",
+      [company],
+    );
+    await as(owner);
+    const stock = String(
+      await scalar(
+        "select create_industry_operation($1,'pet_stock','Ração','Pacote de 10 kg','active','Alimento','',8,'kg',null,null,'',null)",
+        [company],
+      ),
+    );
+    assert.equal(
+      await scalar(
+        "select adjust_industry_stock($1,$2,1,-3,'Consumo registrado')",
+        [company, stock],
+      ),
+      2,
+    );
+    assert.equal(
+      await scalar("select quantity from industry_operations where id=$1", [
+        stock,
+      ]),
+      5,
+    );
+    assert.equal(
+      await scalar(
+        "select count(*) from industry_stock_movements where operation_id=$1",
+        [stock],
+      ),
+      2,
+    );
+    await denied(
+      "select adjust_industry_stock($1,$2,1,1,'Versão antiga')",
+      [company, stock],
+      /operation version conflict/,
+    );
+    await denied(
+      "select adjust_industry_stock($1,$2,2,-6,'Baixa maior que saldo')",
+      [company, stock],
+      /stock cannot be negative/,
+    );
+    await as(employee);
+    assert.equal(
+      await scalar(
+        "select count(*) from industry_stock_movements where operation_id=$1",
+        [stock],
+      ),
+      0,
+    );
+    await denied(
+      "select adjust_industry_stock($1,$2,2,1,'Tentativa da equipe')",
+      [company, stock],
+      /not authorized/,
+    );
+    await db.exec("reset role");
+    await db.query("update companies set niche='salao' where id=$1", [company]);
+    await as(owner);
   },
 );
 await check(

@@ -14,6 +14,8 @@ const paths = {
   "chevron-down": "m5 9 7 7 7-7",
   "chevron-left": "m15 5-7 7 7 7",
   building: "M4 21V5l8-3v19m0-14h8v14M2 21h20M7 7v1m0 3v1m0 3v1m9-5v1m0 3v1",
+  "map-pin":
+    "M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Zm-5 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
   briefcase:
     "M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M4 6h16a1 1 0 0 1 1 1v13H3V7a1 1 0 0 1 1-1Zm-1 5 9 4 9-4m-9 2v4",
   scissors:
@@ -41,6 +43,8 @@ const paths = {
   help: "M9.5 8a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   copy: "M8 8h13v13H8V8ZM4 16H3V3h13v1",
   search: "m21 21-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z",
+  printer:
+    "M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2m-12-4h12v7H6v-7Zm12-2h.01",
 } as const;
 
 export type IconName = keyof typeof paths;

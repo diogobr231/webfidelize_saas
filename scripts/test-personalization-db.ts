@@ -132,8 +132,12 @@ await check(
       [ca],
     );
     await db.query(
-      "select public.configure_company_personalization($1,'Marca A atualizada','Descrição','Endereço','18997695445','blue','compact','day')",
+      "select public.configure_company_personalization($1,'Marca A atualizada','Descrição','Endereço','18997695445','blue','compact','day','https://maps.app.goo.gl/AbCd123')",
       [ca],
+    );
+    assert.equal(
+      await scalar("select booking_maps_url from companies where id=$1", [ca]),
+      "https://maps.app.goo.gl/AbCd123",
     );
     assert.equal(
       await scalar("select display_density from companies where id=$1", [ca]),
@@ -148,10 +152,18 @@ await check(
     await assert.rejects(
       () =>
         db.query(
-          "select public.configure_company_personalization($1,'Tentativa','Descrição','','','teal','comfortable','week')",
+          "select public.configure_company_personalization($1,'Marca A atualizada','Descrição','','18997695445','blue','compact','day','https://maps.app.goo.gl/AbCd123')",
           [cb],
         ),
       /not authorized/,
+    );
+    await assert.rejects(
+      () =>
+        db.query(
+          "select public.configure_company_personalization($1,'Marca A atualizada','Descrição','Endereço','18997695445','blue','compact','day','https://example.test/map')",
+          [ca],
+        ),
+      /invalid maps url/,
     );
   },
 );

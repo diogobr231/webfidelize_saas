@@ -228,6 +228,43 @@ async function main() {
       "Admin content leaked to non-admin.",
     );
   }
+  async function deniedMarketing(client: Session) {
+    // Authorization is checked before lookup, so this fixed synthetic UUID
+    // exercises the protected exports without needing any production write.
+    const fixtureId = "55555555-5555-4555-8555-555555555555";
+    for (const path of [
+      "/admin/marketing",
+      "/admin/espacos",
+      "/admin/integracoes",
+      `/admin/marketing/${fixtureId}/arte`,
+      `/admin/marketing/${fixtureId}/exportar`,
+    ]) {
+      const response = await request(client, path);
+      const source = await response.text();
+      check(
+        response.status === 404 ||
+          source.includes("NEXT_HTTP_ERROR_FALLBACK;404"),
+        "A DEMO account reached a protected marketing route.",
+      );
+      check(
+        !visible(source).includes("Uma boa campanha começa com clareza.") &&
+          !source.includes("WEB FIDELIZE — CAMPANHA") &&
+          !response.headers.get("content-type")?.includes("image/svg+xml"),
+        "Private marketing content escaped its administrative scope.",
+      );
+    }
+    for (const table of [
+      "platform_marketing_campaigns",
+      "platform_marketing_events",
+      "platform_marketing_generations",
+    ]) {
+      const result = await client.db.from(table).select("id").limit(1);
+      check(
+        !result.error && result.data?.length === 0,
+        "DEMO marketing table access was not restricted as expected.",
+      );
+    }
+  }
   for (let index = 0; index < accounts.length; index++) {
     const account = accounts[index];
     const foreign = accounts[(index + 1) % accounts.length];
@@ -271,6 +308,7 @@ async function main() {
           "Wrong DEMO company/plan.",
         );
         await deniedAdmin(client);
+        await deniedMarketing(client);
         const cross = await client.db
           .from("companies")
           .select("id")
@@ -289,7 +327,7 @@ async function main() {
         );
       }
       pass(
-        `${account.plan}: real owner/employee login, HTTPS session, tenant isolation and admin denial`,
+        `${account.plan}: real owner/employee login, HTTPS session, tenant isolation and admin/marketing denial`,
       );
       phase = `${account.plan}: own workday and plan capabilities`;
       const myDay = visible(await html(employee, `${prefix}/meu-dia`));
@@ -400,14 +438,20 @@ async function main() {
       }
     }
   }
+  if (process.env.TEST_SKIP_ADMIN === "1") {
+    console.log(
+      `${checks} production DEMO authentication groups passed. SUPER_ADMIN deliberately not tested; no business data, payments, emails or messages were written.`,
+    );
+    return;
+  }
   phase = "SUPER_ADMIN";
+  check(
+    requestedAdminPassword,
+    "Set TEST_ADMIN_PASSWORD explicitly or TEST_SKIP_ADMIN=1; the DEMO password must not be tried on the platform owner.",
+  );
   const admin = session();
   try {
-    await login(
-      admin,
-      "diogohf231@gmail.com",
-      requestedAdminPassword || password!,
-    );
+    await login(admin, "diogohf231@gmail.com", requestedAdminPassword);
     const role = await admin.db.rpc("is_super_admin");
     check(
       !role.error && role.data === true,

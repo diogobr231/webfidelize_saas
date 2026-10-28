@@ -13,10 +13,36 @@ export const brandThemes = [
   { value: "rose", label: "Rosa", color: "#b73f70" },
 ] as const;
 
+export function isGoogleMapsUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password || url.port)
+      return false;
+    if (
+      url.hostname === "maps.app.goo.gl" ||
+      url.hostname === "maps.google.com"
+    )
+      return true;
+    return (
+      url.hostname === "www.google.com" && url.pathname.startsWith("/maps")
+    );
+  } catch {
+    return false;
+  }
+}
+
 export const personalizationSchema = z.object({
   name: z.string().trim().min(2, "Informe pelo menos 2 caracteres.").max(100),
   description: z.string().trim().max(240, "Use até 240 caracteres."),
   address: z.string().trim().max(200, "Use até 200 caracteres."),
+  maps_url: z
+    .string()
+    .trim()
+    .max(500, "Use um link com até 500 caracteres.")
+    .refine(
+      (value) => value === "" || isGoogleMapsUrl(value),
+      "Informe um link HTTPS válido do Google Maps ou deixe em branco.",
+    ),
   phone: z
     .string()
     .max(24)
