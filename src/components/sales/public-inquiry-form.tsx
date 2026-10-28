@@ -37,12 +37,14 @@ export function PublicInquiryForm({
   selectedOfferId,
   requestId,
   attribution,
+  initialChallenge = "",
 }: {
   offers: SalesOffer[];
   plans: CommercialPlan[] | null;
   selectedOfferId: string;
   requestId: string;
   attribution: { utm_source: string; utm_medium: string; utm_campaign: string };
+  initialChallenge?: string;
 }) {
   const [state, action, pending] = useActionState<SalesActionState, FormData>(
     submitSalesInquiry,
@@ -60,7 +62,7 @@ export function PublicInquiryForm({
     budget_range: "",
     timeline: "",
     decision_role: "",
-    challenge: "",
+    challenge: initialChallenge,
     contact_name: "",
     email: "",
     phone: "",

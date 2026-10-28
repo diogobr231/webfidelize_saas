@@ -1,5 +1,7 @@
 # Web Fidelize
 
+Missão: **A missão da Web Fidelize é digitalizar negócios.** [Oferta modular, valores e fontes](docs/SERVICOS.md). Contato comercial: contato@webfidelize.com.
+
 **Padrão obrigatório de trabalho:** leia [AGENTS.md](AGENTS.md) e [Issues, PRs e releases](docs/WORKFLOW.md). Toda correção, melhoria ou nova função deve ter uma issue; o PR deve mencionar a issue na descrição. Deploys devem ser rastreáveis ao PR e à revisão validada. Essas instruções valem para qualquer agente/modelo.
 
 Central IA exclusiva do SUPER_ADMIN: [funcionamento, limites e configuração](docs/CENTRAL-IA.md). Integrada ao funil, suporte e tarefas, com fila e revisão de rascunhos. Geração real depende da liberação da conta AI Gateway. A integração de pagamentos está implementada, mas a contratação real permanece desativada até homologar a conta e as notificações do Mercado Pago.

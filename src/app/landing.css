@@ -2215,3 +2215,38 @@
     font-size: 36px;
   }
 }
+.wf-mission {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 32px 40px;
+  border-bottom: 1px solid #dce7df;
+}
+.wf-mission > div {
+  max-width: 720px;
+}
+.wf-mission h2 {
+  font-size: clamp(23px, 2.7vw, 32px);
+  line-height: 1.25;
+  letter-spacing: -0.7px;
+  font-weight: 600;
+  margin: 12px 0;
+  color: #244535;
+}
+.wf-mission p {
+  color: #596e64;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0;
+}
+.wf-mission > a {
+  flex-shrink: 0;
+}
+@media (max-width: 760px) {
+  .wf-mission {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+}

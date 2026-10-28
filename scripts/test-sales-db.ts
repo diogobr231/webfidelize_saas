@@ -136,6 +136,12 @@ const plansBefore = await db.query<Record<string, unknown>>(
 const seeded = await value<string>(
   "select id from public.sales_offers where slug='web-fidelize'",
 );
+const initialOfferCount = await count("public.sales_offers");
+const initialPublishedCount = Number(
+  await value(
+    "select count(*) from public.sales_offers where active and published",
+  ),
+);
 const offerInput = {
   slug: "teste-oferta",
   title: "Oferta teste local",
@@ -169,9 +175,9 @@ const inquiry = (email = "capture@example.invalid", offer = seeded) => ({
 let draft: string, manual: string, publicLead: string;
 
 await check(
-  "seed contains one actual offer and no invented prices or leads",
+  "seed preserves platform offer without inventing its price or creating leads",
   async () => {
-    assert.equal(await count("public.sales_offers"), 1);
+    assert.ok(initialOfferCount >= 1);
     assert.equal(await count("public.sales_leads"), 0);
     const offer = (
       await db.query<Record<string, unknown>>(
@@ -187,7 +193,7 @@ await check(
 await check("super admin creates and reads draft offers", async () => {
   await as(admin);
   draft = await saveOffer(offerInput);
-  assert.equal(await count("public.sales_offers"), 2);
+  assert.equal(await count("public.sales_offers"), initialOfferCount + 1);
 });
 await check(
   "anonymous and all company roles see only published active offers",
@@ -195,7 +201,7 @@ await check(
     for (const user of [null, ownerA, ownerB, manager, employee]) {
       if (user) await as(user);
       else await anon();
-      assert.equal(await count("public.sales_offers"), 1);
+      assert.equal(await count("public.sales_offers"), initialPublishedCount);
       assert.equal(
         Number(
           await value("select count(*) from public.sales_offers where id=$1", [
@@ -1047,7 +1053,14 @@ await check(
       /sales capture unavailable/,
     );
     assert.equal(await capture(inquiry(), firstNonce), true);
-    assert.equal(await count("public.sales_offers"), 0);
+    assert.equal(
+      Number(
+        await value("select count(*) from public.sales_offers where id=$1", [
+          seeded,
+        ]),
+      ),
+      0,
+    );
     await as(admin);
     await saveOffer({ ...seedInput, active: true, published: true }, seeded);
   },

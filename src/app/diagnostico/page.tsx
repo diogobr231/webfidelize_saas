@@ -7,6 +7,7 @@ import { PublicInquiryForm } from "@/components/sales/public-inquiry-form";
 import { getSalesOffers } from "@/lib/sales-server";
 import { commercialPlans } from "@/lib/commercial";
 import { site } from "@/lib/seo";
+import { serviceRequest } from "@/lib/managed-services";
 import "./diagnostico.css";
 
 export const dynamic = "force-dynamic";
@@ -189,6 +190,9 @@ export default async function Diagnosis({
           </header>
           {offers?.length ? (
             <PublicInquiryForm
+              initialChallenge={serviceRequest(
+                typeof params.produto === "string" ? params.produto : undefined,
+              )}
               plans={plans}
               offers={offers}
               selectedOfferId={selectedOffer?.id ?? ""}

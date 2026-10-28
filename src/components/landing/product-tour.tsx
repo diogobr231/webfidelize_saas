@@ -1,4 +1,5 @@
 import { Icon } from "@/components/ui/icon";
+import Image from "next/image";
 import "./product-tour.css";
 
 /** Native radio navigation keeps this illustrative tour usable without JavaScript. */
@@ -9,11 +10,36 @@ export function ProductTour() {
         <div className="wf-tour-top">
           <span>
             <span className="wf-tour-mark" aria-hidden="true">
-              <Icon name="calendar" size={18} />
+              <Image
+                src="/webfidelize-logo.png"
+                alt="Web Fidelize"
+                width="160"
+                height="53"
+                decoding="async"
+                sizes="74px"
+              />
             </span>{" "}
             Seu espaço de trabalho
           </span>
           <span className="wf-tour-demo">Demonstração</span>
+        </div>
+        <div className="wf-tour-office">
+          <Image
+            src="/demo/photos/office-interior.webp"
+            alt="Escritório ilustrativo com estações de trabalho; foto de banco de imagens"
+            width="1000"
+            height="667"
+            decoding="async"
+            sizes="(max-width: 760px) 90vw, 50vw"
+            preload
+          />
+          <div>
+            <span>
+              <Icon name="briefcase" size={15} /> AURORA · ESCRITÓRIO FICTÍCIO
+            </span>
+            <strong>Sua rotina, com mais espaço.</strong>
+            <small>Foto ilustrativa · Nastuh Abootalebi / Unsplash</small>
+          </div>
         </div>
         <fieldset className="wf-tour-selector">
           <legend>Explore três partes da sua rotina</legend>
@@ -60,23 +86,23 @@ export function ProductTour() {
               </div>
               <div className="wf-tour-context">
                 <span>Dia ilustrativo</span>
-                <span>Profissional de exemplo</span>
+                <span>Marina · demonstração</span>
               </div>
               <div className="wf-tour-timeline">
                 <div>
                   <time>09:00</time>
                   <article className="wf-tour-event">
                     <span>Agendado</span>
-                    <strong>Serviço de exemplo</strong>
-                    <small>Cliente fictício A · 30 min</small>
+                    <strong>Reunião de planejamento</strong>
+                    <small>Ana · cliente fictícia · 30 min</small>
                   </article>
                 </div>
                 <div>
                   <time>10:00</time>
                   <article className="wf-tour-event wf-tour-event-violet">
                     <span>Agendado</span>
-                    <strong>Serviço de exemplo</strong>
-                    <small>Cliente fictício B · 45 min</small>
+                    <strong>Consultoria de negócios</strong>
+                    <small>Lucas · cliente fictício · 45 min</small>
                   </article>
                 </div>
                 <div>
@@ -107,7 +133,7 @@ export function ProductTour() {
               <div className="wf-tour-customer">
                 <span aria-hidden="true">CE</span>
                 <div>
-                  <strong>Cliente de exemplo</strong>
+                  <strong>Ana · cliente fictícia</strong>
                   <small>Contato e atendimentos no mesmo lugar</small>
                 </div>
               </div>
@@ -115,16 +141,16 @@ export function ProductTour() {
               <div className="wf-tour-history">
                 <Icon name="calendar" size={18} />
                 <div>
-                  <strong>Serviço de exemplo</strong>
-                  <span>Profissional de exemplo · 30 min</span>
+                  <strong>Reunião de planejamento</strong>
+                  <span>Marina · demonstração · 30 min</span>
                 </div>
                 <span>Concluído</span>
               </div>
               <div className="wf-tour-history">
                 <Icon name="calendar" size={18} />
                 <div>
-                  <strong>Serviço de exemplo</strong>
-                  <span>Profissional de exemplo · 45 min</span>
+                  <strong>Consultoria de negócios</strong>
+                  <span>Marina · demonstração · 45 min</span>
                 </div>
                 <span className="wf-tour-status-canceled">Cancelado</span>
               </div>
@@ -148,14 +174,14 @@ export function ProductTour() {
               <div className="wf-tour-booking-brand">
                 <span aria-hidden="true">EF</span>
                 <div>
-                  <strong>Espaço Fictício</strong>
+                  <strong>Aurora · escritório fictício</strong>
                   <small>Sua marca recebe o cliente</small>
                 </div>
               </div>
               <div className="wf-tour-booking-service">
                 <div>
-                  <strong>Serviço de exemplo</strong>
-                  <small>30 min · profissional de exemplo</small>
+                  <strong>Reunião de planejamento</strong>
+                  <small>30 min · Marina (demonstração)</small>
                 </div>
                 <Icon name="check" size={18} />
               </div>

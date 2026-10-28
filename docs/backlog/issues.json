@@ -295,5 +295,59 @@
     "state": "open",
     "number": 33,
     "url": "https://github.com/diogobr231/webfidelize_saas/issues/33"
+  },
+  {
+    "key": "client-social",
+    "title": "[Nova função] Operar conteúdo e agendamento social por empresa no SUPER_ADMIN",
+    "priority": "Alta",
+    "body": "## Fato observado e objetivo\n\nA central atual /admin/marketing promove somente a Web Fidelize. O proprietário solicitou em 28/10/2026 um fluxo para anexar foto, gerar legenda e hashtags, revisar e escolher data/hora e conta social de uma empresa cliente.\n\n## Escopo\n\nÁrea administrativa de serviços por cliente, mídia privada, legenda editável com geração IA opt-in, fuso explícito, calendário persistente, OAuth oficial, autorização por empresa, fila/cron, cancelamento e estados reais. Relaciona-se a #11 e #12; amplia o escopo anterior para empresas clientes, sem liberar a ferramenta para funcionários. Edição e geração de imagem exigem provedor e consentimento próprios.\n\n## Critérios verificáveis\n\nSUPER_ADMIN revalidado no servidor e banco; funcionário/OWNER de empresa sem acesso; contas e mídias nunca trocadas entre empresas; datas futuras e estado/versionamento validados; entrega só confirmada com ID do provedor; execução desativada por padrão; testes de isolamento, erro, persistência e mobile; nenhuma publicação real durante desenvolvimento.\n\nPrioridade: Alta. Hipótese: Instagram/Facebook são os primeiros canais. Outros três módulos da mensagem incompleta aguardam confirmação.",
+    "state": "open",
+    "number": 36,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/36"
+  },
+  {
+    "key": "client-ads",
+    "title": "[Nova função] Gerir planejamento e controles de tráfego pago por empresa no admin",
+    "priority": "Alta",
+    "body": "## Objetivo\n\nSolicitação de 28/10/2026: gestor de tráfego pago por empresa cliente no SUPER_ADMIN. A central atual salva apenas orçamento planejado da própria Web Fidelize.\n\n## Escopo e critérios\n\nVincular empresa, objetivo, conta de anúncios, verba de mídia separada do fee, datas, limite e revisão. Persistir planejamento com autorização no servidor/banco, versões e histórico. Exibir links oficiais de conexão/faturamento. Qualquer campanha externa deve nascer PAUSADA, e ativação ou aumento de gastos exige autorização específica registrada; não executar anúncio/pagamento real nesta implementação. Não apresentar orçamento planejado como consumo ou retorno medido. Testar limites, empresa incorreta e acessos indevidos.\n\nRefs #11 e #13. Prioridade Alta. Integração homologada e credenciais Meta são dependências externas, não resultado presumido.",
+    "state": "open",
+    "number": 37,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/37"
+  },
+  {
+    "key": "managed-services",
+    "title": "[Nova função] Apresentar oferta modular de agenda, conteúdo, tráfego e fotografia no site",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nEm 28/10/2026 o proprietário pediu página Serviços e combo de conteúdo diário com fotos do cliente/IA, tráfego pago e opção de visita de fotógrafo uma vez por mês, com pesquisa atual de preços. A mensagem final dos quatro módulos veio incompleta; cidade de atendimento ainda não informada.\n\n## Escopo\n\nPágina pública e acesso pela landing; agenda personalizada integrada ao SaaS, conteúdo, gestão de tráfego e fotografia como módulos propostos. Tabela com entregáveis/limites, preço sugerido com base em fontes primárias e verba de mídia à parte. Fotografia condicionada a região, deslocamento e disponibilidade, sem prometer parceiro contratado. Solicitação de proposta deve chegar ao comercial do admin; sem checkout ou cobrança automática.\n\n## Critérios\n\nDocumentar URLs, data da pesquisa e distinguir preços observados de sugestão comercial; formulário validado com persistência, confirmação verdadeira e idempotência; mobile/teclado/reduced-motion; ausência de promessa de resultado garantido, publicação/IA ativa sem integração ou cobertura nacional de fotógrafo. Prioridade Média.",
+    "state": "open",
+    "number": 38,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/38"
+  },
+  {
+    "key": "human-demo",
+    "title": "[Melhoria] Humanizar a demonstração com marca, escritório fictício e fotos reais",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nSolicitação de 28/10/2026 com capturas: a demonstração da landing usa ícone e rótulos genéricos, inferior à interface real. Manter a identificação Seu espaço de trabalho, incluir logo Web Fidelize, escritório fictício e fotografias reais para humanizar.\n\n## Critérios verificáveis\n\nRegistrar fonte/licença das fotos; não apresentar pessoas ou escritório como cliente real; usar imagens leves, dimensões estáveis, lazy loading fora da dobra; nomes, serviços e histórico coerentes de uma empresa fictícia; manter navegação por teclado e aviso de simulação; verificar 390px/desktop.\n\nPrioridade Média. Refs #38.\n\n<!-- webfidelize-backlog:human-demo -->",
+    "state": "open",
+    "number": 39,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/39"
+  },
+  {
+    "key": "brand-mission",
+    "title": "[Melhoria] Apresentar a missão de digitalizar negócios no site",
+    "priority": "Média",
+    "body": "## Objetivo\n\nSolicitação explícita de 28/10/2026: incluir a missão “A missão da Web Fidelize é digitalizar negócios.”\n\n## Escopo e critérios\n\nApresentar a missão na landing e conectá-la à oferta de agenda, conteúdo, tráfego e fotografia. Manter a frase legível no celular e desktop e evitar promessas de resultados ou recursos não habilitados. Validar renderização e links. Prioridade Média. Relaciona-se a #38 e #39.\r\n\n\n<!-- webfidelize-backlog:brand-mission -->",
+    "state": "open",
+    "number": 40,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/40"
+  },
+  {
+    "key": "commercial-contact",
+    "title": "[Melhoria] Atualizar o contato comercial público para o domínio Web Fidelize",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nEm 28/10/2026, o proprietário informou o novo e-mail comercial: contato@webfidelize.com.\n\n## Escopo e critérios\n\nUsar o contato nas páginas públicas de início e serviços, com link mailto acessível. Não modificar credenciais de login, SMTP ou identidades de usuários com base somente na troca do contato comercial. Preservar mensagens e dados existentes. Validar renderização desktop/celular. Prioridade Média.\r\n\n\n<!-- webfidelize-backlog:commercial-contact -->",
+    "state": "open",
+    "number": 41,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/41"
   }
 ]
