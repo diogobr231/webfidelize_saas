@@ -347,6 +347,8 @@ export default async function Marketing({
                       alt={`Prévia da arte: ${campaign.headline}`}
                       width={1080}
                       height={1350}
+                      loading="lazy"
+                      decoding="async"
                       style={{
                         width: "100%",
                         maxWidth: 360,

@@ -101,6 +101,8 @@ export default async function Personalization({
                   alt={`Logotipo de ${company.name}`}
                   width={96}
                   height={96}
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <span aria-label="Sem logotipo">{initials}</span>

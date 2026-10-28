@@ -1,0 +1,209 @@
+:root {
+  --motion-fast: 120ms;
+  --motion-enter: 180ms;
+  --motion-exit: 100ms;
+  --motion-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-in: cubic-bezier(0.4, 0, 1, 1);
+}
+.ui-route {
+  min-width: 0;
+  min-height: 100svh;
+  animation: route-enter var(--motion-enter) var(--motion-out) both;
+}
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes route-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root) {
+    animation: route-exit var(--motion-exit) var(--motion-in) both;
+  }
+  ::view-transition-new(root) {
+    animation: route-enter var(--motion-enter) var(--motion-out) both;
+  }
+  :where(button, .button, .wf-button) {
+    transition:
+      background-color var(--motion-fast) var(--motion-out),
+      border-color var(--motion-fast) var(--motion-out),
+      box-shadow var(--motion-fast) var(--motion-out),
+      transform var(--motion-fast) var(--motion-out);
+  }
+  :where(button, .button, .wf-button):active:not(:disabled):not(
+      :focus-visible
+    ) {
+    transform: translateY(1px);
+  }
+  :where(.notice, [role="alert"], .mk-feedback, .help-feedback) {
+    animation: route-enter var(--motion-enter) var(--motion-out);
+  }
+  dialog.ui-confirm-dialog {
+    opacity: 0;
+    transform: translateY(2px);
+    transition:
+      opacity var(--motion-exit) var(--motion-in),
+      transform var(--motion-exit) var(--motion-in),
+      display var(--motion-exit) allow-discrete,
+      overlay var(--motion-exit) allow-discrete;
+  }
+  dialog.ui-confirm-dialog[open] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--motion-enter);
+    transition-timing-function: var(--motion-out);
+  }
+  dialog.ui-confirm-dialog::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--motion-fast) var(--motion-out),
+      display var(--motion-fast) allow-discrete,
+      overlay var(--motion-fast) allow-discrete;
+  }
+  dialog.ui-confirm-dialog[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    dialog.ui-confirm-dialog[open] {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    dialog.ui-confirm-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+  @supports selector(details::details-content) {
+    details::details-content {
+      opacity: 0;
+      transition:
+        opacity var(--motion-fast) var(--motion-out),
+        content-visibility var(--motion-fast) allow-discrete;
+    }
+    details[open]::details-content {
+      opacity: 1;
+    }
+    @starting-style {
+      details[open]::details-content {
+        opacity: 0;
+      }
+    }
+  }
+}
+.ui-skeleton :is(.skeleton-line, .skeleton-block) {
+  position: relative;
+  overflow: hidden;
+  animation: none;
+}
+.ui-skeleton :is(.skeleton-line, .skeleton-block)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent, #ffffff70, transparent);
+  transform: translateX(-100%);
+  animation: skeleton-sweep 1.8s linear infinite;
+}
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+.ui-loading-progress {
+  display: block;
+  appearance: none;
+  width: min(100%, 240px);
+  height: 3px;
+  border: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 18px 0;
+  background: var(--line, #dfe2da);
+  accent-color: var(--cyan, #176b56);
+}
+.ui-skeleton .skeleton-table {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0;
+}
+.ui-skeleton .skeleton-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0;
+}
+.ui-skeleton .skeleton-row .skeleton-line {
+  width: 100%;
+  margin: 0;
+}
+.ui-skeleton .skeleton-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 24px 0;
+}
+.ui-skeleton .skeleton-fields .skeleton-block {
+  height: 48px;
+}
+html[data-input-modality="keyboard"]
+  :is(.ui-route, .notice, [role="alert"], .mk-feedback, .help-feedback) {
+  animation: none;
+}
+html[data-input-modality="keyboard"]
+  :is(
+    button,
+    .button,
+    .wf-button,
+    dialog,
+    dialog::backdrop,
+    details::details-content
+  ) {
+  transition: none;
+}
+@media (max-width: 600px) {
+  .ui-skeleton .skeleton-fields {
+    grid-template-columns: 1fr;
+  }
+  .ui-skeleton .skeleton-row {
+    grid-template-columns: 1.5fr 1fr;
+  }
+  .ui-skeleton .skeleton-row > :last-child {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .ui-route,
+  dialog.ui-confirm-dialog[open] {
+    opacity: 1;
+    transform: none;
+  }
+  .ui-skeleton :is(.skeleton-line, .skeleton-block)::after {
+    display: none;
+  }
+  .ui-loading-progress {
+    appearance: none;
+  }
+  .ui-loading-progress:indeterminate::-webkit-progress-bar {
+    background: var(--line, #dfe2da);
+  }
+}
