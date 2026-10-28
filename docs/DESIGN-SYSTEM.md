@@ -1,5 +1,7 @@
 # Sistema visual da Web Fidelize
 
+Movimento e carregamento seguem [MOTION.md](MOTION.md), com a skill Design Motion Principles e direção rápida/discreta confirmada pelo proprietário. Skeletons, estados pendentes e transições devem ter alternativa para teclado e movimento reduzido; a cobertura de cada fluxo fica registrada nas issues #21–#27.
+
 O sistema visual usa superfícies claras, texto azul-marinho e detalhes em ciano na landing, no acesso, no painel das empresas e no admin. Cabeçalhos, navegação e formulários usam a mesma identidade clara. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
 
 Este documento descreve os padrões e os pontos de manutenção do código. Resultados de build, testes e revisão visual são registrados nos relatórios de cada incremento, separadamente.

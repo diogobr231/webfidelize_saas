@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { site } from "@/lib/seo";
 import "./globals.css";
+import "./motion.css";
+import { MotionPreference } from "@/components/ui/motion-preference";
 const geist = localFont({
   src: "./fonts/Geist.woff2",
   variable: "--font-geist",
@@ -21,7 +23,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={geist.variable}>
-      <body>{children}</body>
+      <body>
+        <MotionPreference />
+        {children}
+      </body>
     </html>
   );
 }

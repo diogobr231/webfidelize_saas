@@ -16,6 +16,7 @@ export function PendingButton({
       disabled={pending}
       aria-disabled={pending}
       aria-busy={pending}
+      aria-live="polite"
       className={className}
     >
       {pending && <span className="ui-spinner" aria-hidden="true" />}

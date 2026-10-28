@@ -1,11 +1,11 @@
 import { Brand } from "@/components/ui/brand";
+import { PageSkeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <main className="ui-state-page" role="status" aria-live="polite">
+    <main className="ui-state-page">
       <Brand />
-      <span className="ui-spinner" aria-hidden="true" />
-      <p>Carregando sua experiência…</p>
+      <PageSkeleton label="Carregando sua experiência…" />
     </main>
   );
 }
