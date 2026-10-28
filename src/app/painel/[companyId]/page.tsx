@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { saoPauloDay, appointmentTime } from "@/lib/scheduling";
 import {
   dashboardGrowth,
@@ -27,6 +27,7 @@ type Appointment = {
   professionals: { name: string } | null;
 };
 const subscriptionLabels: Record<string, string> = {
+  pending_card: "Ativação do teste pendente",
   active: "Assinatura ativa",
   past_due: "Pagamento pendente",
   canceled: "Assinatura cancelada",
@@ -86,7 +87,7 @@ export default async function Dashboard({
       managed ? count("professionals") : Promise.resolve(null),
       managed ? count("availability") : Promise.resolve(null),
     ]);
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const published = Boolean(company.booking_enabled && company.booking_slug);
   const publicUrl = published
     ? new URL(
@@ -136,11 +137,22 @@ export default async function Dashboard({
         className={`notice workspace-subscription ${!writable ? "error" : ""}`}
       >
         <span>
-          {company.status === "trialing"
+          {company.status === "trialing" && company.trial_ends_at
             ? `Teste gratuito até ${new Date(company.trial_ends_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
             : subscriptionLabels[company.status] || "Consulte sua assinatura"}
         </span>
-        {!writable ? (
+        {company.status === "pending_card" ? (
+          <span>
+            Seu teste ainda não começou.{" "}
+            {managed ? (
+              <Link href={`/painel/${companyId}/assinatura`}>
+                Ver condições de ativação →
+              </Link>
+            ) : (
+              "A ativação é gerenciada pelo proprietário."
+            )}
+          </span>
+        ) : !writable ? (
           <span>
             Alterações bloqueadas.{" "}
             <a
@@ -226,7 +238,7 @@ export default async function Dashboard({
                 label="Clientes cadastrados"
                 value={format(data.customers.total)}
                 icon="users"
-                  detail="Total da base, incluindo clientes arquivados."
+                detail="Total da base, incluindo clientes arquivados."
                 trend={
                   <span>
                     <strong>{format(data.customers.new)}</strong> novos no

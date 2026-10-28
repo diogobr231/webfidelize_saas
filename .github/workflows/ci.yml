@@ -1,7 +1,7 @@
 name: Validate
 on:
   push:
-    branches: [main]
+    branches: [main, "codex/**"]
   pull_request:
 permissions:
   contents: read
@@ -19,16 +19,34 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=high
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:db
+      - run: pnpm test:billing:db
       - run: pnpm test:dashboard:db
       - run: pnpm test:help:db
       - run: pnpm test:team:db
       - run: pnpm test:personalization:db
       - run: pnpm test:operations:db
+      - run: pnpm test:classes:db
+      - run: pnpm test:import:db
+      - run: pnpm test:admin-diagnostics:db
       - run: pnpm test:sales:db
+      - run: pnpm test:admin-operations:db
+      - run: pnpm test:ai:db
+      - run: pnpm test:marketing:db
+      - run: pnpm test:trial:db
+      - run: pnpm test:team-insights:db
+      - run: pnpm test:whatsapp:db
+      - run: pnpm test:staff-whatsapp:db
+      - run: pnpm test:cover:db
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm test:auth:isolated
+      - run: pnpm test:auth:domains
+      - run: pnpm test:billing:http
+      - run: pnpm test:whatsapp:http
+      - run: pnpm test:team-insights:http
+      - run: pnpm test:marketing:http

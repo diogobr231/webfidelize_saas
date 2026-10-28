@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
 import { ConfirmSubmit } from "@/components/confirm-submit";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { PendingButton } from "@/components/pending-button";
 import { ShareBooking } from "@/components/share-booking";
 import { PageHeader } from "@/components/ui/page-header";
@@ -87,7 +87,7 @@ export default async function Availability({
   const activeProfessionals =
     professionals.data?.filter((professional) => !professional.archived_at) ??
     [];
-  const writable = hasAccess(company.status, company.trial_ends_at);
+  const writable = company.access_valid;
   const managed = canManage(role);
   const enabled = company.booking_enabled && company.booking_slug;
   const publicUrl = company.booking_slug

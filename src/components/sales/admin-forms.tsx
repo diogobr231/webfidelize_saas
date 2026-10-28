@@ -217,7 +217,7 @@ function SalesLeadEditor({
               },
               {
                 name: "budget_range",
-                label: "Faixa de investimento informada",
+                label: "Plano de interesse / investimento anterior",
                 options: salesBudgetRanges,
               },
               {

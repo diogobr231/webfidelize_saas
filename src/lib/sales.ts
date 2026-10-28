@@ -16,7 +16,14 @@ export const salesTeamSizes = [
   { value: "11-30", label: "11 a 30 pessoas" },
   { value: "31-plus", label: "Mais de 30 pessoas" },
 ] as const;
+export const salesPlanInterests = [
+  { value: "plan-essencial", label: "Plano Essencial" },
+  { value: "plan-profissional", label: "Plano Profissional" },
+  { value: "plan-empresarial", label: "Plano Empresarial" },
+  { value: "other", label: "Outros / quero orientação" },
+] as const;
 export const salesBudgetRanges = [
+  ...salesPlanInterests,
   { value: "explore", label: "Quero entender as opções" },
   { value: "under-1000", label: "Até R$ 1.000" },
   { value: "1000-3000", label: "R$ 1.000 a R$ 3.000" },
@@ -138,6 +145,10 @@ const leadContactShape = {
   niche: salesNicheSchema,
   team_size: z.enum(["solo", "2-5", "6-10", "11-30", "31-plus"]),
   budget_range: z.enum([
+    "plan-essencial",
+    "plan-profissional",
+    "plan-empresarial",
+    "other",
     "explore",
     "under-1000",
     "1000-3000",

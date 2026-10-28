@@ -59,12 +59,13 @@ export function parseEmailConfirmation(input: {
 export function authDestinationFromEmailRedirect(
   value: unknown,
   origin: string,
+  trustedOrigins: readonly string[] = [],
 ): string {
   if (typeof value !== "string" || value.length > 2048) return "/painel";
   try {
     const url = new URL(value);
     if (
-      url.origin !== origin ||
+      (url.origin !== origin && !trustedOrigins.includes(url.origin)) ||
       url.pathname !== "/auth/callback" ||
       url.username ||
       url.password ||

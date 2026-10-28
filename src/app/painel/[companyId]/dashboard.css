@@ -17,7 +17,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 18px;
   color: var(--muted);
   font-size: 13px;
@@ -195,6 +195,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 20px;
 }
 .executive-panel-heading h2 {
@@ -209,7 +210,7 @@
   flex-wrap: wrap;
 }
 .executive-chart-tabs button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 8px;

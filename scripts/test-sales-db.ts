@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
@@ -21,6 +22,7 @@ for (const name of (await readdir("supabase/migrations"))
   .filter((name) => name.endsWith(".sql"))
   .sort())
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
+await installLegacyTrialFixtures(db);
 
 const ownerA = randomUUID(),
   ownerB = randomUUID(),
@@ -96,6 +98,17 @@ const capture = (
     credential,
     request,
     JSON.stringify(input),
+  ]);
+const captureFrom = (
+  source: string | null,
+  input: unknown,
+  request = randomUUID(),
+) =>
+  value<boolean>("select public.sales_capture($1,$2,$3::jsonb,$4)", [
+    secret,
+    request,
+    JSON.stringify(input),
+    source,
   ]);
 await as(ownerA);
 const ca = await value<string>(
@@ -868,6 +881,156 @@ await check(
   },
 );
 await check(
+  "source keys reject raw addresses and malformed hashes without trusting form fields",
+  async () => {
+    await anon();
+    for (const source of [
+      "",
+      "203.0.113.20",
+      "2001:db8::1",
+      "x".repeat(64),
+      "a".repeat(65),
+    ])
+      await assert.rejects(
+        () => captureFrom(source, inquiry()),
+        /sales capture unavailable/,
+      );
+    await assert.rejects(
+      () =>
+        captureFrom("a".repeat(64), {
+          ...inquiry(),
+          source_hash: "b".repeat(64),
+        }),
+      /invalid sales input/,
+    );
+  },
+);
+await check(
+  "source burst quota stops email rotation before the global budget and preserves exact retries",
+  async () => {
+    await postgres();
+    await db.exec(
+      "update private.sales_capture_requests set created_at=now()-interval '2 hours'",
+    );
+    const source = "b".repeat(64);
+    const nonce = randomUUID();
+    await anon();
+    assert.equal(
+      await captureFrom(source, inquiry("source-0@example.invalid"), nonce),
+      true,
+    );
+    for (let i = 1; i < 5; i++)
+      assert.equal(
+        await captureFrom(source, inquiry(`source-${i}@example.invalid`)),
+        true,
+      );
+    await assert.rejects(
+      () => captureFrom(source, inquiry("source-5@example.invalid")),
+      /sales capture limit/,
+    );
+    await postgres();
+    assert.equal(
+      Number(
+        await value(
+          "select count(*) from private.sales_capture_requests where created_at>now()-interval '1 hour'",
+        ),
+      ),
+      5,
+    );
+    await anon();
+    assert.equal(
+      await captureFrom(
+        "c".repeat(64),
+        inquiry("another-network@example.invalid"),
+      ),
+      true,
+    );
+    assert.equal(
+      await captureFrom(
+        "c".repeat(64),
+        inquiry("source-0@example.invalid"),
+        nonce,
+      ),
+      true,
+    );
+    await postgres();
+    assert.equal(
+      Number(
+        await value(
+          "select count(*) from private.sales_capture_requests where created_at>now()-interval '1 hour'",
+        ),
+      ),
+      6,
+    );
+  },
+);
+await check(
+  "hourly source quota remains independent from short bursts and other sources",
+  async () => {
+    await postgres();
+    await db.exec(
+      "update private.sales_capture_requests set created_at=now()-interval '2 hours'",
+    );
+    await db.exec(`insert into private.sales_capture_requests(request_id,payload_hash,contact_hash,source_hash,created_at)
+      select gen_random_uuid(),repeat('a',64),encode(sha256(convert_to('source-hour-'||n::text,'UTF8')),'hex'),repeat('d',64),now()-interval '6 minutes' from generate_series(1,20) n`);
+    await anon();
+    await assert.rejects(
+      () =>
+        captureFrom("d".repeat(64), inquiry("hourly-blocked@example.invalid")),
+      /sales capture limit/,
+    );
+    assert.equal(
+      await captureFrom(
+        "e".repeat(64),
+        inquiry("hourly-other@example.invalid"),
+      ),
+      true,
+    );
+    await postgres();
+    assert.equal(
+      Number(
+        await value(
+          "select count(*) from private.sales_capture_requests where created_at>now()-interval '1 hour'",
+        ),
+      ),
+      21,
+    );
+  },
+);
+await check(
+  "source marker cleanup preserves every lead and durable request while legacy callers remain bounded",
+  async () => {
+    await postgres();
+    await db.exec(
+      "update private.sales_capture_requests set created_at=now()-interval '25 hours'",
+    );
+    const leads = await count("public.sales_leads");
+    const requests = await count("private.sales_capture_requests");
+    await anon();
+    for (let i = 0; i < 5; i++)
+      assert.equal(
+        await capture(inquiry(`legacy-source-${i}@example.invalid`)),
+        true,
+      );
+    await assert.rejects(
+      () => capture(inquiry("legacy-source-blocked@example.invalid")),
+      /sales capture limit/,
+    );
+    assert.equal(await capture(inquiry(), firstNonce), true);
+    await postgres();
+    assert.equal(await count("public.sales_leads"), leads + 5);
+    assert.equal(await count("private.sales_capture_requests"), requests + 5);
+    assert.equal(
+      Number(
+        await value(
+          "select count(*) from private.sales_capture_requests where created_at<now()-interval '24 hours' and source_hash is not null",
+        ),
+      ),
+      0,
+    );
+  },
+);
+await check(
   "unpublished offer blocks new capture while exact prior receipt stays idempotent",
   async () => {
     await as(admin);
@@ -996,6 +1159,50 @@ await check(
         ),
       ),
       1,
+    );
+  },
+);
+await check(
+  "requested plan prices and limits persist without altering billing",
+  async () => {
+    await postgres();
+    assert.deepEqual(
+      (
+        await db.query(
+          "select id,price_cents,staff_limit from public.plans order by price_cents",
+        )
+      ).rows,
+      [
+        { id: "essencial", price_cents: 4990, staff_limit: 1 },
+        { id: "profissional", price_cents: 8990, staff_limit: 3 },
+        { id: "empresarial", price_cents: 14990, staff_limit: 10 },
+      ],
+    );
+  },
+);
+await check(
+  "SQL accepts new plan interests, preserves legacy bands and rejects invented plans",
+  async () => {
+    await postgres();
+    for (const budget_range of [
+      "plan-essencial",
+      "plan-profissional",
+      "plan-empresarial",
+      "other",
+      "1000-3000",
+    ]) {
+      const result = await value<{ budget_range: string }>(
+        "select private.sales_contact($1::jsonb,true)",
+        [JSON.stringify({ ...inquiry(), budget_range })],
+      );
+      assert.equal(result.budget_range, budget_range);
+    }
+    await assert.rejects(
+      () =>
+        value("select private.sales_contact($1::jsonb,true)", [
+          JSON.stringify({ ...inquiry(), budget_range: "plan-admin" }),
+        ]),
+      /invalid sales input/,
     );
   },
 );

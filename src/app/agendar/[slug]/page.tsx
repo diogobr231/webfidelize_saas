@@ -3,6 +3,9 @@ import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import { publicDatabase } from "@/lib/supabase/public";
 import { signedPublicLogo } from "@/lib/company-logo";
+import { signedPublicCover } from "@/lib/company-cover";
+import { BookingCover } from "@/components/booking/booking-cover";
+import { StoredReceipt } from "@/components/booking/stored-receipt";
 import { money } from "@/lib/catalog";
 import {
   bookingReceiptSchema,
@@ -13,6 +16,8 @@ import {
 import { ReserveForm } from "@/components/booking/reserve-form";
 import { BookingAnchor } from "@/components/booking/booking-anchor";
 import { Icon } from "@/components/ui/icon";
+import { bookingCopy } from "@/lib/booking-copy";
+import { isGoogleMapsUrl } from "@/lib/company-personalization";
 import "./booking.css";
 
 export const dynamic = "force-dynamic";
@@ -21,11 +26,14 @@ type Catalog = {
   name: string;
   slug: string;
   is_demo: boolean;
+  niche?: string;
   description?: string;
   address?: string;
+  maps_url?: string;
   phone?: string;
   theme?: string;
   logo_path?: string | null;
+  cover_path?: string | null;
   services: {
     id: string;
     name: string;
@@ -48,6 +56,7 @@ export default async function Booking({
     confirmado?: string;
     proof?: string;
     recibo?: string;
+    aviso?: string;
   }>;
 }) {
   const { slug } = await params;
@@ -56,9 +65,35 @@ export default async function Booking({
   const db = publicDatabase();
   const { data, error } = await db.rpc("public_catalog", { slug });
   if (error) throw new Error("Catálogo temporariamente indisponível");
-  if (!data) notFound();
+  if (!data) {
+    // A closed catalog must not hide an existing customer's receipt. Only a
+    // signed, tenant-bound capability permits this minimal stored lookup.
+    const secret = process.env.BOOKING_GATEWAY_SECRET;
+    const claims =
+      q.recibo && secret ? readDetailedReceipt(q.recibo, slug, secret) : null;
+    if (!claims || !secret) notFound();
+    const result = await db.rpc("public_booking_receipt", {
+      slug,
+      request_id: claims.request_id,
+      gateway_secret: secret,
+    });
+    if (result.error)
+      throw new Error("Comprovante temporariamente indisponível");
+    const stored = bookingReceiptSchema.safeParse(result.data);
+    if (!stored.success || stored.data.id !== claims.receipt.id) notFound();
+    return (
+      <StoredReceipt
+        receipt={stored.data}
+        calendarUrl={`/agendar/${slug}/calendario?${new URLSearchParams({ recibo: q.recibo! })}`}
+      />
+    );
+  }
   const catalog = data as Catalog;
-  const logo = await signedPublicLogo(db, catalog.logo_path);
+  const presentation = bookingCopy(catalog.niche || "");
+  const [logo, cover] = await Promise.all([
+    signedPublicLogo(db, catalog.logo_path),
+    signedPublicCover(db, catalog.cover_path),
+  ]);
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
@@ -135,6 +170,17 @@ export default async function Booking({
   const currentStep = confirmed ? 3 : selected && professional ? 2 : 1;
   return (
     <main className="booking-page" data-theme={theme}>
+      <div
+        className="booking-shell booking-mode-switch"
+        aria-label="Tipo de reserva"
+      >
+        <a className="button secondary" href="#horarios">
+          Atendimento individual
+        </a>
+        <Link className="button" href={`/agendar/${slug}/turmas`}>
+          Turmas e atividades em grupo →
+        </Link>
+      </div>
       <div className="booking-topbar">
         <div className="booking-shell booking-topbar-inner">
           <Link href={`/agendar/${slug}`} className="booking-business">
@@ -167,24 +213,25 @@ export default async function Booking({
       <div className="booking-shell">
         <header className="booking-hero">
           <div className="booking-hero-copy">
-            <span className="booking-eyebrow">
-              SEU PRÓXIMO HORÁRIO, SEM COMPLICAÇÃO
-            </span>
-            <h1>
-              Reserve um tempo
-              <br />
-              para você.
-            </h1>
-            <p>
-              {catalog.description ||
-                `Escolha seu serviço e encontre o melhor horário com ${catalog.name}. É simples, rápido e sem precisar instalar um aplicativo.`}
-            </p>
+            <span className="booking-eyebrow">AGENDAMENTO ONLINE</span>
+            <h1>{presentation.headline}</h1>
+            <p>{catalog.description || presentation.description}</p>
             <div className="booking-details">
               {catalog.address ? (
                 <span>
                   <Icon name="building" size={15} />
                   {catalog.address}
                 </span>
+              ) : null}
+              {catalog.maps_url && isGoogleMapsUrl(catalog.maps_url) ? (
+                <a
+                  href={catalog.maps_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name="map-pin" size={15} />
+                  Ver no Google Maps <Icon name="arrow-up-right" size={14} />
+                </a>
               ) : null}
               {contact ? (
                 <a href={contact} target="_blank" rel="noopener noreferrer">
@@ -194,26 +241,28 @@ export default async function Booking({
               ) : null}
             </div>
           </div>
-          <div className="booking-hero-art" aria-hidden="true">
-            <div className="booking-art-orbit" />
-            <div className="booking-art-card">
-              <Icon name="calendar" size={30} />
-              <span>
-                Mais facilidade
-                <br />
-                <strong>para o seu dia.</strong>
-              </span>
-              <div className="booking-art-lines">
-                <i />
-                <i />
-                <i />
+          <BookingCover src={cover} companyName={catalog.name}>
+            <div className="booking-hero-art" aria-hidden="true">
+              <div className="booking-art-orbit" />
+              <div className="booking-art-card">
+                <Icon name="calendar" size={30} />
+                <span>
+                  Mais facilidade
+                  <br />
+                  <strong>para o seu dia.</strong>
+                </span>
+                <div className="booking-art-lines">
+                  <i />
+                  <i />
+                  <i />
+                </div>
               </div>
+              <span className="booking-art-badge">
+                <Icon name="clock" size={14} />
+                No seu tempo.
+              </span>
             </div>
-            <span className="booking-art-badge">
-              <Icon name="clock" size={14} />
-              No seu tempo.
-            </span>
-          </div>
+          </BookingCover>
         </header>
         {catalog.is_demo ? (
           <div className="booking-notice booking-demo">
@@ -245,17 +294,28 @@ export default async function Booking({
             ),
           )}
         </ol>
+        {confirmed && q.aviso === "lembrete" ? (
+          <div className="booking-notice" role="status">
+            Seu agendamento foi reservado, mas não foi possível registrar a
+            autorização para o lembrete. Guarde o horário e avise a empresa caso
+            queira receber lembretes pelo WhatsApp.
+          </div>
+        ) : null}
         {q.erro ? (
           <div className="booking-notice booking-error" role="alert">
             <strong>
               {q.erro === "configuracao"
                 ? "Reservas temporariamente indisponíveis."
-                : "Não conseguimos concluir sua reserva."}
+                : q.erro === "campos"
+                  ? "Confira os dados do formulário."
+                  : "Não conseguimos concluir sua reserva."}
             </strong>
             <span>
               {q.erro === "configuracao"
                 ? "Tente novamente mais tarde ou fale com a empresa."
-                : "Confira seus dados e consulte os horários novamente. O horário pode ter sido ocupado ou o limite de tentativas pode ter sido atingido."}
+                : q.erro === "campos"
+                  ? "Confira o endereço, os dados do pet ou os campos obrigatórios e tente novamente."
+                  : "Consulte os horários novamente. O horário pode ter sido ocupado ou o limite de tentativas pode ter sido atingido."}
             </span>
           </div>
         ) : null}
@@ -403,8 +463,8 @@ export default async function Booking({
                 <div className="booking-section-heading">
                   <span className="booking-step-number">1</span>
                   <div>
-                    <h2>Como podemos cuidar do seu dia?</h2>
-                    <p>Escolha o serviço, o profissional e a data desejada.</p>
+                    <h2>{presentation.servicePrompt}</h2>
+                    <p>Escolha o profissional e a data desejada.</p>
                   </div>
                 </div>
                 <form
@@ -514,6 +574,7 @@ export default async function Booking({
                     day={validDay}
                     slots={slots}
                     requestId={randomUUID()}
+                    niche={catalog.niche || ""}
                   />
                 )
               ) : null}

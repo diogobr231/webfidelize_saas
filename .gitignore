@@ -5,6 +5,7 @@ node_modules/
 *.tsbuildinfo
 .vercel/
 test-results/
+artifacts/
 playwright-report/
 .recovery/
 supabase/.temp/

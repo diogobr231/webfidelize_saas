@@ -1,10 +1,14 @@
 # E-mails de acesso em produção
 
-**Situação desta etapa:** `webfidelize.com.br` ainda não foi comprado e não há provedor SMTP configurado. Os templates deste repositório são arquivos preparados para instalação; não comprovam configuração remota, envio ou recebimento. A homologação de entrega real depende do domínio, do provedor e de caixas de teste autorizadas. Nenhuma compra ou envio é necessário para revisar estes arquivos.
+**Atualizado em 23/10/2026:** `webfidelize.com.br` ainda não foi comprado e não há SMTP próprio configurado. Uma confirmação real foi recebida na caixa autorizada do proprietário, com o remetente e template padrão do Supabase. Após corrigir o retorno que apontava para localhost, um reenvio pela aplicação chegou com o callback público correto e concluiu confirmação PKCE, configuração da empresa e acesso ao painel. Isso valida esse destinatário; não comprova entrega para todos os clientes. O SMTP padrão restringe destinatários e volume. Os templates da Web Fidelize continuam preparados para instalação após configurar SMTP próprio.
 
 O fluxo de autenticação e os templates precisam ser publicados juntos. Pagamentos continuam fora desta etapa.
 
+Preparação seguinte em 23/10: os três templates foram alinhados à paleta clara navy/ciano e receberam nove testes automatizados do HTML e dos links. O Brevo Free foi escolhido para o início sem mensalidade (até 300 e-mails por dia; inclui identificação do provedor). Ainda falta concluir a conta do provedor, verificar o remetente, habilitar o transporte e homologar o recebimento. Nenhuma credencial SMTP foi configurada e estes templates **ainda não estão ativos no Supabase**. Sem domínio próprio autenticado, o Brevo pode substituir temporariamente o endereço do remetente por um domínio de envio dele; não prometer remetente `@webfidelize.com.br` antes da compra e verificação. [Plano gratuito](https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan), [remetentes e autenticação](https://help.brevo.com/hc/en-us/articles/14925263522578-Comply-with-Gmail-Yahoo-and-Microsoft-s-requirements-for-email-senders).
+
 ## O que será enviado
+
+Conexão do provedor em 23/10: o proprietário concluiu o login Google e o perfil do Brevo. O painel confirmou a cota Free de 300 e-mails/dia. A verificação por e-mail foi aceita, mas o Brevo exigiu também a verificação do telefone antes da emissão da chave SMTP. A chave ainda não foi disponibilizada, o remetente e a entrega transacional ainda precisam ser verificados. O Custom SMTP do Supabase permanece desligado para preservar o transporte anterior; nenhum template remoto ou segredo de produção foi substituído nesta etapa. O endpoint público de saúde do Auth respondeu HTTP 200 às 08:13 BRT.
 
 | Finalidade no Supabase | Assunto sugerido                       | Arquivo                                                                |
 | ---------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
@@ -12,7 +16,7 @@ O fluxo de autenticação e os templates precisam ser publicados juntos. Pagamen
 | Reset password         | Redefina sua senha da Web Fidelize     | [`recovery.html`](../supabase/templates/recovery.html)                 |
 | Password changed       | Sua senha da Web Fidelize foi alterada | [`password-changed.html`](../supabase/templates/password-changed.html) |
 
-Os HTMLs usam tabelas de apresentação, CSS inline, fontes do sistema e links descritivos, sem imagens externas, scripts ou rastreamento. O aviso **Password changed** só deve ser habilitado junto ao recurso correspondente do Supabase, para ser disparado por uma alteração real de senha. Não enviar esse aviso apenas porque alguém pediu recuperação. [Templates e notificações de segurança](https://supabase.com/docs/guides/auth/auth-email-templates).
+Os HTMLs usam tabelas de apresentação, CSS inline, fontes do sistema e links descritivos, com a logo servida pela origem pública da aplicação e texto alternativo, sem scripts ou pixels de rastreamento. O aviso **Password changed** só deve ser habilitado junto ao recurso correspondente do Supabase, para ser disparado por uma alteração real de senha. Não enviar esse aviso apenas porque alguém pediu recuperação. [Templates e notificações de segurança](https://supabase.com/docs/guides/auth/auth-email-templates).
 
 Convites de participação em empresas são outro fluxo: o sistema gera um link próprio de uso único, válido por 48 horas, vinculado ao e-mail e ao papel definidos pelo OWNER. O template Auth **Invite user** não substitui esse convite. Configurar SMTP no Supabase não configura automaticamente o transporte de convites da aplicação. Sem transporte configurado, a interface deve informar a geração do link, sem afirmar que houve envio. O aceite continua exigindo conta autenticada com o e-mail confirmado correspondente.
 
@@ -47,6 +51,8 @@ Desative rastreamento de abertura e de cliques para os e-mails de acesso. Ajuste
 ## 4. URLs, confirmação e expiração
 
 Configure `APP_URL` e o **Site URL** do Supabase com a mesma origem HTTPS, sem caminho, query, fragmento ou barra final. A configuração de produção não deve apontar para localhost. O Site URL é uma configuração administrativa confiável; o template o usa como destino principal dos links.
+
+Configuração remota conferida em 23/10: Site URL `https://webfidelize-saas.vercel.app`; Redirect URLs `https://webfidelize-saas.vercel.app/auth/callback` e `https://webfidelize-saas.vercel.app/auth/callback?next=*`. A origem e a rota ficam restritas à aplicação, com variação apenas para os destinos codificados pelo servidor. O link efetivamente recebido foi usado sem reescrever seu token ou endereço. E-mails enviados antes da correção podem conter o retorno antigo; solicite novo link pela tela de entrada.
 
 O aplicativo monta o callback com `/auth/callback?next=...`. Os destinos de `next` aceitos são `/painel` ou `/convite/` seguido pelo token próprio de 64 caracteres hexadecimais. Recuperação usa `/nova-senha`. Adicione os callbacks necessários à lista **Redirect URLs**, incluindo a query codificada conforme gerada pela aplicação. Para o destino variável do convite, use apenas o padrão mínimo para a rota e a origem necessárias; evite liberar todo o domínio com `/**`. O backend continua validando o destino independentemente dessa configuração. [Configuração de redirects](https://supabase.com/docs/guides/auth/redirect-urls).
 

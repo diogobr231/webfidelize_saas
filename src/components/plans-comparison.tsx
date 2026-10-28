@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { money } from "@/lib/catalog";
 import type { CommercialPlan } from "@/lib/commercial";
+import { teamPlanBenefits } from "@/lib/plan-benefits";
 import { Icon } from "./ui/icon";
 import "./plans-comparison.css";
 
@@ -9,6 +10,8 @@ const features = [
   "Clientes e catálogo de serviços",
   "Turnos e intervalos por profissional",
   "Página pública de agendamento",
+  "Turmas com limite de vagas e inscrição online",
+  "Importação de agenda por ICS ou CSV",
   "Configuração guiada e central de ajuda",
 ];
 export function PlansComparison({
@@ -54,7 +57,7 @@ export function PlansComparison({
                 na agenda
               </p>
               <ul>
-                {features.map((feature) => (
+                {[...features, ...teamPlanBenefits(plan)].map((feature) => (
                   <li key={feature}>
                     <Icon name="check" size={16} />
                     {feature}
@@ -80,36 +83,45 @@ export function PlansComparison({
               ) : (
                 <Link
                   className={`button ${plan.id === "profissional" ? "" : "secondary"}`}
-                  href="/cadastro"
+                  href="/demonstracao"
                 >
-                  Testar grátis por 7 dias
+                  Experimentar demonstração
                 </Link>
               )}
               <p className="plan-caption">
                 {authenticated
                   ? "O contato não altera seu plano nem ativa cobrança."
-                  : "O teste começa no Essencial, com 1 profissional."}
+                  : "Demonstração com dados de exemplo, sem login e sem cartão."}
               </p>
             </article>
           ))}
         </div>
       )}
-      <div className="plan-conditions">
+      <div className="plan-conditions" id="condicoes-teste">
         <Icon name="shield" size={22} />
         <div>
-          <h3>Condições claras, desde o primeiro dia</h3>
+          <h3>7 dias grátis para conhecer sua rotina no sistema</h3>
           <p>
-            Os 7 dias de teste começam ao criar a empresa. Sem cartão e sem
-            cobrança automática. O proprietário ocupa uma vaga quando também
-            atende; cadastrar um profissional é diferente de convidar alguém
-            para acessar o painel.
+            Experimente o Essencial, com 1 profissional, por 7 dias grátis, sem
+            cartão e sem cobrança automática. Confirme seu e-mail e cadastre a
+            empresa para começar. O prazo fica salvo no sistema e aparece no
+            painel. Ao terminar, alterações ficam bloqueadas e seus dados
+            permanecem disponíveis para consulta.
           </p>
           <p>
-            A cobrança online pelo Mercado Pago ainda não está disponível. Fale
-            no WhatsApp para consultar as condições de contratação. Recursos
-            específicos de nicho, IA, caixa e mensagens automáticas não estão
-            incluídos nesta versão.
+            A contratação e a cobrança online ainda estão em preparação. Para
+            continuar após o teste, fale com a Web Fidelize. O proprietário
+            ocupa uma vaga quando também atende; cadastrar um profissional é
+            diferente de convidar alguém para acessar o painel. Recursos
+            específicos de nicho, IA, caixa e chatbot não estão incluídos nesta
+            versão. Os avisos de WhatsApp dependem de configuração e cota
+            próprias.
           </p>
+          {!authenticated && (
+            <Link className="button secondary" href="/cadastro">
+              Testar grátis por 7 dias <Icon name="arrow-right" size={16} />
+            </Link>
+          )}
         </div>
       </div>
     </section>

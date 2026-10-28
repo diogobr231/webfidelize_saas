@@ -32,34 +32,34 @@ export const niches = [
     name: "Restaurante",
     icon: "♨",
     color: "#fb923c",
-    description: "Módulo de mesas, comandas e caixa em planejamento.",
+    description: "Mesas, comandas, etapas dos pedidos e caixa manual.",
   },
   {
     slug: "fornecedores",
     name: "Fornecedores",
     icon: "▦",
     color: "#fbbf24",
-    description: "Módulo de pedidos e entregas em planejamento.",
+    description: "Pedidos a fornecedores e acompanhamento de entregas.",
   },
   {
     slug: "logistica",
     name: "Entregadores e logística",
     icon: "➜",
     color: "#f87171",
-    description: "Módulo de rotas em planejamento.",
+    description: "Entregadores, rotas e fluxo de entregas com Google Maps.",
   },
   {
     slug: "academia",
     name: "Academia",
     icon: "◈",
     color: "#c084fc",
-    description: "Módulo de turmas e alunos em planejamento.",
+    description: "Turmas com vagas, inscrições online e agenda individual.",
   },
 ] as const;
 export const plans = [
-  { id: "essencial", name: "Essencial", cents: 6990, staff: 1 },
-  { id: "profissional", name: "Profissional", cents: 11990, staff: 3 },
-  { id: "empresarial", name: "Empresarial", cents: 19990, staff: 10 },
+  { id: "essencial", name: "Essencial", cents: 4990, staff: 1 },
+  { id: "profissional", name: "Profissional", cents: 8990, staff: 3 },
+  { id: "empresarial", name: "Empresarial", cents: 14990, staff: 10 },
 ] as const;
 export const money = (cents: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(

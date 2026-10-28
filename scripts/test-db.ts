@@ -1,3 +1,4 @@
+import { installLegacyTrialFixtures } from "./legacy-trial-fixture";
 import { PGlite } from "@electric-sql/pglite";
 import { btree_gist } from "@electric-sql/pglite/contrib/btree_gist";
 import { readFile, readdir } from "node:fs/promises";
@@ -12,6 +13,7 @@ const migrations = await readdir("supabase/migrations").catch(() => []);
 await db.exec(storageFixture);
 for (const name of migrations.filter((n) => n.endsWith(".sql")).sort())
   await db.exec(await readFile(`supabase/migrations/${name}`, "utf8"));
+await installLegacyTrialFixtures(db);
 if (!migrations.length) throw new Error("Versioned migrations missing");
 
 const a = "00000000-0000-4000-8000-000000000001",
@@ -561,10 +563,13 @@ await check("owner publishes only explicit public profile fields", async () => {
   );
   assert.deepEqual(Object.keys(catalog).sort(), [
     "address",
+    "cover_path",
     "description",
     "is_demo",
     "logo_path",
+    "maps_url",
     "name",
+    "niche",
     "phone",
     "professionals",
     "services",
@@ -573,9 +578,12 @@ await check("owner publishes only explicit public profile fields", async () => {
   ]);
   assert.equal(catalog.description, profileValues[1]);
   assert.equal(catalog.logo_path, null);
+  assert.equal(catalog.cover_path, null);
   assert.equal(catalog.address, profileValues[2]);
   assert.equal(catalog.phone, profileValues[3]);
   assert.equal(catalog.theme, "violet");
+  assert.equal(catalog.maps_url, "");
+  assert.equal(catalog.niche, "salao");
   assert.ok(!JSON.stringify(catalog).includes("11999990001"));
   assert.ok(!JSON.stringify(catalog).includes("Visitante TESTE"));
 });
@@ -965,28 +973,71 @@ await check(
   },
 );
 await check(
-  "disabled and unpaid public pages cannot expose a receipt",
+  "closed public pages preserve only existing gateway-authorized receipts",
   async () => {
     await db.query("select public.configure_booking($1,'demo-salao',false)", [
       ca,
     ]);
-    assert.equal(
-      await scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]),
-      "null",
-    );
+    const stored = () =>
+      scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]);
+    const expected = JSON.parse(await stored());
+    assert.equal(expected.id, reservation);
+    assert.equal(expected.status, "canceled");
+    assert.equal(await scalar("select public_catalog('demo-salao')"), "null");
     await db.query("select public.configure_booking($1,'demo-salao',true)", [
       ca,
     ]);
-    await db.exec("reset role");
-    await db.query(
-      "update public.companies set status='past_due' where id=$1",
-      [ca],
-    );
-    await as(null);
-    assert.equal(
-      await scalar(receiptSql, ["demo-salao", request, "test-only-gateway"]),
-      "null",
-    );
+    for (const status of ["past_due", "trialing", "suspended", "canceled"]) {
+      await db.exec("reset role");
+      await db.query(
+        "update public.companies set status=$2,trial_ends_at=now()-interval '1 day' where id=$1",
+        [ca, status],
+      );
+      await as(null);
+      assert.deepEqual(JSON.parse(await stored()), expected);
+      assert.equal(await scalar("select public_catalog('demo-salao')"), "null");
+      assert.deepEqual(
+        (
+          await db.query("select * from public_slots($1,$2,$3,$4)", [
+            "demo-salao",
+            service,
+            professional,
+            day,
+          ])
+        ).rows,
+        [],
+      );
+      const newBooking = [...args];
+      newBooking[6] = "00000000-0000-4000-8000-000000000098";
+      await assert.rejects(
+        () => db.query(submit, newBooking),
+        /booking unavailable/,
+      );
+      assert.equal(
+        await scalar(receiptSql, ["demo-outro", request, "test-only-gateway"]),
+        "null",
+      );
+      assert.equal(
+        await scalar(receiptSql, [
+          "demo-salao",
+          newBooking[6],
+          "test-only-gateway",
+        ]),
+        "null",
+      );
+      await assert.rejects(
+        () => db.query(receiptSql, ["demo-salao", request, "wrong-secret"]),
+        /gateway unauthorized/,
+      );
+    }
+    assert.deepEqual(Object.keys(expected).sort(), [
+      "ends_at",
+      "id",
+      "professional_name",
+      "service_name",
+      "starts_at",
+      "status",
+    ]);
   },
 );
 await db.close();

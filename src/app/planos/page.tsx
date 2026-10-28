@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Planos e condições | Web Fidelize",
   description:
-    "Compare planos e limites da agenda online Web Fidelize. Teste grátis por 7 dias no Essencial, sem cartão e sem cobrança automática.",
+    "Compare preços, limites de profissionais e benefícios da Web Fidelize. Experimente uma demonstração antes de escolher seu plano.",
   alternates: { canonical: new URL("/planos", site.url).href },
   robots: { index: site.indexable, follow: site.indexable },
 };
@@ -41,8 +41,12 @@ export default async function Plans() {
           </h1>
           <p>
             Agenda, clientes, serviços e seu link de agendamento em todos os
-            planos. Compare o espaço para os profissionais que atendem na sua
-            empresa.
+            planos. Compare o espaço para profissionais e os recursos de análise
+            para acompanhar o crescimento da sua equipe.
+          </p>
+          <p>
+            <strong>7 dias grátis no Essencial</strong>, sem cartão e sem
+            cobrança automática. <a href="#condicoes-teste">Ver condições</a>.
           </p>
           <a
             className="plans-contact"
@@ -60,21 +64,24 @@ export default async function Plans() {
           </span>
           <h2 id="trial-title">Conheça antes de escolher.</h2>
           <p>
-            Teste grátis por <strong>7 dias no Essencial</strong>, com 1
-            profissional na agenda.
+            Explore a agenda e a ficha de um cliente com{" "}
+            <strong>dados de exemplo</strong>.
           </p>
           <div>
             <span>
-              <Icon name="check" size={15} /> Sem cartão
+              <Icon name="check" size={15} /> Sem login
             </span>
             <span>
-              <Icon name="check" size={15} /> Sem cobrança automática
+              <Icon name="check" size={15} /> Sem cartão
             </span>
           </div>
-          <Link className="button" href="/cadastro">
-            Testar grátis por 7 dias <Icon name="arrow-right" size={16} />
+          <Link className="button" href="/demonstracao">
+            Experimentar demonstração <Icon name="arrow-right" size={16} />
           </Link>
-          <small>O período começa quando você cria a empresa.</small>
+          <small>
+            A demonstração não cria reservas reais nem inicia um período de
+            assinatura.
+          </small>
         </aside>
       </header>
       <section
@@ -100,11 +107,27 @@ export default async function Plans() {
             antes de começar.
           </h2>
           <p>
-            O tamanho da equipe muda. O núcleo de agenda e atendimento está em
-            todos os planos.
+            O núcleo de agenda e atendimento está em todos os planos. Os
+            indicadores da equipe e a exportação ajudam quando sua operação
+            precisa de mais acompanhamento.
           </p>
         </div>
         <div className="plans-answers">
+          <details>
+            <summary>
+              O que muda além do número de profissionais?
+              <Icon name="plus" size={18} />
+            </summary>
+            <p>
+              Todos os planos incluem o Meu dia para colaboradores vinculados,
+              com agenda pessoal, confirmações registradas e conclusão dos
+              próprios atendimentos após o horário. O Profissional inclui
+              indicadores de equipe com consultas de até 31 dias. O Empresarial
+              amplia o período para até 90 dias e permite exportar os
+              indicadores em CSV. Esses relatórios são operacionais e não
+              representam receita.
+            </p>
+          </details>
           <details>
             <summary>
               Quem ocupa uma vaga no plano?
@@ -131,13 +154,15 @@ export default async function Plans() {
           </details>
           <details>
             <summary>
-              O teste começa em qual plano?
+              Como funcionam os 7 dias grátis?
               <Icon name="plus" size={18} />
             </summary>
             <p>
-              Todos os botões de teste iniciam o mesmo fluxo: cadastro da conta
-              e criação da empresa no Essencial, com 1 profissional. A contagem
-              de 7 dias começa ao criar a empresa e não há cobrança automática.
+              O teste de 7 dias grátis é no Essencial, com 1 profissional, sem
+              cartão e sem cobrança automática. Confirme seu e-mail e cadastre
+              sua empresa para começar. O prazo fica salvo no sistema e aparece
+              no painel. Ao terminar, as alterações ficam bloqueadas e seus
+              dados permanecem disponíveis para consulta.
             </p>
           </details>
           <details>
@@ -146,10 +171,11 @@ export default async function Plans() {
               <Icon name="plus" size={18} />
             </summary>
             <p>
-              A cobrança online ainda não está disponível. Os preços exibidos
-              apresentam os planos previstos. Fale pelo WhatsApp para consultar
-              as condições; entrar em contato não ativa uma assinatura nem
-              altera o plano da sua empresa.
+              O teste já está disponível sem cartão. A contratação e a cobrança
+              online ainda estão em preparação. Fale pelo WhatsApp para
+              consultar as condições para continuar após o teste; entrar em
+              contato não ativa uma assinatura paga nem altera o plano da sua
+              empresa.
             </p>
           </details>
         </div>

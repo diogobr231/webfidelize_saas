@@ -1,16 +1,30 @@
 # Web Fidelize
 
+**Padrão obrigatório de trabalho:** leia [AGENTS.md](AGENTS.md) e [Issues, PRs e releases](docs/WORKFLOW.md). Toda correção, melhoria ou nova função deve ter uma issue; o PR deve mencionar a issue na descrição. Deploys devem ser rastreáveis ao PR e à revisão validada. Essas instruções valem para qualquer agente/modelo.
+
+Central IA exclusiva do SUPER_ADMIN: [funcionamento, limites e configuração](docs/CENTRAL-IA.md). Integrada ao funil, suporte e tarefas, com fila e revisão de rascunhos. Geração real depende da liberação da conta AI Gateway. A integração de pagamentos está implementada, mas a contratação real permanece desativada até homologar a conta e as notificações do Mercado Pago.
+
 SaaS B2B multiempresa em reconstrução. Next.js App Router, TypeScript, Tailwind e Supabase. **Ainda não liberado para clientes pagantes.**
 
-Auditoria atual, correções, evidências de testes e prioridades para o lançamento: [auditoria para a primeira venda](docs/AUDITORIA-PRIMEIRA-VENDA.md), de 19/10/2026.
+Revisão mais recente: [segurança e estabilidade em 22/10/2026](docs/AUDITORIA-SEGURANCA.md). Histórico comercial: [auditoria para a primeira venda](docs/AUDITORIA-PRIMEIRA-VENDA.md), de 19/10/2026.
 
 Incremento operacional posterior: [edição, arquivamento e bloqueios de agenda](docs/STATUS-OPERACOES.md), com migração aplicada, testes de regressão e evidências dos fluxos DEMO.
 
-Preparação de acesso por e-mail: [configuração, testes e pendências de produção](docs/EMAIL-PRODUCAO.md). O domínio desejado ainda não foi comprado; SMTP e recebimento de e-mails reais continuam pendentes. Pagamentos permanecem para a última etapa.
+Preparação de acesso por e-mail: [configuração, testes e pendências de produção](docs/EMAIL-PRODUCAO.md). Em 23/10, a confirmação real chegou à caixa autorizada e concluiu o acesso após corrigir os callbacks de produção. SMTP próprio para atender novos destinatários públicos e aplicar os templates da marca continua pendente.
+
+**Integração de pagamentos de 23/10/2026:** Pix manual e assinatura mensal por cartão com checkout hospedado, cotação conferida no banco, webhooks verificados, reconciliação e períodos pagos finitos estão implementados. O teste de sete dias sem cartão foi preservado. A produção continua desativada: a verificação de telefone e a configuração das credenciais/webhook foram concluídas; falta homologar Pix e cartão com o provedor. Testes unitários, de banco descartável e HTTP com transportes controlados não comprovam transações no Mercado Pago. **Nenhuma transação financeira real foi realizada.** [Configuração e operação](docs/MERCADO_PAGO.md).
+
+**Publicado em 23/10/2026:** novos cadastros de empresa iniciam 7 dias no Essencial sem cartão, com expiração calculada e validada pelo PostgreSQL. Migração `20261023104309_no_card_trial`: liberou uma empresa que nunca havia iniciado o teste e preservou os outros nove prazos. Login geral, por segmento e cadastro têm botão acessível para mostrar/ocultar senha. Validação: 166 testes unitários, 367 grupos PostgreSQL, 41 grupos HTTP isolados, build e [CI](https://github.com/diogobr231/webfidelize_saas/actions/runs/39941199352) aprovados; 34 grupos de produção, conta nova com e-mail real → confirmação → empresa → serviço → profissional → painel, e revisão em 320/390/768/1280 px. A conta e os registros temporários foram removidos após encerrar as sessões. Versão de aplicação `774081f`, publicada em [webfidelize-saas.vercel.app](https://webfidelize-saas.vercel.app). Mercado Pago não ativado: credenciais ausentes no ambiente e acesso ao provedor solicitou login.
 
 Situação consolidada mais recente: [revisão para o primeiro piloto](docs/STATUS-PILOTO.md), de 21/10/2026, incluindo testes por segmento, perfis e limites comerciais.
 
-O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a identidade grafite e menta, a área de trabalho clara, os tokens, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
+Lembretes por WhatsApp: [configuração e operação](docs/WHATSAPP.md). Inclui confirmação de presença para clientes, resumo diário da equipe, aviso de novo agendamento, autorização individual e teto mensal compartilhado por empresa. O envio fica desabilitado até configurar a conexão oficial, aprovar os modelos e ativar o agendador de produção; não depende do Mercado Pago. Cada colaborador configura seu número em **Meu dia**. A foto do espaço pode ser enviada e publicada em **Personalização**, com prévia na página de reservas.
+
+O [sistema visual](docs/DESIGN-SYSTEM.md) documenta a landing clara em azul-marinho e ciano, a logo oficial, os temas das áreas de trabalho, os componentes reutilizáveis e as regras de responsividade e acessibilidade. A fonte Geist é servida localmente, com origem e licença SIL OFL registradas no mesmo documento.
+
+As páginas `/segmentos/[nicho]` apresentam benefícios e escopo dos oito segmentos, com o mesmo destaque. `/demonstracao` permite escolher qualquer segmento e experimentar agenda e ficha do cliente sem login, com exemplos apenas na memória do navegador. Recarregar apaga as alterações; nenhum agendamento real é criado. A demonstração é ilustrativa e identifica os limites de cada fluxo. O formulário `/diagnostico` oferece os planos do catálogo e “Outros”; registros antigos de investimento continuam legíveis no admin.
+
+O [painel de operação interna](docs/ADMIN-OPERACOES.md) centraliza métricas reais e tarefas de acompanhamento em `/admin`, com regras e histórico em `/admin/automacoes`. A política temporária de 23/10/2026 libera sete dias grátis sem cartão ao criar a empresa, com expiração no PostgreSQL. Nenhuma cobrança é iniciada automaticamente durante o teste; a contratação exige ação do OWNER após o término e a integração devidamente habilitada.
 
 ## Executar
 
@@ -36,8 +50,12 @@ pnpm test:help:db
 pnpm test:team:db
 pnpm test:operations:db
 pnpm test:personalization:db
+pnpm test:whatsapp:db
+pnpm test:billing:db
 pnpm build
 pnpm test:auth:isolated
+pnpm test:whatsapp:http
+pnpm test:billing:http
 ```
 
 As suítes `*:db` usam PostgreSQL descartável via PGlite e não alteram empresas reais. `test:db` verifica as migrações e o isolamento com os papéis authenticated/anon; as suítes específicas cobrem agregações do dashboard, ajuda e chamados, vínculos/revogação de acessos, edição/arquivamento/bloqueios operacionais e personalização. As fixtures locais do Storage verificam políticas SQL, mas não substituem o serviço HTTP real. `scripts/remote-isolation.sql` verifica parte das garantias no Supabase real, dentro de transação com ROLLBACK. Auth, SMTP, Storage e pagamentos exigem também homologação própria.
@@ -93,7 +111,7 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Site responsivo, página `/planos`, comparação de recursos e limites, plano recomendado e WhatsApp comercial. Landing e páginas de planos consultam o mesmo catálogo do banco; não há preços alternativos fixados na interface.
 - Entradas por oito nichos, com autenticação compartilhada e autorização por vínculo.
 - Cadastro, login, confirmação, recuperação e troca de senha com Supabase SSR.
-- Criação transacional de empresa e OWNER, trial de sete dias calculado no banco.
+- Criação transacional de empresa e OWNER. Novas empresas recebem sete dias sem cartão no Essencial, com prazo definido pelo servidor. A migração libera uma única vez empresas que estavam em `pending_card`, exigiam cartão e nunca tiveram prazo de teste; testes em andamento/expirados e empresas suspensas/canceladas conservam seus estados e prazos.
 - Clientes, serviços, profissionais e criação de agendamentos; duração vem do serviço. As listas possuem busca por nome, paginação de 25 registros, total exato autorizado e ordenação estável, sem o corte anterior de 100 cadastros.
 - Fichas de clientes, serviços e profissionais com edição, controle de versão concorrente, arquivamento e reativação confirmados. Filtros Ativos/Arquivados/Todos e histórico paginado do cliente preservam vínculos e atendimentos. Arquivar profissional não revoga seu login; o OWNER gerencia acessos separadamente em **Equipe e acessos**. Veja as [regras operacionais](docs/STATUS-OPERACOES.md).
 - Agenda visual diária e semanal, filtros por profissional, horários clicáveis e detalhes com nomes de cliente, serviço e profissional. OWNER e MANAGER podem remarcar, cancelar e concluir atendimentos conforme as permissões e o estado da assinatura.
@@ -111,20 +129,40 @@ Remove-Item Env:SEED_PASSWORD, Env:TEST_ONBOARDING_LIVE -ErrorAction SilentlyCon
 - Convites por link: hash SHA-256 no banco, validade 48h, uso único e e-mail confirmado obrigatório. Lista paginada, cancelamento confirmado, renovação que invalida o link anterior, limite de 25 emissões/24h e intervalo de 60s por destinatário. SMTP opcional no servidor, acionado explicitamente; aceite pelo SMTP não é confirmação de entrega.
 - Gestão de vínculos entre contas e profissionais, identificação da equipe por e-mail para o OWNER, desvinculação e revogação de acesso com confirmação, preservando os cadastros e a agenda. Migração aplicada e fluxo validado com contas DEMO no Supabase real; veja [equipe e acessos](docs/EQUIPE-ACESSOS.md).
 - Central de ajuda por assunto/módulo, busca, FAQs, tutoriais, orientações de primeiro acesso, solicitações e WhatsApp. Chamados são isolados por empresa; colaboradores consultam seus próprios pedidos. SUPER_ADMIN edita/publica conteúdos e responde às solicitações. Suporte permanece acessível após o fim do trial.
-- Página de assinatura por empresa com plano, utilização, prazo e estado consultados no backend. O contato comercial não altera o plano nem concede acesso pago. Checkout e webhook do Mercado Pago ainda não estão implementados.
+- Página de assinatura por empresa com plano, utilização, prazo e estado consultados no backend. Pix manual, cartão no checkout hospedado, webhook validado e reconciliação estão implementados, com contratação desativada até homologar o Mercado Pago. O contato comercial e o retorno do checkout não alteram o plano nem concedem acesso pago.
 - Navegação adaptada para celular, tablet e computador, atalhos móveis, tabelas com apresentação por registro, formulários responsivos, skeletons, feedback de sucesso/erro, botões com estado pendente e confirmações nas ações que retiram dados ou acesso. As transições respeitam a preferência de movimento reduzido.
-- SUPER_ADMIN: consulta empresas, ajusta plano, suspende/cancela e estende trial até 30 dias. Ativação paga não está disponível manualmente.
+- SUPER_ADMIN: consulta empresas, ajusta plano, suspende/cancela e administra testes sem cartão dentro do limite existente de 30 dias. Não pode ativar assinatura paga manualmente nem autorizar cartão por conta própria.
+
+## Turmas, migração de agenda e suporte de acesso
+
+- **Turmas:** `/painel/[companyId]/turmas` permite criar, editar, concluir e cancelar atividades com capacidade de 1 a 100 participantes, em todos os segmentos e planos. Inscrições e presença têm controle por empresa e profissional; participantes não consomem vagas de profissionais do plano. O horário da turma bloqueia atendimentos individuais, outras turmas e bloqueios conflitantes.
+- **Inscrição online:** `/agendar/[slug]/turmas` mostra apenas atividades publicadas, vagas e informações comerciais. A última vaga é validada no banco, a solicitação é idempotente e o comprovante assinado é conferido com o registro persistido. Cancelamentos liberam vagas; nenhuma cobrança ou mensagem automática é disparada por esta funcionalidade.
+- **Importação:** em Agenda → Importar agenda, envie ICS (extraído do ZIP do Google Agenda) ou CSV UTF-8, até 1 MB. Escolha profissional, período de até 90 dias e revise até 200 ocorrências por lote. Horários ocupados são o padrão; atendimentos precisam de cliente e serviço existentes escolhidos explicitamente. Prévia não persiste; conflitos impedem a gravação parcial. Uma origem já importada não é recriada, mesmo se o bloqueio tiver sido removido depois.
+- A importação copia um arquivo, sem sincronização contínua nem alteração no Google ou no concorrente. Recorrências diárias e semanais compatíveis são expandidas no período; regras não suportadas, eventos de dia inteiro e erros aparecem na revisão. Títulos externos só aparecem na prévia; o bloqueio persistido usa “Compromisso importado”.
+- **Suporte:** `/admin/empresas/[companyId]` mostra confirmação de e-mail, último acesso dos proprietários, ativação e totais da empresa, somente para SUPER_ADMIN. Não revela senhas, tokens ou sessões e não permite personificar clientes. Recuperação continua sob controle do titular.
+- Os templates de confirmação, recuperação e alteração de senha incluem português e a logo da aplicação. O painel Supabase confirmou em 22/10/2026 que ainda usa modelos padrão e exige SMTP próprio para personalização; os arquivos locais não representam envio de produção configurado.
+- Testes: `pnpm test:classes:db`, `pnpm test:import:db`, `pnpm test:admin-diagnostics:db` e os testes de parser/recibos em `pnpm test`. Os testes SQL isolados não simulam concorrência real; a aceitação online de turmas tem opt-in separado em `scripts/test-classes-live.ts`.
+
+Validação da entrega em 22/10/2026: 166 testes unitários, 356 grupos SQL (incluindo as regressões anteriores), TypeScript e build passaram. Na URL publicada, passaram 8 grupos de turmas, 5 de importação, 27 de páginas públicas e 7 de autenticação. Três reservas simultâneas disputaram duas vagas: exatamente duas foram aceitas. Os testes de escrita usaram somente empresas DEMO e registraram os IDs criados para limpeza; os cadastros anteriores permaneceram iguais. Isso não comprova envio real de e-mail nem contratação por cartão, que continuam pendentes.
 
 ## Ainda pendente antes da primeira venda
 
-- Mercado Pago: implementar checkout de assinatura, webhook validado, idempotência persistida, conciliação e tratamento de inadimplência; depois homologar em sandbox. Também faltam aplicação/credenciais do provedor e endpoint HTTPS de homologação. **A pendência inclui desenvolvimento, não apenas configuração. Nenhuma cobrança foi habilitada.**
+- Mercado Pago: credenciais e webhook configurados; homologar Pix/cartão, entrega de eventos de pagamentos existentes, renovação, cancelamento e estorno no provedor. A implementação local e seus testes não substituem essa validação. **Nenhuma cobrança real foi habilitada.**
 - Turnos que atravessam a meia-noite e proteção adicional anti-bot conforme volume. Cancelamento e remarcação pelo próprio cliente ainda dependem de contato com a empresa; os responsáveis já podem fazê-los no painel.
 - Seleção pesquisável de clientes/serviços na criação de agendamentos para bases maiores. A listagem já possui busca e paginação; o formulário da agenda ainda carrega até 1.000 clientes e serviços ativos.
 - SUPER_ADMIN: editor de preços/limites do catálogo, gerenciamento de módulos, métricas financeiras e trilha de auditoria administrativa. Conteúdo de ajuda e chamados já possuem gerenciamento.
 - Homologação de entrega real de confirmação, recuperação e convites, após domínio, SMTP e implantação. A validação isolada de Auth e a integração de equipe com contas DEMO não comprovam recebimento em caixas reais.
 - SMTP de produção, termos e privacidade, rotina de backup e teste de restauração.
 
-Restaurante/comandas, pets/tutores, tarefas, rotas, chatbot, site adicional, IA e créditos são expansão futura. As entradas por nicho não significam que seus módulos específicos já existem.
+Chatbot, site adicional, publicação de redes sociais e créditos de IA continuam fora da entrega. A ficha clínica para clínicas permanece deliberadamente excluída do MVP.
+
+## Operações por segmento
+
+O incremento atual adiciona `/painel/[companyId]/operacoes` para OWNER e MANAGER: restaurante (mesas, comandas, etapas de pedidos, tempo desde a abertura e caixa manual), fornecedores/entregas (pedidos e estados de entrega), logística (entregadores, rotas e links do Google Maps), pet shop (pet/tutor, atendimentos não clínicos e saldo de estoque com histórico de ajustes), escritório (tarefas, processos e links HTTPS para documentos), salão (comissões registradas manualmente, caixa e estoque) e academia (fichas textuais, presença e validade de plano). As gravações são limitadas ao segmento e à empresa no PostgreSQL, com transições controladas e permissões também verificadas no servidor.
+
+O endereço comercial e os endereços de entregas aceitam busca de CEP sob ação explícita do usuário, com sugestão de rua, bairro, cidade e UF. A pessoa confere e completa o número; a busca não confirma a cobertura de uma região.
+
+Limites explícitos desta etapa: não há prontuário clínico, integração com PDV/maquininha, cobrança automática de mensalidades, integração de catraca, cálculo automático de comissões, roteirização/posição em tempo real ou armazenamento de arquivos de escritório. A demonstração pública continua fictícia e não simula os registros operacionais. As migrações `20261024022451_company_booking_maps.sql` e `20261024023238_industry_operations.sql` precisam estar aplicadas no projeto Supabase correto antes de publicar esta versão.
 
 ## Banco e migrações
 
@@ -138,19 +176,25 @@ O primeiro SUPER_ADMIN usa um bootstrap de instalação de uso único: o e-mail 
 
 ## Vercel / implantação
 
+Homologação online: [site](https://webfidelize-saas.vercel.app), [admin](https://webfidelize-saas.vercel.app/admin) e [funil](https://webfidelize-saas.vercel.app/diagnostico). Projeto `diogobr231/webfidelize-saas`, separado do projeto antigo `web-fidelize`. Publicação via CLI; ainda sem deploy automático por Git. O endereço `vercel.app` não exige compra de domínio. A conta atual é Hobby: a operação comercial exige plano compatível com as [regras da Vercel](https://vercel.com/docs/limits/fair-use-guidelines). Nenhum plano pago foi contratado.
+
+`vercel.json` define Next.js, instalação com lockfile e funções em São Paulo; `.vercelignore` exclui ambientes privados, backups e artefatos de teste. As variáveis foram configuradas somente em Production. Pagamentos e envios automáticos do WhatsApp permanecem desativados; SMTP e callbacks/templates de e-mail continuam pendentes de homologação. Os trials DEMO existentes vencem em 25/10/2026 às 14h47 (São Paulo); o deploy não altera seus prazos.
+
+Validação pública de leitura: `TEST_DEPLOYMENT_LIVE=1` e `TEST_DEPLOYMENT_URL=https://webfidelize-saas.vercel.app`, depois `pnpm test:deployment`. Para validar logins reais autorizados, `TEST_DEPLOYMENT_AUTH=1 pnpm test:deployment:auth`, com a senha DEMO somente em `TEST_PLAN_ACCOUNTS_PASSWORD` no ambiente privado. Ambos recusam outros projetos/origens; não executá-los automaticamente em CI contra produção. Os scripts de HTTP não substituem inspeção visual no navegador.
+
 1. Importe `diogobr231/webfidelize_saas` no projeto Vercel correto, framework Next.js, Node.js 24, diretório raiz.
 2. Instale com `pnpm install --frozen-lockfile`; build `pnpm build`.
 3. Configure `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_WHATSAPP` e `APP_URL` com a origem HTTPS estável do projeto antes do build. Cadastre `AUTH_FLOW_SECRET`, `BOOKING_GATEWAY_SECRET` e `SALES_GATEWAY_SECRET` como segredos exclusivos do ambiente Production. Preserve os valores dos gateways já configurados: seus hashes correspondentes estão no banco. Não copie credenciais de produção para previews nem envie secret/service_role ao navegador. Não sobrescreva `.env.local` ao sincronizar configurações da Vercel.
 4. No Supabase Auth, defina Site URL e os callbacks de cadastro/recuperação/convites conforme o [guia de e-mails](docs/EMAIL-PRODUCAO.md). Instale os templates junto com a versão compatível da aplicação. Restrinja os redirects à origem e à rota de callback necessárias; não libere `/**`.
 5. Mantenha confirmação de e-mail; configure SMTP, política de senha e proteção contra abuso no Auth antes de abrir ao público.
 6. Teste cadastro, confirmação, login, recuperação e convites em homologação, com dois tenants. Teste também tentativa de acessar `/admin` como cliente.
-7. Nesta fase, publique o site, a captação comercial e os painéis com pagamentos ainda desabilitados. Valide o funil completo na URL online e remova somente os registros sintéticos criados pela validação. Cadastro/recuperação por e-mail dependem da homologação de SMTP; contratação automática depende da futura integração de pagamentos. Publicação do site não comprova essas integrações.
+7. Nesta fase, publique o site, a captação comercial e os painéis com pagamentos ainda desabilitados. Valide o funil completo na URL online e remova somente os registros sintéticos criados pela validação. Cadastro/recuperação por e-mail dependem da homologação de SMTP; contratação automática depende da habilitação e homologação do Mercado Pago conforme o [guia de pagamentos](docs/MERCADO_PAGO.md). Publicação do site não comprova essas integrações.
 
 O Storage já possui o bucket privado `company-logos`, criado pela migração de personalização. Em outro ambiente, aplique essa migração antes de liberar uploads e confirme a disponibilidade de `storage.allow_only_operation(text)`. Valide upload autenticado, isolamento entre empresas e publicação somente do logotipo escolhido. Não torne o bucket público. Detalhes de tipos, tamanho, expiração, concorrência e limpeza estão em [docs/PERSONALIZACAO.md](docs/PERSONALIZACAO.md).
 
 ## Landing comercial e SEO
 
-A página inicial apresenta agenda, clientes, profissionais e reservas públicas. As ilustrações do sistema usam dados identificados como fictícios. Landing, `/planos` e assinatura consultam os preços e limites do catálogo do banco e mostram erro quando a consulta falha. Novos testes começam no Essencial; a cobrança online pelo Mercado Pago ainda não foi implementada. Não há retorno de checkout capaz de simular uma assinatura ativa.
+A página inicial apresenta agenda, clientes, profissionais e reservas públicas. As ilustrações do sistema usam dados identificados como fictícios. Landing, `/planos` e assinatura consultam os preços e limites do catálogo do banco e mostram erro quando a consulta falha. Novos testes começam no Essencial; a cobrança online pelo Mercado Pago está implementada e permanece desativada até homologação. Não há retorno de checkout capaz de simular uma assinatura ativa.
 
 Título, descrição, canonical, Open Graph, imagem de compartilhamento e dados estruturados de WebSite/Organization ficam em `src/lib/seo.ts` e nas convenções de metadados do App Router. Não há avaliações, depoimentos ou números de clientes inventados. O sitemap inclui a página inicial e a página de diagnóstico comercial. Rotas de conta, painel e demonstração permanecem fora da indexação.
 
@@ -164,11 +208,27 @@ Implementação conforme as convenções oficiais de [metadados e imagens sociai
 
 ## Primeiro acesso e retomada
 
-Quem entra sem empresa é encaminhado a `/comecar`, onde informa nome e segmento, sem nicho pré-selecionado. Criar a empresa inicia o trial já definido no banco. A configuração continua em `/painel/[companyId]/configuracao`, com as etapas `empresa`, `servicos`, `equipe` e `resumo`. Proprietários com empresa existente retomam o cadastro atual; não recebem outro trial ao reabrir o fluxo.
+Quem entra sem empresa é encaminhado a `/comecar`, onde informa nome e segmento, sem nicho pré-selecionado. A criação inicia sete dias sem cartão no Essencial e segue para `/painel/[companyId]/configuracao?etapa=servicos`; a opção de pausar leva ao painel. A configuração tem etapas `empresa`, `servicos`, `equipe` e `resumo`. Proprietários com empresa existente retomam o cadastro atual: login, reenvio do formulário e retomada não renovam o prazo. Ao expirar, as restrições de gravação e reserva pública são aplicadas pelo backend; nenhum agendador ou relógio do navegador libera acesso. Convites de colaboradores não exigem cartão. A confirmação de e-mail permanece habilitada.
 
 **Salvar e continuar depois** valida e persiste a etapa antes de voltar ao painel. O link **Continuar depois** apenas sai da tela: mantém o que já foi salvo, mas não guarda os campos ainda não enviados. Erros de validação preservam o preenchimento no formulário; o roteiro live verifica também a resposta HTML completa de erro sem JavaScript, com os campos preservados e o formulário aberto. Não há rascunho em localStorage. O menu **Primeiros passos** permite retomar e revisar os cadastros. O resumo distingue os três cadastros iniciais da configuração de horários e da publicação da página.
 
 Um profissional é quem aparece na agenda; cadastrá-lo não cria usuário nem envia convite. O proprietário que atende também ocupa uma vaga de profissional. Em **Equipe e acessos**, o OWNER pode vincular uma conta já pertencente à empresa a um profissional existente, desvinculá-la ou revogar o acesso de gerentes/colaboradores, preservando os atendimentos. OWNER e MANAGER podem usar a configuração inicial conforme suas permissões; as ações continuam sujeitas à assinatura, autorização no servidor e RLS. A revogação de acessos permanece disponível mesmo após bloqueio comercial.
+
+### Benefícios dos planos e trabalho da equipe
+
+- **Essencial — R$ 49,90/mês, 1 profissional:** conserva agenda, CRM, reservas públicas e os recursos já existentes. **Meu dia** está disponível em todos os planos: colaborador vinculado consulta seus atendimentos e confirma a conclusão somente depois do horário final, sem poder editar os demais dados da agenda.
+- **Profissional — R$ 89,90/mês, até 3 profissionais:** acrescenta indicadores por profissional, disponíveis ao proprietário e gerente: agendados, concluídos, cancelados, presenças confirmadas e minutos reservados, consultados em períodos de até 31 dias.
+- **Empresarial — R$ 149,90/mês, até 10 profissionais:** acrescenta períodos de até 90 dias e exportação CSV dos indicadores agregados. A exportação não inclui nomes nem contatos dos clientes e protege células contra fórmulas de planilha.
+
+As permissões extras vêm de `plans.team_insights` e `plans.team_export`, consultadas novamente no banco a cada RPC. Colaboradores não podem consultar indicadores de outros profissionais nem exportar relatórios gerenciais. Profissionais arquivados permanecem no relatório quando têm histórico no período. “Minutos reservados” não é taxa de ocupação nem faturamento; cancelamentos ficam fora desse total. O catálogo do banco continua sendo a fonte de preços e limites exibidos. Pagamentos e mudanças de plano por contratação dependem da habilitação e homologação da integração.
+
+Validação local: `pnpm test:trial:db` verifica a política atual de sete dias sem cartão, a conversão única das empresas que nunca iniciaram o teste, expiração, permissões e preservação dos prazos anteriores; `pnpm test:team-insights:db` verifica plano, período, isolamento e conclusão própria. As suítes de regressão usam `scripts/legacy-trial-fixture.ts` exclusivamente no PGlite descartável para representar empresas de períodos anteriores. Esse helper nunca deve ser executado no banco real ou importado pela aplicação.
+
+Após `pnpm build`, `pnpm test:team-insights:http` inicia um Next isolado com Auth/REST sintéticos e bloqueio de chamadas externas: verifica acesso, renderização, conclusão via Server Action, mudanças de permissão, exportação e falhas, e executa a regressão de landing/planos/cadastro. Em 21/10/2026 passaram 14 grupos de política de trial, 15 de equipe no banco, 8 de equipe HTTP e 14 de páginas públicas, além das regressões existentes, TypeScript e build. As duas migrações foram aplicadas ao Supabase; os status e prazos das nove empresas existentes foram preservados. Verificação visual/mobile, concorrência entre conexões PostgreSQL e autorização/cobrança real do cartão continuam fora dessa evidência automatizada. Permanece o aviso preexistente de [proteção contra senhas vazadas desabilitada](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+Na validação seguinte de 21/10, a matriz foi ampliada para **24 grupos de banco, 14 grupos HTTP de equipe e 14 da landing**, cobrindo os três planos e os papéis OWNER/MANAGER/EMPLOYEE. A execução com Supabase real passou em **12 grupos com seis logins DEMO**, incluindo Server Actions de login/conclusão, isolamento, limites de 31/90 dias e exportação. Apenas três atendimentos fictícios explicitamente identificados foram concluídos; nenhuma assinatura foi ativada ou prazo alterado. Nomes longos, filtros estreitos e destaque duplicado no menu foram corrigidos. Build, TypeScript e 107 testes unitários passaram; a validação visual em celular continua pendente porque a política do navegador bloqueou o localhost.
+
+`pnpm test:plan-accounts:live` exige `TEST_PLAN_ACCOUNTS_LIVE=1`, um manifesto `TEST_PLAN_ACCOUNTS_FILE` dentro de `test-results/` e `TEST_PLAN_ACCOUNTS_PASSWORD` no ambiente ou `.env.local` ignorado. O manifesto identifica exatamente os três tenants, contas `@example.invalid`, profissional, atendimento, data e marcador fictício autorizados; nunca usar dados de clientes. O script verifica o contexto DEMO antes de escrever, não reverte conclusões e encerra suas próprias sessões. Ele não roda automaticamente no CI. `scripts/provision-plan-demo.sql` documenta o provisionamento administrativo limitado às DEMOs já existentes Academia (Essencial), Escritório (Profissional) e Salão (Empresarial), sem novas empresas, alteração de políticas de cartão ou senhas em código. Para respeitar o Essencial, somente o profissional fictício 02 da Academia, sem vínculo nem atendimentos, foi arquivado; seu cadastro foi preservado.
 
 O fluxo inicial reutiliza as tabelas e regras existentes. Serviços e profissionais recebem um UUID de registro por formulário: repetir o mesmo envio com o mesmo conteúdo retoma o cadastro salvo, sem inserir outro. O UUID não substitui a autorização por empresa.
 
@@ -192,10 +252,12 @@ Arquitetura e árvore: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Relatório 
 
 Orientações de recuperação local: [docs/RECUPERACAO-LEGADO.md](docs/RECUPERACAO-LEGADO.md). Backups e relatórios privados ficam fora do versionamento público, na pasta ignorada `.recovery/`.
 
-## Demonstração e próxima integração
+## Demonstração e habilitação dos pagamentos
 
 Contas e roteiro: [docs/DEMONSTRACAO.md](docs/DEMONSTRACAO.md). Mercado Pago: [docs/MERCADO_PAGO.md](docs/MERCADO_PAGO.md).
 
-A integração de pagamentos permanece por último nesta sequência, após concluir a validação operacional. Checkout, webhook e conciliação continuam pendentes; nenhum estado de assinatura paga deve ser concedido por simulação.
+A integração está implementada e permanece desativada para cobrança real até a homologação externa. `BILLING_MODE=disabled` e `private.billing_config.enabled=false` são os padrões de instalação. Tokens separados de teste e produção, conta recebedora, segredo de webhook e gateway privado são descritos no [guia de pagamentos](docs/MERCADO_PAGO.md); nenhum segredo pertence ao frontend ou ao Git.
+
+O cartão é preenchido exclusivamente no Mercado Pago; o Pix é mensal e manual. Cotação, empresa, autorização, valores e período de acesso são validados no backend. A assinatura autorizada e o retorno do checkout não equivalem a pagamento aprovado. Estornos e contestações revogam o período correspondente, e nenhum resultado de teste concede acesso pago. A verificação de telefone e a configuração do webhook foram concluídas; a homologação financeira permanece pendente, sem transação real nesta entrega.
 
 Reserva pública exige BOOKING_GATEWAY_SECRET privado no servidor e seu hash em private.booking_gateway. O segredo não vai ao navegador. Para deploy, copie a variável privada do ambiente local para o ambiente servidor da Vercel com cuidado; não gere um segredo diferente sem atualizar o hash no banco. Localmente, as reservas compartilham o limite de IP; na Vercel é usado o header de IP definido pela plataforma. Somente o provedor pode preencher esse header em produção.

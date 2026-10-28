@@ -1,30 +1,30 @@
 # Sistema visual da Web Fidelize
 
-O sistema visual combina superfícies grafite na comunicação comercial e na navegação com uma área de trabalho clara. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
+O sistema visual usa superfícies claras, texto azul-marinho e detalhes em ciano na landing, no acesso, no painel das empresas e no admin. Cabeçalhos, navegação e formulários usam a mesma identidade clara. A hierarquia privilegia a tarefa principal, os dados do negócio e o próximo passo. Bordas finas, cantos moderados e sombras discretas separam o conteúdo sem depender de grandes efeitos decorativos.
 
 Este documento descreve os padrões e os pontos de manutenção do código. Resultados de build, testes e revisão visual são registrados nos relatórios de cada incremento, separadamente.
 
 ## Superfícies e cores
 
-Os tokens comuns ficam em [globals.css](../src/app/globals.css). O tema padrão é grafite. `.workspace-shell`, `.admin-shell` e `.onb-entry` sobrescrevem as cores para a área clara. O cabeçalho e a navegação lateral do painel mantêm o grafite `#11151d`, com item atual identificado por cor, fundo, borda e `aria-current`.
+Os tokens comuns ficam em [globals.css](../src/app/globals.css). O tema base grafite permanece restrito às páginas públicas legadas que ainda o usam. `.workspace-shell`, `.admin-shell`, `.onb-entry` e `.ui-state-page` aplicam os tokens claros; a autenticação possui tokens claros próprios. Cabeçalhos e navegação usam branco, com item atual identificado por ciano, fundo suave, borda e `aria-current`. O fundo do documento acompanha esses contêineres, inclusive durante carregamento e erro.
 
 | Token              | Tema grafite | Área de trabalho clara | Uso                            |
 | ------------------ | ------------ | ---------------------- | ------------------------------ |
-| `--bg`             | `#101216`    | `#f6f7f9`              | Fundo da página                |
+| `--bg`             | `#101216`    | `#f7fafc`              | Fundo da página                |
 | `--panel`          | `#181c23`    | `#ffffff`              | Cartões e painéis              |
-| `--surface-subtle` | `#20252d`    | `#f0f3f6`              | Superfícies secundárias        |
-| `--line`           | `#303640`    | `#e1e6ed`              | Bordas e divisores             |
-| `--text`           | `#f5f7fa`    | `#17212b`              | Conteúdo principal             |
-| `--muted`          | `#a3aab8`    | `#657182`              | Descrições e metadados         |
-| `--cyan`           | `#5eead4`    | `#0d8078`              | Ação principal, seleção e foco |
+| `--surface-subtle` | `#20252d`    | `#edf6fa`              | Superfícies secundárias        |
+| `--line`           | `#303640`    | `#dce7ef`              | Bordas e divisores             |
+| `--text`           | `#f5f7fa`    | `#082b46`              | Conteúdo principal             |
+| `--muted`          | `#a3aab8`    | `#52677a`              | Descrições e metadados         |
+| `--cyan`           | `#5eead4`    | `#00758c`              | Ação principal, seleção e foco |
 | `--on-accent`      | `#093b35`    | `#ffffff`              | Texto sobre a ação principal   |
-| `--accent-soft`    | `#173c38`    | `#e6f4f0`              | Destaques suaves               |
+| `--accent-soft`    | `#173c38`    | `#e5f8fc`              | Destaques suaves               |
 
-O nome histórico `--cyan` permanece no código, embora seu valor varie entre menta e verde conforme a superfície. Erros usam o conjunto `--danger`, `--danger-bg` e `--danger-line`, acompanhado de texto que explica o problema.
+Na interface clara, `--cyan` usa ciano escuro para preservar o contraste de texto, botões e foco. O ciano intenso da marca fica nos detalhes decorativos. Erros usam o conjunto `--danger`, `--danger-bg` e `--danger-line`, acompanhado de texto que explica o problema.
 
 Estilos específicos ficam limitados ao contêiner da experiência:
 
-- Landing: `.landing` e tokens `--wf-*` em [landing.css](../src/app/landing.css).
+- Landing: `.wf-site` e tokens `--wf-*` em [landing.css](../src/app/landing.css). O tema claro é independente dos tokens globais; ciano intenso fica nos detalhes, com azul-marinho ou ciano escuro para textos legíveis. As camadas decorativas ficam atrás do conteúdo e não interceptam cliques.
 - Autenticação: [auth.css](../src/components/auth.css), com apresentação de marca e formulário claro.
 - Painel: [painel.css](../src/app/painel/painel.css), [operations.css](../src/app/painel/operations.css) e estilos próprios da agenda.
 - Configuração guiada: `.onb-page`, tokens `--onb-*` e [onboarding.css](../src/components/onboarding/onboarding.css).
@@ -66,6 +66,8 @@ Prefira esses componentes ao repetir símbolos, cabeçalhos e estados vazios. A 
 
 ## Ícones do site
 
+A marca compartilhada usa [public/webfidelize-logo.png](../public/webfidelize-logo.png), arquivo original de 1600 × 533 enviado pelo proprietário, sem redesenho. O componente `Brand` preserva a proporção e contém o espaço externo da imagem por CSS. A placa clara mantém o contraste também nos cabeçalhos escuros. `public/logo.png` é a versão transparente preexistente da mesma identidade, incorporada ao SVG do ícone com enquadramento no monograma WF. Não substituir pelo antigo símbolo genérico em formato de W.
+
 O símbolo da marca também aparece em [src/app/icon.svg](../src/app/icon.svg), para identificação do site no navegador, e em [src/app/apple-icon.tsx](../src/app/apple-icon.tsx), que gera um PNG de 180 × 180 com `ImageResponse` de `next/og`. São arquivos locais, sem imagens ou fontes externas. O Next.js inclui os metadados de ícone conforme suas [convenções nativas de app icons](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons).
 
 Esses arquivos identificam visualmente o site. Eles não implementam instalação de aplicativo, suporte offline, notificações ou sincronização em segundo plano. A geração do PNG e as tags resultantes devem ser verificadas no build e nas respostas HTTP; revisão somente do código não comprova a renderização nos dispositivos.
@@ -84,12 +86,20 @@ Transições são curtas e discretas, em geral de 160ms. `prefers-reduced-motion
 
 ## Acesso e orientação no celular
 
-O `AuthShell` mantém a apresentação grafite da marca e a área clara de formulário. O símbolo existente é preservado; os detalhes visuais usam apenas CSS e SVG local. O link de pular conteúdo aparece ao receber foco e leva diretamente ao formulário. No celular, os campos usam 16px e os links auxiliares têm área de toque mínima de 44px. As notas e os placeholders usam cores de leitura, sem depender de cinza muito claro. Os recuos consideram a área segura do dispositivo.
+O `AuthShell` apresenta a marca sobre fundo claro com detalhes suaves em ciano e formulário branco. O símbolo existente é preservado; os detalhes visuais usam apenas CSS e SVG local. O link de pular conteúdo aparece ao receber foco e leva diretamente ao formulário. No celular, os campos usam 16px e os links auxiliares têm área de toque mínima de 44px. As notas e os placeholders usam cores de leitura, sem depender de cinza muito claro. Os recuos consideram a área segura do dispositivo.
 
 O botão do menu móvel mostra a seção atual e mantém o nome acessível de abrir ou fechar o menu. A página exata usa `aria-current="page"`; uma ficha dentro da seção usa `aria-current="location"`, com o mesmo destaque visual na navegação lateral e nos atalhos inferiores. A lista continua sendo montada conforme o papel recebido do servidor. Isso orienta o usuário sem criar novas permissões ou rotas.
 
 Cabeçalhos e ações compartilhados permitem quebra de linha para nomes longos. Estados vazios acomodam mais de uma ação sem comprimir os botões. Controles desabilitados mostram impedimento; botões com `aria-busy="true"` mantêm o indicador de espera. Esses ajustes não substituem a validação de autorização no servidor.
 
 ## Manutenção
+
+### Imagem da demonstração
+
+`public/demo/espaco-ilustrativo.png` é uma imagem ilustrativa de recepção comercial, gerada com a ferramenta integrada ImageGen em 23/10/2026. Não representa uma empresa cliente. A demonstração identifica a imagem como ilustrativa; a página real continua usando a foto e a logo autorizadas da própria empresa. O arquivo original tem 1536 × 1024 px e deve ser entregue pela otimização de imagens do Next.js para reduzir o tráfego no celular.
+
+Prompt utilizado: “Use case: photorealistic-natural. Asset type: wide cover photograph for a Brazilian SaaS online booking demonstration, 1536x1024 landscape. Create an inviting small-business reception space, contemporary and realistic: light oak reception desk, white and warm off-white walls, two comfortable navy fabric chairs, a small indoor plant, soft natural daylight from large windows, a subtle cyan design accent. Neutral reception suitable for many service businesses, with no equipment specific to one niche. Eye-level architectural interior photography, clean balanced composition, believable materials, welcoming rather than luxury-hotel scale. No people, no writing, no logos, no watermark, no frames or UI. This will be explicitly labeled as an illustrative AI-generated space in the demo, never as a real customer business.”
+
+Validação publicada em 23/10/2026 (commit `3bae3b5`): 182 testes unitários, build, 32 grupos HTTP locais e 27 grupos anônimos em produção passaram. No navegador público foram conferidos reserva ilustrativa, rejeição de conflito, dois profissionais no mesmo horário, histórico, reinicialização e navegação por teclado. As oito demonstrações abriram a página de agendamento em 390 px sem rolagem horizontal; o layout compartilhado também foi medido em 320, 768 e 1280 px, com controles de pelo menos 44 px. A capa otimizada de 640 px respondeu como WebP de 33.466 bytes. Capturas locais em `test-results/demo-booking-mobile.png` e `test-results/demo-booking-desktop.png` (não versionadas). Nenhum dado de cliente ou reserva real foi alterado por essas interações.
 
 Uma mudança visual deve preservar os contratos dos fluxos: destinos dos links, nomes e IDs dos campos, ações no servidor, estados de erro, idempotência e autorização. Na configuração guiada, mantenha as ações vinculadas no Server Component, os permalinks e a abertura do formulário adicional quando houver erro. A revisão do layout deve incluir desktop, celular, teclado e movimento reduzido; registre as verificações efetivamente executadas no relatório do incremento.

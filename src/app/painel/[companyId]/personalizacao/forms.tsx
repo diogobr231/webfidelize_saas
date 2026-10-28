@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { PendingButton } from "@/components/pending-button";
+import { CepAddressInput } from "@/components/cep-address-input";
 import {
   brandThemes,
   LOGO_MAX_BYTES,
@@ -16,6 +17,7 @@ type CompanySettings = {
   name: string;
   booking_description?: string;
   booking_address?: string;
+  booking_maps_url?: string;
   booking_phone?: string;
   booking_theme?: string;
   display_density?: string;
@@ -120,19 +122,39 @@ export function PersonalizationForm({
           </small>
           {fieldError("description")}
         </div>
+        <CepAddressInput
+          key={state.values?.address ?? company.booking_address ?? ""}
+          id="address"
+          name="address"
+          label="Endereço de atendimento"
+          initialValue={state.values?.address ?? company.booking_address ?? ""}
+          maxLength={200}
+          placeholder="Rua, número, bairro e cidade (opcional)"
+          helper="Confira e complete com número ou complemento. O endereço aparece na sua página pública."
+        />
+        {fieldError("address")}
         <div>
-          <label htmlFor="address">Endereço de atendimento</label>
+          <label htmlFor="maps_url">Link do Google Maps</label>
           <input
-            id="address"
-            name="address"
-            autoComplete="street-address"
+            id="maps_url"
+            name="maps_url"
+            type="url"
+            inputMode="url"
+            autoComplete="url"
             defaultValue={
-              state.values?.address ?? company.booking_address ?? ""
+              state.values?.maps_url ?? company.booking_maps_url ?? ""
             }
-            maxLength={200}
-            placeholder="Rua, número, bairro e cidade (opcional)"
+            maxLength={500}
+            placeholder="https://maps.app.goo.gl/..."
+            aria-describedby="maps-url-tip"
+            aria-invalid={Boolean(state.fields?.maps_url)}
           />
-          {fieldError("address")}
+          <small id="maps-url-tip">
+            Opcional. Cole o link de compartilhamento do seu ponto no Google
+            Maps. Ele aparece na página pública para ajudar clientes a encontrar
+            seu espaço ou ponto de retirada.
+          </small>
+          {fieldError("maps_url")}
         </div>
       </section>
       <section className="panel">

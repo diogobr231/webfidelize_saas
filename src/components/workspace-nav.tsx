@@ -8,7 +8,9 @@ import { Icon, type IconName } from "@/components/ui/icon";
 
 const entries = [
   { path: "", label: "Visão geral", icon: "layout" },
+  { path: "/meu-dia", label: "Meu dia", icon: "user" },
   { path: "/agenda", label: "Agenda", icon: "calendar" },
+  { path: "/turmas", label: "Turmas e vagas", icon: "users" },
   { path: "/customers", label: "Clientes", icon: "users" },
   { path: "/services", label: "Serviços", icon: "briefcase" },
   { path: "/professionals", label: "Profissionais", icon: "user" },
@@ -19,9 +21,11 @@ const entries = [
 export function WorkspaceNav({
   companyId,
   role,
+  niche,
 }: {
   companyId: string;
   role: Role;
+  niche: string;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -44,6 +48,24 @@ export function WorkspaceNav({
           ? "Meus horários"
           : entry.label,
     })),
+    ...(canManage(role) &&
+    [
+      "restaurante",
+      "fornecedores",
+      "logistica",
+      "pet-shop",
+      "escritorio",
+      "salao",
+      "academia",
+    ].includes(niche)
+      ? [
+          {
+            path: "/operacoes",
+            label: "Operações do negócio",
+            icon: "layout" as const,
+          },
+        ]
+      : []),
     ...(role === "OWNER"
       ? [
           {
@@ -61,6 +83,16 @@ export function WorkspaceNav({
     ...(canManage(role)
       ? [
           {
+            path: "/equipe/indicadores",
+            label: "Indicadores da equipe",
+            icon: "users" as const,
+          },
+          {
+            path: "/lembretes",
+            label: "Lembretes WhatsApp",
+            icon: "phone" as const,
+          },
+          {
             path: "/assinatura",
             label: "Planos e assinatura",
             icon: "briefcase" as const,
@@ -68,15 +100,24 @@ export function WorkspaceNav({
         ]
       : []),
   ];
+  const currentEntry = navigation
+    .toSorted((a, b) => b.path.length - a.path.length)
+    .find((entry) => {
+      const href = `${base}${entry.path}`;
+      return (
+        pathname === href ||
+        pathname === `${href}/` ||
+        (href !== base && pathname.startsWith(`${href}/`))
+      );
+    });
   function currentLocation(href: string) {
-    if (pathname === href || pathname === `${href}/`) return "page" as const;
-    if (href !== base && pathname.startsWith(`${href}/`))
-      return "location" as const;
-    return undefined;
+    // Only the most specific item is current within this navigation set.
+    if (!currentEntry || href !== `${base}${currentEntry.path}`)
+      return undefined;
+    return pathname === href || pathname === `${href}/`
+      ? ("page" as const)
+      : ("location" as const);
   }
-  const currentEntry = navigation.find((entry) =>
-    currentLocation(`${base}${entry.path}`),
-  );
   return (
     <>
       <aside
@@ -163,7 +204,7 @@ export function WorkspaceNav({
       <nav className="workspace-bottom-nav" aria-label="Atalhos no celular">
         {[
           {
-            href: base,
+            href: role === "EMPLOYEE" ? `${base}/meu-dia` : base,
             label: role === "EMPLOYEE" ? "Meu dia" : "Visão geral",
             icon: "layout" as const,
           },

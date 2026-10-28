@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { teamPlanBenefits } from "@/lib/plan-benefits";
 import { money, niches } from "@/lib/catalog";
 import { commercialPlans } from "@/lib/commercial";
 import { landingStructuredData } from "@/lib/seo";
@@ -13,13 +14,13 @@ export const dynamic = "force-dynamic";
 const whatsapp =
   "https://wa.me/5518997695445?text=Ol%C3%A1!%20Quero%20conhecer%20a%20Web%20Fidelize.";
 
-function TrialLink({ secondary = false }: { secondary?: boolean }) {
+function DemoLink({ secondary = false }: { secondary?: boolean }) {
   return (
     <Link
       className={`wf-button ${secondary ? "wf-button-outline" : ""}`}
-      href="/cadastro"
+      href="/demonstracao"
     >
-      Testar grátis por 7 dias
+      Experimentar demonstração
       <Icon name="arrow-right" />
     </Link>
   );
@@ -32,9 +33,14 @@ const questions = [
       "Agenda diária e semanal, cadastro de clientes, serviços e profissionais, disponibilidade semanal e uma página pública para receber reservas. Você também pode remarcar e cancelar atendimentos pelo painel, conforme sua permissão.",
   },
   {
-    question: "Como funcionam os 7 dias gratuitos?",
+    question: "Como funciona a demonstração?",
     answer:
-      "Crie sua conta, confirme seu e-mail e cadastre a empresa. Os 7 dias começam na criação da empresa, com o plano Essencial e 1 profissional na agenda. O teste não solicita cartão e não gera cobrança automática.",
+      "Você escolhe seu segmento e experimenta a agenda e a ficha do cliente com dados fictícios. Não precisa de login ou cartão. As alterações existem apenas na demonstração e são apagadas ao recarregar. Para organizar sua operação real, consulte os planos e as condições de ativação.",
+  },
+  {
+    question: "Como funcionam os 7 dias grátis?",
+    answer:
+      "São 7 dias grátis no Essencial, com 1 profissional, sem cartão e sem cobrança automática. Confirme seu e-mail e cadastre a empresa para iniciar o teste. O prazo fica salvo no sistema e aparece no painel; entrar novamente não o renova. Ao terminar, as alterações ficam bloqueadas e seus dados continuam disponíveis para consulta. Para continuar depois do teste, fale com a Web Fidelize sobre a contratação.",
   },
   {
     question: "Meu cliente precisa instalar um aplicativo?",
@@ -49,7 +55,7 @@ const questions = [
   {
     question: "Posso compartilhar minha agenda no WhatsApp?",
     answer:
-      "Sim. Copie o link da sua página e compartilhe em conversas, no perfil do Instagram ou onde seus clientes encontrarem você. O compartilhamento é feito por você; mensagens, lembretes automáticos e chatbot ainda não estão disponíveis.",
+      "Sim. Copie o link da sua página e compartilhe em conversas, no perfil do Instagram ou onde seus clientes encontrarem você. O compartilhamento é feito por você; o envio automático de avisos depende da conexão oficial do WhatsApp, de modelos aprovados e da cota da empresa. Chatbot não está incluído.",
   },
   {
     question: "O cliente consegue alterar a reserva sozinho?",
@@ -59,12 +65,12 @@ const questions = [
   {
     question: "Já posso contratar e pagar pelo site?",
     answer:
-      "A assinatura e a cobrança online ainda não estão disponíveis. Os valores apresentados são os preços previstos dos planos. Você pode usar o teste gratuito e falar pelo WhatsApp para conhecer a proposta para seu negócio.",
+      "Você já pode testar por 7 dias sem cartão. A contratação e a cobrança online ainda estão em preparação e este teste não gera cobrança automática. Fale pelo WhatsApp para conhecer os planos e as condições para continuar; entrar em contato não ativa uma assinatura paga.",
   },
   {
     question: "O sistema tem módulos específicos para cada segmento?",
     answer:
-      "Hoje, os segmentos compartilham o núcleo de agenda, clientes e serviços. Recursos como prontuário, comandas, caixa, cadastro de pets, rotas, turmas e inteligência artificial não fazem parte da versão disponível.",
+      "Os segmentos compartilham agenda individual, turmas com limite de vagas, reservas online, clientes e serviços. Recursos como prontuário, comandas, caixa, cadastro de pets, rotas e inteligência artificial para clientes não fazem parte da versão disponível.",
   },
 ];
 
@@ -143,7 +149,9 @@ export default async function Home() {
             disponíveis, direto pelo celular.
           </p>
           <div className="wf-hero-actions">
-            <TrialLink />
+            <Link className="wf-button" href="/cadastro">
+              Testar grátis por 7 dias <Icon name="arrow-right" />
+            </Link>
             <a
               className="wf-button wf-button-outline"
               href={whatsapp}
@@ -157,13 +165,17 @@ export default async function Home() {
           <div className="wf-trial-facts">
             <span>
               <Icon name="check" />
-              Sem cartão para testar
+              Teste sem cartão e sem cobrança automática
             </span>
             <span>
               <Icon name="check" />
-              Acesso pelo navegador
+              Comece com 1 profissional no Essencial
             </span>
           </div>
+          <p className="wf-plan-trial-note">
+            <strong>7 dias grátis no Essencial</strong>, sem cartão e sem
+            cobrança automática. <a href="#teste-gratis">Ver condições</a>.
+          </p>
           <a className="wf-tour-link" href="#demonstracao">
             Veja como seu cliente agenda <Icon name="arrow-right" size={15} />
           </a>
@@ -445,8 +457,9 @@ export default async function Home() {
             <span className="wf-setup-number">01</span>
             <h3>Crie seu espaço.</h3>
             <p>
-              Cadastre sua conta, confirme o e-mail e crie sua empresa para
-              iniciar os 7 dias de teste.
+              Cadastre sua conta, confirme o e-mail e crie sua empresa. Os 7
+              dias de teste começam nesse momento, sem precisar cadastrar
+              cartão.
             </p>
           </article>
           <article>
@@ -467,8 +480,8 @@ export default async function Home() {
           </article>
         </div>
         <div className="wf-centered-action">
-          <TrialLink />
-          <span>Teste no plano Essencial, com 1 profissional na agenda.</span>
+          <DemoLink />
+          <span>Explore com dados de exemplo, sem login e sem cartão.</span>
         </div>
       </section>
       <section
@@ -476,7 +489,78 @@ export default async function Home() {
         id="segmentos"
         aria-labelledby="segments-title"
       >
-        <div>
+        <div className="wf-segment-intro">
+          <div className="wf-segment-signal" aria-hidden="true">
+            <svg viewBox="0 0 184 112" fill="none" focusable="false">
+              <defs>
+                <linearGradient
+                  id="segment-calendar-edge"
+                  x1="62"
+                  y1="22"
+                  x2="128"
+                  y2="94"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop stopColor="#5eead4" />
+                  <stop offset="1" stopColor="#a78bfa" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M35 32h18l11 11m56 28 11 11h18M35 81h14l15-15m56-20 14-14h15"
+                stroke="#5eead4"
+                strokeOpacity=".4"
+                strokeDasharray="3 5"
+              />
+              <path
+                d="M58 18h-9v15m77-15h9v15M49 79v15h9m68 0h9V79"
+                stroke="#576776"
+                strokeLinecap="round"
+              />
+              <rect
+                x="64"
+                y="22"
+                width="56"
+                height="68"
+                rx="12"
+                fill="#18242b"
+                stroke="url(#segment-calendar-edge)"
+              />
+              <path
+                d="M65 43h54M80 18v11m24-11v11"
+                stroke="#8bebe0"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <rect
+                x="75"
+                y="53"
+                width="13"
+                height="13"
+                rx="4"
+                fill="#5eead4"
+              />
+              <path
+                d="m78 59 2 2 4-4"
+                stroke="#142b28"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M98 58h10M98 63h6M77 76h30"
+                stroke="#718993"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <circle cx="29" cy="32" r="6" fill="#172e2e" stroke="#5eead4" />
+              <circle cx="155" cy="32" r="6" fill="#20243b" stroke="#a78bfa" />
+              <circle cx="29" cy="81" r="6" fill="#172e2e" stroke="#67d9ee" />
+              <circle cx="155" cy="82" r="6" fill="#172e2e" stroke="#5eead4" />
+              <path d="M92 3v6m-3-3h6m74 51v6m-3-3h6" stroke="#a78bfa" />
+              <circle cx="17" cy="56" r="1.5" fill="#a78bfa" />
+            </svg>
+            <span>AGENDA · CLIENTES · SERVIÇOS</span>
+          </div>
           <span className="wf-eyebrow">
             PARA QUEM TRABALHA COM HORA MARCADA
           </span>
@@ -487,34 +571,43 @@ export default async function Home() {
           </p>
         </div>
         <div className="wf-segment-links">
-          {niches.slice(0, 4).map((niche) => (
-            <Link href={`/entrar/${niche.slug}`} key={niche.slug}>
-              <Icon
-                name={
-                  niche.slug === "salao"
-                    ? "scissors"
-                    : niche.slug === "pet-shop"
-                      ? "paw"
-                      : niche.slug === "clinica"
-                        ? "heart"
-                        : "briefcase"
-                }
-              />
-              {niche.name}
-              <Icon name="arrow-right" />
+          {niches.map((niche) => (
+            <Link
+              href={`/segmentos/${niche.slug}`}
+              key={niche.slug}
+              className={`wf-segment-${niche.slug}`}
+            >
+              <span className="wf-segment-icon">
+                <Icon
+                  name={
+                    niche.slug === "salao"
+                      ? "scissors"
+                      : niche.slug === "pet-shop"
+                        ? "paw"
+                        : niche.slug === "clinica"
+                          ? "heart"
+                          : niche.slug === "restaurante"
+                            ? "utensils"
+                            : niche.slug === "academia"
+                              ? "dumbbell"
+                              : niche.slug === "fornecedores" ||
+                                  niche.slug === "logistica"
+                                ? "truck"
+                                : "briefcase"
+                  }
+                />
+              </span>
+              <span className="wf-segment-name">{niche.name}</span>
+              <Icon name="arrow-up-right" className="wf-segment-arrow" />
             </Link>
           ))}
         </div>
         <div className="wf-other-segments">
-          <span>Outros segmentos com módulos específicos em planejamento:</span>
-          <div>
-            {niches.slice(4).map((niche) => (
-              <Link key={niche.slug} href={`/entrar/${niche.slug}`}>
-                {niche.name}
-                <Icon name="arrow-up-right" size={14} />
-              </Link>
-            ))}
-          </div>
+          <span>
+            Todos os segmentos têm demonstração interativa de agenda, clientes e
+            serviços. Veja os recursos disponíveis e planejados na página de
+            cada segmento.
+          </span>
         </div>
       </section>
       <section
@@ -531,10 +624,11 @@ export default async function Home() {
             <p>
               Converse sobre a implantação da Web Fidelize no seu negócio:
               serviços, profissionais, horários e página de agendamento
-              organizados com você.
+              organizados com você. Conte o que busca e indique um plano de
+              interesse ou escolha Outros.
             </p>
             <Link className="wf-button" href="/diagnostico">
-              Solicitar diagnóstico <Icon name="arrow-right" size={17} />
+              Descreva o que você busca <Icon name="arrow-right" size={17} />
             </Link>
             <span className="wf-implementation-note">
               Escopo e investimento sob consulta. Sem contratação automática.
@@ -631,10 +725,9 @@ export default async function Home() {
               <ul>
                 {[
                   "Agenda visual por dia e semana",
-                  "Cadastro de clientes e serviços",
-                  "Disponibilidade por profissional",
-                  "Página pública de agendamento",
-                  "Seu logotipo e 4 opções de cor",
+                  "Clientes, serviços e histórico",
+                  "Agendamento com sua foto, logo e cores",
+                  ...teamPlanBenefits(plan),
                 ].map((feature) => (
                   <li key={feature}>
                     <Icon name="check" />
@@ -642,22 +735,22 @@ export default async function Home() {
                   </li>
                 ))}
               </ul>
-              <TrialLink secondary={plan.id !== "profissional"} />
+              <DemoLink secondary={plan.id !== "profissional"} />
               <span className="wf-plan-trial-note">
-                Teste de 7 dias no plano Essencial.
+                Demonstração com dados de exemplo. Não ativa assinatura.
               </span>
             </article>
           ))}
         </div>
-        <div className="wf-pricing-note">
+        <div className="wf-pricing-note" id="teste-gratis">
           <Icon name="phone" />
           <div>
             <p>
-              <strong>
-                O teste é gratuito. A cobrança online ainda não está disponível.
-              </strong>{" "}
-              Os valores acima apresentam os planos previstos. Para conhecer a
-              proposta para sua empresa,{" "}
+              <strong>7 dias grátis no Essencial, com 1 profissional.</strong>{" "}
+              Confirme seu e-mail e crie sua empresa para começar.{" "}
+              <strong>Sem cartão e sem cobrança automática.</strong> O prazo
+              aparece no painel e termina automaticamente após os 7 dias. Para
+              continuar depois do teste e conhecer os planos,{" "}
               <a href={whatsapp} target="_blank" rel="noopener noreferrer">
                 fale no WhatsApp
               </a>
@@ -665,8 +758,13 @@ export default async function Home() {
             </p>
             <p>
               O proprietário ocupa uma vaga quando cadastrado como profissional
-              na agenda. Nenhum cartão é solicitado no teste.
+              na agenda. Ao terminar o teste, alterações ficam bloqueadas e os
+              dados permanecem disponíveis para consulta. A contratação online
+              ainda está em preparação.
             </p>
+            <Link className="wf-button wf-button-outline" href="/cadastro">
+              Testar grátis por 7 dias <Icon name="arrow-right" />
+            </Link>
           </div>
         </div>
       </section>
@@ -715,7 +813,9 @@ export default async function Home() {
             </p>
           </div>
           <div className="wf-final-actions">
-            <TrialLink />
+            <Link className="wf-button" href="/cadastro">
+              Testar grátis por 7 dias <Icon name="arrow-right" />
+            </Link>
             <a
               className="wf-button wf-button-outline"
               href={whatsapp}
@@ -725,7 +825,9 @@ export default async function Home() {
               <Icon name="phone" />
               Falar no WhatsApp
             </a>
-            <span>7 dias no Essencial · Sem cartão</span>
+            <span>
+              7 dias no Essencial · sem cartão · sem cobrança automática
+            </span>
           </div>
         </div>
       </section>

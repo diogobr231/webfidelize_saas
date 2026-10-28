@@ -1,10 +1,10 @@
 .onb-page {
-  --onb-bg: #f6f7f9;
+  --onb-bg: #f7fafc;
   --onb-card: #fff;
-  --onb-border: #e1e6ed;
-  --onb-muted: #657182;
-  --onb-cyan: #0d8078;
-  --onb-ink: #17212b;
+  --onb-border: #dce7ef;
+  --onb-muted: #52677a;
+  --onb-cyan: #00758c;
+  --onb-ink: #082b46;
   color-scheme: light;
   width: 100%;
   min-width: 0;
@@ -122,8 +122,8 @@
 }
 .onb-progress-nav li[data-current="true"] {
   border-color: #78b9b0;
-  background: #eff8f5;
-  box-shadow: 0 0 0 1px #0d807808;
+  background: #e5f8fc;
+  box-shadow: 0 0 0 1px #00758c08;
 }
 .onb-progress-nav li > a,
 .onb-progress-nav li > div {
@@ -216,7 +216,7 @@
   border-radius: 14px;
   padding: 24px;
   margin-bottom: 18px;
-  box-shadow: 0 2px 5px #17212b03;
+  box-shadow: 0 2px 5px #082b4603;
 }
 .onb-card h2 {
   font-size: 20px;
@@ -282,7 +282,7 @@
 }
 .onb-field label > span,
 .onb-niches legend > span {
-  color: #657182;
+  color: #52677a;
 }
 .onb-page .onb-field input {
   display: block;
@@ -295,7 +295,7 @@
   color: var(--onb-ink);
   font-size: 14px;
   line-height: 1.5;
-  box-shadow: 0 1px 2px #17212b03;
+  box-shadow: 0 1px 2px #082b4603;
   transition:
     border-color 0.16s,
     box-shadow 0.16s;
@@ -309,7 +309,7 @@
 }
 .onb-page .onb-field input:focus-visible {
   border-color: var(--onb-cyan);
-  outline: 3px solid #0d80781c;
+  outline: 3px solid #00758c1c;
   outline-offset: 1px;
 }
 .onb-page .onb-field input[aria-invalid="true"] {
@@ -372,8 +372,8 @@
 }
 .onb-page .onb-niche-card:has(input:checked) {
   border-color: #57a79c;
-  background: #eff8f5;
-  box-shadow: 0 0 0 1px #0d807809;
+  background: #e5f8fc;
+  box-shadow: 0 0 0 1px #00758c09;
 }
 .onb-page .onb-niche-card:has(input:focus-visible) {
   outline: 2px solid var(--onb-cyan);
@@ -527,8 +527,8 @@
 .onb-page button:hover,
 .onb-page .button:hover,
 .onb-page .onb-primary:hover {
-  background: #096c65;
-  box-shadow: 0 2px 5px #0d807812;
+  background: #006c81;
+  box-shadow: 0 2px 5px #00758c12;
 }
 .onb-page .onb-secondary,
 .onb-page .button.secondary {
@@ -553,7 +553,7 @@
   padding: 22px 20px;
   position: sticky;
   top: 24px;
-  box-shadow: 0 2px 5px #17212b03;
+  box-shadow: 0 2px 5px #082b4603;
 }
 .onb-context-header {
   display: flex;
@@ -784,14 +784,14 @@
   min-height: 100vh;
   padding: 0;
   margin: 0;
-  background: #f6f7f9;
+  background: #f7fafc;
 }
 .onb-entry > nav {
   max-width: 1176px;
   margin: 0 auto;
   padding: 18px 28px;
   min-height: 80px;
-  border-bottom: 1px solid #e1e6ed;
+  border-bottom: 1px solid #dce7ef;
 }
 .onb-entry > nav form {
   margin: 0;
@@ -816,18 +816,18 @@
   max-width: none;
   min-height: 100vh;
   padding: 24px;
-  color: #17212b;
+  color: #082b46;
   color-scheme: light;
-  background: #f6f7f9;
+  background: #f7fafc;
 }
 .onb-loading-card {
   width: 100%;
   max-width: 460px;
   padding: 36px;
-  border: 1px solid #e1e6ed;
+  border: 1px solid #dce7ef;
   border-radius: 16px;
   background: #fff;
-  box-shadow: 0 8px 28px #17212b05;
+  box-shadow: 0 8px 28px #082b4605;
 }
 .onb-loading h1 {
   font-size: 26px;
@@ -836,7 +836,7 @@
   margin: 20px 0 10px;
 }
 .onb-loading p {
-  color: #657182;
+  color: #52677a;
   font-size: 14px;
   line-height: 1.65;
   margin: 0;
@@ -846,7 +846,7 @@
   width: 30px;
   height: 30px;
   border: 3px solid #e3eeeb;
-  border-top-color: #0d8078;
+  border-top-color: #00758c;
   border-radius: 50%;
   animation: onb-spin 0.8s linear infinite;
 }

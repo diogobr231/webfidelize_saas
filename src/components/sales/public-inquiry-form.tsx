@@ -7,12 +7,12 @@ import { submitSalesInquiry } from "@/app/diagnostico/actions";
 import { money, niches } from "@/lib/catalog";
 import {
   salesTeamSizes,
-  salesBudgetRanges,
   salesTimelines,
   salesDecisionRoles,
   type SalesActionState,
   type SalesOffer,
 } from "@/lib/sales";
+import type { CommercialPlan } from "@/lib/commercial";
 import { Icon } from "@/components/ui/icon";
 
 const stages = ["Seu negócio", "Suas prioridades", "Como falar com você"];
@@ -33,11 +33,13 @@ type FieldControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 export function PublicInquiryForm({
   offers,
+  plans,
   selectedOfferId,
   requestId,
   attribution,
 }: {
   offers: SalesOffer[];
+  plans: CommercialPlan[] | null;
   selectedOfferId: string;
   requestId: string;
   attribution: { utm_source: string; utm_medium: string; utm_campaign: string };
@@ -157,10 +159,11 @@ export function PublicInquiryForm({
         <div className="sales-success-trial">
           <strong>Quer conhecer a plataforma enquanto isso?</strong>
           <p>
-            O teste gratuito continua disponível por 7 dias no plano Essencial.
+            Explore a agenda com dados de exemplo, sem login e sem cartão. A
+            demonstração não cria reservas nem inicia uma assinatura.
           </p>
-          <Link href="/cadastro">
-            Começar meu teste grátis <Icon name="arrow-right" size={16} />
+          <Link href="/demonstracao">
+            Experimentar demonstração <Icon name="arrow-right" size={16} />
           </Link>
         </div>
       </section>
@@ -333,7 +336,7 @@ export function PublicInquiryForm({
           Não precisa ter tudo definido. Conte o que mais toma tempo na sua
           rotina.
         </p>
-        <label htmlFor="sales-challenge">Sua principal necessidade</label>
+        <label htmlFor="sales-challenge">Descreva o que você busca</label>
         <textarea
           id="sales-challenge"
           name="challenge"
@@ -351,7 +354,7 @@ export function PublicInquiryForm({
           pacientes ou informações pessoais de clientes.
         </p>
         <label htmlFor="sales-budget">
-          Investimento que você considera para a implantação
+          Qual plano combina com o que você busca?
         </label>
         <select
           id="sales-budget"
@@ -361,12 +364,25 @@ export function PublicInquiryForm({
           onChange={(event) => update("budget_range", event.target.value)}
         >
           <option value="">Selecione</option>
-          {salesBudgetRanges.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
+          {(plans || [])
+            .filter((plan) =>
+              ["essencial", "profissional", "empresarial"].includes(plan.id),
+            )
+            .map((plan) => (
+              <option key={plan.id} value={`plan-${plan.id}`}>
+                {plan.name} · {money(plan.cents)}/mês · até {plan.staff}{" "}
+                {plan.staff === 1 ? "profissional" : "profissionais"}
+              </option>
+            ))}
+          <option value="other">Outros / quero orientação</option>
         </select>
+        <p className="sales-note">
+          Escolha apenas uma opção. Isso indica seu interesse, sem contratar ou
+          cobrar. O acompanhamento de implantação tem orçamento separado.
+          {plans === null
+            ? " Os preços não carregaram agora; escolha Outros para receber orientação."
+            : ""}
+        </p>
         <div className="sales-fields-row">
           <div>
             <label htmlFor="sales-timeline">Quando pretende começar?</label>

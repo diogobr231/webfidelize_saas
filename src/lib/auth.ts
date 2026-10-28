@@ -36,7 +36,29 @@ export const requireCompany = cache(async function requireCompany(
   if (!company) redirect("/painel?erro=acesso");
   if (management && !canManage(member.role as Role))
     redirect(`/painel/${companyId}?erro=permissao`);
-  if (write && !hasAccess(company.status, company.trial_ends_at))
-    redirect(`/painel/${companyId}?erro=assinatura`);
-  return { db, user, company, role: member.role as Role };
+  let accessValid = hasAccess(
+    company.status,
+    company.trial_ends_at,
+    new Date(),
+    company.paid_until,
+  );
+  // A future paid deadline can contain a refunded gap. Ask for the access bit
+  // without exposing the owner's financial records to managers or employees.
+  if (company.status === "active" && accessValid) {
+    try {
+      const { data, error } = await db.rpc("company_access_state", {
+        p_company_id: companyId,
+      });
+      accessValid = !error && data === true;
+    } catch {
+      accessValid = false;
+    }
+  }
+  if (write && !accessValid) redirect(`/painel/${companyId}?erro=assinatura`);
+  return {
+    db,
+    user,
+    company: { ...company, access_valid: accessValid },
+    role: member.role as Role,
+  };
 });

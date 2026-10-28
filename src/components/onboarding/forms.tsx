@@ -170,11 +170,13 @@ export function CompanySetupForm() {
           <Icon name="sparkles" size={18} />
         </span>
         <p>
-          Seu teste de 7 dias começa ao criar a empresa, no plano Essencial com
-          1 profissional na agenda. Sem cartão e sem cobrança automática.
+          Ao criar sua empresa, você começa os 7 dias grátis no Essencial, com 1
+          profissional. Não precisa de cartão e não há cobrança automática. O
+          prazo fica salvo no sistema; você pode continuar a configuração depois
+          sem perder os dados ou reiniciar o teste.
         </p>
       </div>
-      <FormActions nextLabel="Criar empresa e continuar" />
+      <FormActions nextLabel="Criar empresa e começar teste" />
     </form>
   );
 }

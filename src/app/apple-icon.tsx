@@ -1,4 +1,8 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const brandLogo = `data:image/png;base64,${readFileSync(join(process.cwd(), "public/webfidelize-logo.png")).toString("base64")}`;
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -13,19 +17,26 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#11151d",
+          background: "#f7f7f7",
         }}
       >
-        <svg width="140" height="140" viewBox="0 0 64 64" fill="none">
-          <path
-            d="M12 18 24 47 34 23l7 15 11-20"
-            stroke="#5eead4"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div
+          style={{
+            display: "flex",
+            position: "relative",
+            width: 149,
+            height: 100,
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={brandLogo}
+            alt=""
+            width={480}
+            height={160}
+            style={{ position: "absolute", left: -17, top: -30 }}
           />
-          <circle cx="52" cy="18" r="3.5" fill="#5eead4" />
-        </svg>
+        </div>
       </div>
     ),
     size,

@@ -4,17 +4,15 @@
   padding: 0;
 }
 .workspace-header {
-  --text: #f5f7fa;
-  --muted: #a3aab8;
-  --cyan: #5eead4;
   display: flex;
   align-items: center;
   gap: 28px;
   min-height: 72px;
   padding: 0 28px;
-  background: #11151d;
+  background: #fff;
   color: var(--text);
-  border-bottom: 1px solid #2a303b;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 2px 14px #082b4505;
   position: sticky;
   top: 0;
   z-index: 30;
@@ -22,24 +20,29 @@
 .workspace-header .brand {
   min-width: 190px;
   font-size: 23px;
+  flex-shrink: 0;
 }
 .workspace-header-context {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #a3aab8;
+  color: var(--muted);
   font-size: 12px;
 }
 .workspace-header-context > span {
   height: 18px;
   width: 1px;
-  background: #343b46;
+  background: var(--line);
 }
 .workspace-account {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-left: auto;
+  min-width: 0;
+}
+.workspace-account > div {
+  min-width: 0;
 }
 .workspace-account strong {
   display: block;
@@ -51,7 +54,7 @@
   font-weight: 550;
 }
 .workspace-account > div > span {
-  color: #a3aab8;
+  color: var(--muted);
   font-size: 10px;
   display: block;
   margin-top: 2px;
@@ -59,11 +62,15 @@
 .workspace-account form button {
   margin: 0 0 0 12px;
   padding: 8px 10px;
-  min-height: 34px;
+  min-height: 44px;
   font-size: 11px;
-  background: #1c222d;
-  color: #d8dde7;
-  border-color: #343b46;
+  background: var(--surface-subtle);
+  color: var(--text);
+  border-color: var(--line);
+}
+.workspace-account form button:hover {
+  background: var(--accent-soft);
+  border-color: var(--cyan);
 }
 .company-avatar {
   display: inline-flex;
@@ -72,28 +79,29 @@
   flex: 0 0 36px;
   width: 36px;
   height: 36px;
-  border: 1px solid #c5e2dc;
-  color: #0b746b;
-  background: #e6f4f0;
+  border: 1px solid var(--line);
+  color: var(--cyan);
+  background: var(--accent-soft);
   border-radius: 10px;
   font-size: 12px;
   font-weight: 650;
 }
 .workspace-header .company-avatar {
-  background: #203c3b;
-  color: #9ae3d3;
-  border-color: #36534f;
+  background: var(--accent-soft);
+  color: var(--cyan);
+  border-color: var(--line);
 }
 .workspace-grid {
   display: grid;
   grid-template-columns: 228px minmax(0, 1fr);
   gap: 0;
   min-height: calc(100dvh - 72px);
-  background: linear-gradient(90deg, #11151d 228px, transparent 228px);
+  background: linear-gradient(90deg, #fff 228px, transparent 228px);
 }
 .workspace-sidebar {
-  background: #11151d;
-  color: #c7cdd8;
+  background: #fff;
+  color: var(--text);
+  border-right: 1px solid var(--line);
   padding: 28px 16px;
   position: sticky;
   top: 72px;
@@ -101,13 +109,13 @@
   height: calc(100dvh - 72px);
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #343b46 #11151d;
+  scrollbar-color: #cbdde5 #fff;
 }
 .workspace-mobile-menu {
   display: none;
 }
 .workspace-nav-caption {
-  color: #8e99aa;
+  color: var(--muted);
   margin: 0 0 16px 12px;
   font-size: 9px;
   text-transform: uppercase;
@@ -126,21 +134,23 @@
   align-items: center;
   gap: 11px;
   border-radius: 7px;
-  color: #b9c1ce;
+  color: var(--muted);
   font-size: 12px;
   padding: 11px 12px;
   border: 1px solid transparent;
-  min-height: 42px;
+  min-height: 44px;
   position: relative;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .workspace-nav a:hover {
-  background: #1d2430;
-  color: #fff;
+  background: var(--surface-subtle);
+  color: var(--text);
 }
 .workspace-nav a[aria-current="page"] {
-  color: #b1f5e5;
-  background: #203b38;
-  border-color: #31534e;
+  color: var(--cyan);
+  background: var(--accent-soft);
+  border-color: var(--line);
   font-weight: 550;
 }
 .workspace-nav a[aria-current="page"]::after {
@@ -149,33 +159,35 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #68dcc1;
+  background: var(--cyan);
 }
 .workspace-nav-icon {
   display: inline-flex;
   width: 18px;
+  flex: 0 0 18px;
   justify-content: center;
 }
 .workspace-nav-footer {
   margin: 28px 12px 0;
   padding-top: 16px;
-  border-top: 1px solid #2a303b;
+  border-top: 1px solid var(--line);
 }
 .workspace-nav-footer a {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 16px 0;
-  color: #aab5c6;
+  margin: 4px 0;
+  min-height: 44px;
+  color: var(--muted);
   font-size: 11px;
 }
 .workspace-nav-footer a:hover {
-  color: #9be9d6;
+  color: var(--cyan);
 }
 .workspace-nav-footer p {
   font-size: 10px;
   margin-top: 32px;
-  color: #8996a9;
+  color: var(--muted);
   line-height: 1.8;
 }
 .workspace-content {
@@ -223,9 +235,9 @@
   font-size: 11px;
   margin: 0 0 24px;
   padding: 10px 14px;
-  background: #eef6f3;
-  border-color: #d9e9e2;
-  color: #35635a;
+  background: var(--accent-soft);
+  border-color: var(--line);
+  color: var(--text);
 }
 .workspace-subscription.error {
   color: var(--danger);
@@ -268,14 +280,14 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  color: #488779;
-  background: #f0f6f4;
+  color: var(--cyan);
+  background: var(--accent-soft);
   border-radius: 9px;
-  border: 1px solid #e3ede8;
+  border: 1px solid var(--line);
 }
 .workspace-metric-action {
-  background: #eef7f3;
-  border-color: #d2e6dc;
+  background: var(--accent-soft);
+  border-color: var(--line);
 }
 .workspace-metric-action > strong {
   font-size: 23px;
@@ -284,8 +296,8 @@
   letter-spacing: -0.8px;
 }
 .workspace-metric-action .workspace-metric-icon {
-  background: #e0f0e8;
-  color: #0d8078;
+  background: var(--panel);
+  color: var(--cyan);
 }
 .workspace-overview-grid {
   display: grid;
@@ -359,7 +371,7 @@
   justify-self: start;
 }
 .workspace-appointment-time {
-  border-left: 2px solid #72b5a3;
+  border-left: 2px solid var(--cyan);
   padding-left: 10px;
 }
 .workspace-appointment-time span {
@@ -376,9 +388,9 @@
   background: #fff;
 }
 .setup-count {
-  color: #187569;
+  color: var(--cyan);
   font-size: 11px;
-  background: #eaf5ef;
+  background: var(--accent-soft);
   border-radius: 6px;
   padding: 5px 9px;
   flex-shrink: 0;
@@ -397,11 +409,11 @@
   border-radius: 8px;
 }
 .setup-guide progress::-webkit-progress-value {
-  background: #229884;
+  background: var(--cyan);
   border-radius: 8px;
 }
 .setup-guide progress::-moz-progress-bar {
-  background: #229884;
+  background: var(--cyan);
   border-radius: 8px;
 }
 .setup-steps {
@@ -457,8 +469,8 @@
   line-height: 1.7;
 }
 .workspace-share {
-  border-color: #d9e6df;
-  background: linear-gradient(120deg, #fff, #f1f7f3);
+  border-color: var(--line);
+  background: linear-gradient(120deg, var(--panel), var(--accent-soft));
 }
 .share-booking label {
   font-size: 12px;
@@ -538,9 +550,9 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid #d4e5dc;
-  background: #f1f8f4;
-  color: #345d50;
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  color: var(--text);
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 11px;
@@ -548,9 +560,10 @@
 .availability-shift button {
   display: block;
   padding: 4px;
-  min-height: 24px;
+  min-height: 44px;
+  min-width: 44px;
   margin: 0;
-  color: #537366;
+  color: var(--cyan);
   background: transparent;
   font-size: 17px;
   line-height: 1;
@@ -587,9 +600,9 @@
   margin-top: 16px;
   padding: 28px 20px;
   text-align: center;
-  border: 1px solid #dce6e0;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #f3f8f5;
+  background: var(--surface-subtle);
 }
 .booking-profile-preview .company-avatar {
   width: 52px;
@@ -693,8 +706,9 @@
   position: fixed;
   left: 16px;
   top: 16px;
-  background: #d7fff0;
-  color: #0b473e;
+  background: var(--accent-soft);
+  color: var(--text);
+  border: 2px solid var(--cyan);
   padding: 12px;
   border-radius: 8px;
   z-index: 100;
@@ -732,15 +746,16 @@
     height: auto;
     position: static;
     padding: 10px 20px;
-    border-top: 1px solid #252d38;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
   .workspace-mobile-menu {
     display: flex;
     width: 100%;
     justify-content: flex-start;
-    background: #1c2430;
-    border: 1px solid #333d4c;
-    color: #d7e2ee;
+    background: var(--surface-subtle);
+    border: 1px solid var(--line);
+    color: var(--text);
     padding: 10px 12px;
     font-size: 12px;
   }
@@ -796,8 +811,8 @@
   .workspace-header .brand {
     font-size: 20px;
   }
-  .workspace-header .brand-mark {
-    width: 22px;
+  .workspace-header .brand-logo {
+    width: 150px;
   }
   .workspace-account {
     gap: 8px;
@@ -806,7 +821,7 @@
     display: none;
   }
   .workspace-account strong {
-    max-width: 105px;
+    max-width: min(105px, calc(100vw - 250px));
     font-size: 11px;
   }
   .workspace-account > div > span {
@@ -814,8 +829,8 @@
   }
   .workspace-account form button {
     margin-left: 2px;
-    width: 36px;
-    min-height: 36px;
+    width: 44px;
+    min-height: 44px;
     padding: 8px;
   }
   .workspace-account form button > span {
@@ -823,6 +838,10 @@
   }
   .workspace-sidebar {
     padding: 8px 16px;
+  }
+  .workspace-nav a {
+    padding: 10px 8px;
+    gap: 8px;
   }
   .workspace-content {
     padding: 24px 16px 32px;

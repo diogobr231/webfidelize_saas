@@ -140,11 +140,12 @@ const responses = await Promise.all([
   get("/entrar"),
   get("/planos"),
   get("/__qa_page_not_found__", 404),
+  get("/cadastro"),
+  get(`/cadastro?next=${encodeURIComponent(`/convite/${"a".repeat(64)}`)}`),
 ]);
 assert.match(responses[0].headers.get("content-type") || "", /^text\/html\b/i);
-const [home, robots, sitemap, login, plans, missing] = await Promise.all(
-  responses.map((response) => response.text()),
-);
+const [home, robots, sitemap, login, plans, missing, signup, invitationSignup] =
+  await Promise.all(responses.map((response) => response.text()));
 
 const headings = [...home.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/gi)];
 assert.equal(headings.length, 1, "A landing deve ter um único H1.");
@@ -155,28 +156,28 @@ assert.equal(
 );
 const anchors = links(home);
 const trialLinks = anchors.filter(
-  (anchor) => anchor.text === "Testar grátis por 7 dias",
+  (anchor) => anchor.text === "Experimentar demonstração",
 );
 assert(
   trialLinks.length >= 2,
-  "O CTA de teste deve estar disponível ao longo da página.",
+  "O CTA de demonstração deve estar disponível ao longo da página.",
 );
 for (const anchor of trialLinks) {
   const url = new URL(anchor.href, base);
   assert.equal(
     url.origin,
     base.origin,
-    "CTA de cadastro deve continuar no aplicativo.",
+    "CTA de demonstração deve continuar no aplicativo.",
   );
   assert.equal(
     url.pathname,
-    "/cadastro",
-    "CTA de teste deve abrir o cadastro.",
+    "/demonstracao",
+    "CTA de demonstração deve abrir a demonstração.",
   );
   assert.equal(
     url.search,
     "",
-    "CTA de teste deve apontar diretamente para o cadastro.",
+    "CTA de demonstração deve apontar diretamente para a demonstração.",
   );
 }
 const whatsappLinks = anchors.filter((anchor) => {
@@ -206,7 +207,110 @@ for (const anchor of whatsappLinks) {
     "WhatsApp deve usar o número comercial autorizado.",
   );
 }
-pass("H1 único, CTA de 7 dias para cadastro e contato comercial correto");
+pass("H1 único, CTA de demonstração sem login e contato comercial correto");
+
+// Streamed loading fallbacks can also contain a Brand. Check the actual
+// landing landmarks rather than counting every brand in the transport HTML.
+const brandLandmarks = [
+  ...resolvedHtmlFragments(home).matchAll(
+    /<(header|footer)\b([^>]*)>([\s\S]*?)<\/\1>/gi,
+  ),
+];
+const brandImagePaths = new Set<string>();
+for (const landmarkName of ["header", "footer"]) {
+  const landmarks = brandLandmarks.filter(
+    (match) =>
+      match[1] === landmarkName &&
+      attributes(match[2]).class?.split(/\s+/).includes(`wf-${landmarkName}`),
+  );
+  assert.equal(
+    landmarks.length,
+    1,
+    `A landing deve entregar um ${landmarkName} identificável.`,
+  );
+  const brandedLinks = [
+    ...landmarks[0][3].matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi),
+  ].filter(
+    (match) => attributes(match[1])["aria-label"] === "Web Fidelize — início",
+  );
+  assert.equal(
+    brandedLinks.length,
+    1,
+    `O ${landmarkName} deve oferecer a marca com nome acessível.`,
+  );
+  const link = brandedLinks[0];
+  const images = [...link[2].matchAll(/<img\b[^>]*>/gi)].map(([tag]) =>
+    attributes(tag),
+  );
+  assert.equal(images.length, 1, "Cada marca deve entregar uma imagem.");
+  assert.equal(
+    images[0].alt,
+    "",
+    "O nome da marca já pertence ao link, sem anúncio duplicado da imagem.",
+  );
+  assert(images[0].src, "A imagem da marca precisa de uma origem.");
+  brandImagePaths.add(localAssetPath(images[0].src));
+}
+assert.deepEqual(
+  [...brandImagePaths],
+  ["/webfidelize-logo.png"],
+  "Cabeçalho e rodapé devem usar a logo oficial hospedada no aplicativo.",
+);
+const brandResponse = await get([...brandImagePaths][0]);
+assert.match(brandResponse.headers.get("content-type") || "", /^image\/png\b/i);
+assertPng(Buffer.from(await brandResponse.arrayBuffer()), 1600, 533);
+pass(
+  "Logo oficial entregue no cabeçalho e rodapé, com PNG local de 1600 × 533",
+);
+
+const homeText = readableText(home);
+assert.match(homeText, /sem login e sem cartão/i);
+assert.match(homeText, /7 dias grátis no Essencial/i);
+assert.match(homeText, /sem cartão e sem cobrança automática/i);
+assert.match(
+  homeText,
+  /confirme seu e-mail e (?:cadastre|crie) (?:a|sua) empresa para (?:começar|iniciar)/i,
+);
+assert.match(
+  homeText,
+  /ao terminar(?: o teste)?, (?:as )?alterações ficam bloqueadas/i,
+);
+assert.match(
+  homeText,
+  /contratação e a cobrança online ainda estão em preparação/i,
+);
+assert.doesNotMatch(
+  homeText,
+  /cartão obrigatório|exigem cartão cadastrado|teste começa somente após a confirmação do cartão/i,
+);
+assert.match(readableText(signup), /sem cartão e sem cobrança automática/i);
+assert.match(
+  readableText(signup),
+  /teste no plano Essencial, com 1 profissional/i,
+);
+assert.match(
+  readableText(signup),
+  /começa quando você cadastra sua empresa após confirmar o e-mail/i,
+);
+assert.match(
+  readableText(signup),
+  /prazo aparece no painel e não é renovado ao entrar novamente/i,
+);
+assert.doesNotMatch(
+  signup,
+  /autocomplete="cc-|name="(?:card|card_number|cvv|cvc)"/i,
+);
+assert.match(
+  readableText(invitationSignup),
+  /usando o e-mail que recebeu o convite/i,
+);
+assert.doesNotMatch(
+  readableText(invitationSignup),
+  /cartão|mensalidade|ativação do teste/i,
+);
+pass(
+  "Oferta libera sete dias sem cartão, explica início e expiração e preserva o convite do colaborador",
+);
 
 const ids = new Set(
   [...home.matchAll(/<[^>]+\bid\s*=\s*["']([^"']+)["'][^>]*>/gi)].map((match) =>
@@ -364,20 +468,38 @@ assert.equal([...plans.matchAll(/<h1\b[^>]*>/gi)].length, 1);
 assert.match(plans, /<section\b[^>]*aria-label="Comparação de planos"/i);
 const plansText = readableText(plans);
 for (const condition of [
-  /7 dias no Essencial/i,
+  /7 dias grátis no Essencial/i,
   /1 profissional/i,
-  /sem cartão/i,
-  /sem cobrança automática/i,
-  /começa quando você cria a empresa/i,
+  /sem cartão e sem cobrança automática/i,
+  /confirme seu e-mail e cadastre a empresa para começar/i,
+  /prazo fica salvo no sistema e aparece no painel/i,
+  /ao terminar, alterações ficam bloqueadas/i,
   /proprietário também conta quando atende/i,
   /convite para acessar o painel é diferente/i,
-  /cobrança online ainda não está disponível/i,
-  /não ativa uma assinatura nem altera o plano/i,
+  /contratação e a cobrança online ainda estão em preparação/i,
+  /não ativa uma assinatura paga nem altera o plano/i,
 ])
   assert.match(plansText, condition);
+assert.doesNotMatch(
+  plansText,
+  /cartão obrigatório|exigem cartão cadastrado|criar a empresa agora não inicia o teste/i,
+  "O teste deve começar na criação da empresa sem cartão, mantendo a expiração.",
+);
 const planLinks = links(plans);
+for (const publicLinks of [anchors, planLinks]) {
+  const preparationLinks = publicLinks.filter((link) =>
+    link.text.startsWith("Testar grátis por 7 dias"),
+  );
+  assert.ok(preparationLinks.length >= 1);
+  for (const link of preparationLinks)
+    assert.equal(
+      new URL(link.href, base).pathname,
+      "/cadastro",
+      "O teste deve abrir o cadastro, sem coletar dados de pagamento.",
+    );
+}
 const planTrials = planLinks.filter((link) =>
-  /Testar grátis por 7 dias/.test(link.text),
+  /Experimentar demonstração/.test(link.text),
 );
 assert(
   planTrials.length > 0,
@@ -386,7 +508,7 @@ assert(
 for (const link of planTrials) {
   const url = new URL(link.href, base);
   assert.equal(url.origin, base.origin);
-  assert.equal(url.pathname, "/cadastro");
+  assert.equal(url.pathname, "/demonstracao");
   assert.equal(
     url.search,
     "",
@@ -422,8 +544,78 @@ for (const link of planLinks) {
     "A comparação deve encaminhar ao cadastro ou contato, sem ativação simulada.",
   );
 }
+// React streams some price-card children into hidden fragments after the shell.
+// Reconstruct only the literal template/fragment moves announced by React's
+// transport; do not execute any scripts or treat its serialized RSC as DOM text.
+function resolvedHtmlFragments(html: string) {
+  const moves = new Map<string, string>();
+  for (const match of html.matchAll(/\$R([SC])\("([^"]+)","([^"]+)"\)/g)) {
+    moves.set(
+      match[1] === "S" ? match[3] : match[2],
+      match[1] === "S" ? match[2] : match[3],
+    );
+  }
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+  const sources = new Map<string, string>();
+  const ranges: { start: number; end: number }[] = [];
+  for (const opening of markup.matchAll(
+    /<([a-z][\w:-]*)\b[^>]*\bid="S:[^"]+"[^>]*>/g,
+  )) {
+    const id = attributes(opening[0]).id;
+    const start = opening.index;
+    const contentStart = start + opening[0].length;
+    const tags = new RegExp(`<\\/?${opening[1]}\\b[^>]*>`, "g");
+    tags.lastIndex = contentStart;
+    let depth = 1;
+    let close: RegExpExecArray | null;
+    while ((close = tags.exec(markup))) {
+      depth += close[0].startsWith("</") ? -1 : 1;
+      if (depth === 0) {
+        sources.set(id, markup.slice(contentStart, close.index));
+        ranges.push({ start, end: tags.lastIndex });
+        break;
+      }
+    }
+    assert.equal(
+      depth,
+      0,
+      "Fragmento HTML deve possuir um fechamento completo.",
+    );
+  }
+  let shell = markup;
+  const outerRanges = ranges.filter(
+    (range) =>
+      !ranges.some(
+        (parent) =>
+          parent !== range &&
+          parent.start < range.start &&
+          parent.end >= range.end,
+      ),
+  );
+  for (const range of outerRanges.sort((a, b) => b.start - a.start))
+    shell = shell.slice(0, range.start) + shell.slice(range.end);
+  const expand = (value: string, seen = new Set<string>()): string =>
+    value.replace(/<template\b[^>]*><\/template>/g, (template) => {
+      const sourceId = moves.get(attributes(template).id);
+      if (!sourceId) return template;
+      assert.ok(!seen.has(sourceId), "Fragmentos não podem formar ciclos.");
+      const source = sources.get(sourceId);
+      assert.notEqual(
+        source,
+        undefined,
+        "Todo fragmento referenciado precisa ser entregue.",
+      );
+      return expand(source!, new Set([...seen, sourceId]));
+    });
+  return expand(shell);
+}
+
 function displayedPlans(html: string) {
-  return [...html.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)]
+  return [
+    ...resolvedHtmlFragments(html).matchAll(
+      /<article\b[^>]*>([\s\S]*?)<\/article>/gi,
+    ),
+  ]
     .flatMap((match) => {
       const text = readableText(match[1]);
       const price = text.match(/R\$\s*[\d.]+,\d{2}/)?.[0];
@@ -443,7 +635,7 @@ const publicPlans = displayedPlans(plans);
 const homePlans = displayedPlans(home);
 assert(
   planTrials.length >= publicPlans.length + 1,
-  "A comparação deve entregar um CTA de teste por plano, além do convite inicial, inclusive em fragmentos streamed.",
+  "A comparação deve entregar um CTA de demonstração por plano, além do convite inicial, inclusive em fragmentos streamed.",
 );
 if (publicPlans.length && homePlans.length) {
   assert.deepEqual(
@@ -622,15 +814,27 @@ for (const url of locations) {
     "Sitemap não pode publicar painéis, contas ou demonstrações.",
   );
   assert.equal(
-    url.pathname,
-    "/",
-    "Somente a landing comercial deve constar no sitemap atual.",
+    [
+      "/",
+      "/planos",
+      "/diagnostico",
+      "/segmentos/salao",
+      "/segmentos/pet-shop",
+      "/segmentos/clinica",
+      "/segmentos/escritorio",
+      "/segmentos/restaurante",
+      "/segmentos/fornecedores",
+      "/segmentos/logistica",
+      "/segmentos/academia",
+    ].includes(url.pathname),
+    true,
+    "Sitemap deve conter apenas páginas comerciais públicas.",
   );
 }
-assert.equal(locations.length, expectedSite.indexable ? 1 : 0);
+assert.equal(locations.length, expectedSite.indexable ? 11 : 0);
 pass(
   expectedSite.indexable
-    ? "Sitemap contém somente a landing comercial"
+    ? "Sitemap contém páginas comerciais e segmentos disponíveis"
     : "Sitemap local vazio e sem páginas privadas ou demonstrações",
 );
 
@@ -668,6 +872,150 @@ assert(
 );
 pass("URL inexistente responde 404 com marca, noindex e caminhos de retorno");
 
+const demoCoverPaths = new Set<string>();
+for (const slug of [
+  "salao",
+  "pet-shop",
+  "clinica",
+  "escritorio",
+  "restaurante",
+  "fornecedores",
+  "logistica",
+  "academia",
+]) {
+  const segment = await (await get("/segmentos/" + slug)).text();
+  assert(links(home).some((a) => a.href === "/segmentos/" + slug));
+  assert(links(segment).some((a) => a.href === "/demonstracao/" + slug));
+  assert(
+    links(segment).some((a) => a.href === "/entrar/" + slug),
+    "Existing customer login remains available",
+  );
+  const demo = await (await get("/demonstracao/" + slug)).text();
+  assert.match(metadata(demo, "robots"), /noindex/);
+  const demoMarkup = resolvedHtmlFragments(demo);
+  const demoText = readableText(demoMarkup);
+  assert.match(demoText, /resultados ficam temporariamente no navegador/i);
+  assert.match(demoText, /não criam reservas reais nem alteram os dados de uma empresa/i);
+  assert.match(demoText, /Nenhuma reserva real ou cobrança é feita nesta demonstração/i);
+  assert.match(demoText, /Marca ilustrativa/i);
+  assert.match(
+    demoText,
+    /Imagem ilustrativa\. Sua empresa usa sua própria foto\./i,
+  );
+  const tabs = [
+    ...demoMarkup.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/gi),
+  ]
+    .map((match): Record<string, string> => ({
+      ...attributes(match[1]),
+      text: readableText(match[2]),
+    }))
+    .filter((button) => button.role === "tab");
+  assert.deepEqual(
+    tabs.map((tab) => tab.text),
+    ["Página de agendamento", "Agenda", "Ficha do cliente"],
+    `A demonstração de ${slug} deve preservar agenda e ficha ao apresentar a página pública.`,
+  );
+  const selectedTabs = tabs.filter((tab) => tab["aria-selected"] === "true");
+  assert.equal(selectedTabs.length, 1);
+  assert.equal(selectedTabs[0].text, "Página de agendamento");
+  const selectedPanel = [...demoMarkup.matchAll(/<[a-z][\w-]*\b([^>]*)>/gi)]
+    .map((match) => attributes(match[1]))
+    .find((element) => element.id === selectedTabs[0]["aria-controls"]);
+  assert(
+    selectedPanel,
+    `A página de ${slug} deve entregar o conteúdo da aba inicial no HTML.`,
+  );
+  assert.equal(selectedPanel.role, "tabpanel");
+  assert.equal(selectedPanel["aria-labelledby"], selectedTabs[0].id);
+  const cover = [...demoMarkup.matchAll(/<img\b[^>]*>/gi)]
+    .map(([tag]) => attributes(tag))
+    .find((image) => /Recepção ilustrativa/.test(image.alt || ""));
+  assert(
+    cover?.src,
+    `A demonstração de ${slug} precisa entregar a imagem do espaço com descrição acessível.`,
+  );
+  const coverUrl = new URL(localAssetPath(cover.src), base);
+  const originalCover =
+    coverUrl.pathname === "/_next/image"
+      ? coverUrl.searchParams.get("url")
+      : cover.src;
+  assert(
+    originalCover,
+    "A imagem otimizada precisa apontar para uma imagem local existente.",
+  );
+  demoCoverPaths.add(localAssetPath(originalCover));
+  const bookingForm = [
+    ...demoMarkup.matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi),
+  ].find(
+    (form) =>
+      attributes(form[1])["aria-label"] === "Experimentar uma reserva online",
+  );
+  assert(
+    bookingForm,
+    `A demonstração de ${slug} deve permitir experimentar uma reserva.`,
+  );
+  assert.equal(
+    attributes(bookingForm[1]).action,
+    undefined,
+    "A simulação não deve enviar reservas a um endpoint.",
+  );
+  const bookingText = readableText(bookingForm[2]);
+  for (const label of [
+    "Cliente de exemplo",
+    "Profissional de exemplo",
+    "Escolha um serviço",
+    "Horário de exemplo",
+    "Confirmar agendamento de exemplo",
+  ])
+    assert(
+      bookingText.includes(label),
+      `Controle de reserva ausente em ${slug}: ${label}.`,
+    );
+  assert.doesNotMatch(demo, /name="(?:password|email|phone)"/);
+}
+for (const path of demoCoverPaths) {
+  const coverResponse = await get(path);
+  assert.match(
+    coverResponse.headers.get("content-type") || "",
+    /^image\/png\b/i,
+  );
+  const png = Buffer.from(await coverResponse.arrayBuffer());
+  assert(
+    png.length >= 33,
+    "A foto ilustrativa precisa ser um arquivo PNG completo.",
+  );
+  assert(png.readUInt32BE(16) > 0 && png.readUInt32BE(20) > 0);
+  assertPng(png, png.readUInt32BE(16), png.readUInt32BE(20));
+}
+pass(
+  "Os oito segmentos apresentam página de agendamento com marca e imagem ilustrativas, controles acessíveis e sem envio real",
+);
+await get("/segmentos/nao-existe", 404);
+await get("/demonstracao/nao-existe", 404);
+const discovery = await (await get("/demonstracao")).text();
+assert.match(metadata(discovery, "robots"), /noindex/);
+for (const publicHtml of [home, plans, signup]) {
+  const publicText = readableText(publicHtml);
+  assert.match(publicText, /7 dias grátis/);
+  assert.match(publicText, /sem cartão e sem cobrança automática/i);
+  assert.match(publicText, /(?:prazo|período).*(?:painel|sistema)/i);
+  assert.doesNotMatch(
+    publicText,
+    /cartão obrigatório|exigem cartão cadastrado|teste já está ativo/i,
+    "A oferta deve permitir o teste sem cartão sem simular a criação da empresa ou da assinatura.",
+  );
+}
+const inquiry = await (await get("/diagnostico")).text();
+assert.match(readableText(inquiry), /Descreva o que você busca/);
+const budget = inquiry.match(
+  /<select[^>]*name="budget_range"[^>]*>([\s\S]*?)<\/select>/,
+)?.[1];
+assert.ok(budget);
+assert.match(budget, /value="other"/);
+assert.doesNotMatch(budget, /under-1000|1000-3000|3000-10000|over-10000/);
+pass(
+  "Segmentos levam a benefícios e demonstração sem login; formulário preserva planos + Outros",
+);
 console.log(
   `${passed} grupos HTTP da landing aprovados; apenas leituras locais, sem cadastros ou mensagens.`,
 );

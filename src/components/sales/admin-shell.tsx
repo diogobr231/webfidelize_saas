@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Brand } from "@/components/ui/brand";
+import { AdminNavigation } from "@/components/admin/navigation";
 import { Icon } from "@/components/ui/icon";
 
 export function AdminSalesShell({
@@ -15,17 +15,7 @@ export function AdminSalesShell({
       <a className="sales-skip" href="#comercial-conteudo">
         Pular para o conteúdo
       </a>
-      <nav className="admin-topbar" aria-label="Administração comercial">
-        <Brand href="/admin" />
-        <div className="admin-topbar-actions">
-          <span className="admin-access">
-            <Icon name="shield" size={14} /> SUPER_ADMIN
-          </span>
-          <Link className="button secondary" href="/admin">
-            Administração <Icon name="arrow-up-right" size={16} />
-          </Link>
-        </div>
-      </nav>
+      <AdminNavigation current="sales" />
       <div
         className="admin-content sales-admin-content"
         id="comercial-conteudo"

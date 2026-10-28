@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
   poweredByHeader: false,
+  experimental: { serverActions: { bodySizeLimit: "2mb" } },
   async headers() {
     return [
       {
@@ -15,13 +16,26 @@ const config: NextConfig = {
           },
         ],
       },
-      ...["/auth/:path*", "/convite/:path*", "/nova-senha"].map((source) => ({
+      ...[
+        "/auth/:path*",
+        "/convite/:path*",
+        "/nova-senha",
+        "/confirmar/:path*",
+      ].map((source) => ({
         source,
         headers: [
           { key: "Referrer-Policy", value: "no-referrer" },
           { key: "Cache-Control", value: "private, no-store" },
         ],
       })),
+      {
+        source: "/agendar/:path*",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "private, no-store" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
     ];
   },
 };

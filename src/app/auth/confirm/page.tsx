@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { AuthShell } from "@/components/auth-shell";
 import { PendingButton } from "@/components/pending-button";
 import {
@@ -8,7 +9,7 @@ import {
   authPageUrl,
   parseEmailConfirmation,
 } from "@/lib/auth-flow";
-import { getAuthOrigin } from "@/lib/auth-origin";
+import { authCallbackOrigin, getAuthDomainPolicy } from "@/lib/auth-origin";
 import { confirmEmail } from "../actions";
 
 export const metadata: Metadata = {
@@ -31,9 +32,13 @@ export default async function ConfirmEmail({
   let next = params.next;
   let configured = true;
   try {
-    const origin = getAuthOrigin();
+    const origin = authCallbackOrigin(await headers());
     if (params.redirect_to !== undefined)
-      next = authDestinationFromEmailRedirect(params.redirect_to, origin);
+      next = authDestinationFromEmailRedirect(
+        params.redirect_to,
+        origin,
+        getAuthDomainPolicy().origins,
+      );
   } catch {
     configured = false;
   }

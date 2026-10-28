@@ -8,7 +8,10 @@ export function ProductTour() {
       <div className="wf-tour-window">
         <div className="wf-tour-top">
           <span>
-            <span className="wf-tour-mark">w.</span> Seu espaço de trabalho
+            <span className="wf-tour-mark" aria-hidden="true">
+              <Icon name="calendar" size={18} />
+            </span>{" "}
+            Seu espaço de trabalho
           </span>
           <span className="wf-tour-demo">Demonstração</span>
         </div>

@@ -41,7 +41,7 @@
   height: 34px;
   border-radius: 9px;
   color: var(--cyan);
-  background: #eaf5f3;
+  background: var(--accent-soft);
 }
 .operations-count {
   padding: 5px 8px;

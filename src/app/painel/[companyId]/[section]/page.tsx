@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { archiveFilter, businessListQuery } from "@/lib/business-records";
 import { money } from "@/lib/catalog";
 import {
@@ -113,8 +113,7 @@ export default async function Records({
   const total = countResult.count ?? 0;
   const pageLink = (page: number) =>
     `${base}?${businessListQuery(state, search, page)}#registros`;
-  const managed =
-    canManage(role) && hasAccess(company.status, company.trial_ends_at);
+  const managed = canManage(role) && company.access_valid;
   const display = presentation[section as keyof typeof presentation];
   const [customers, services, professionals] =
     section === "agenda" && managed

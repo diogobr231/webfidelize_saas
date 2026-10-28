@@ -1,8 +1,9 @@
 import { createServer } from "node:http";
-import { generateKeyPairSync, randomUUID, sign } from "node:crypto";
+import { createHash, generateKeyPairSync, randomUUID, sign } from "node:crypto";
 import type { AddressInfo } from "node:net";
 
 export const confirmationHash = "ab".repeat(28);
+export const onboardingConfirmationHash = "ef".repeat(28);
 export const recoveryHash = `pkce_${"cd".repeat(28)}`;
 export const fakeEmail = "auth-flow@example.invalid";
 export const fakePassword = "Local-Test-Password-Only!";
@@ -36,8 +37,23 @@ export async function startFakeAuth(issuerOrigin: string) {
     recoveryCalls: 0,
     resendCalls: 0,
     jwksCalls: 0,
+    pkceCalls: 0,
+    pkceSuccesses: 0,
+    emailRequests: [] as {
+      path: string;
+      redirectTo: string | null;
+      challenge: string | null;
+    }[],
+    pkceCodes: new Map<
+      string,
+      { challenge: string; method: "otp" | "recovery" }
+    >(),
     password: fakePassword,
     usedTokens: new Set<string>(),
+    company: null as null | Record<string, unknown>,
+    companyCreations: 0,
+    services: [] as Record<string, unknown>[],
+    professionals: [] as Record<string, unknown>[],
   };
   function newSession(method: "otp" | "recovery" | "password") {
     const seconds = Math.floor(Date.now() / 1000);
@@ -129,6 +145,12 @@ export async function startFakeAuth(issuerOrigin: string) {
       if (url.pathname.endsWith("signup")) state.signupCalls++;
       if (url.pathname.endsWith("recover")) state.recoveryCalls++;
       if (url.pathname.endsWith("resend")) state.resendCalls++;
+      state.emailRequests.push({
+        path: url.pathname,
+        redirectTo: url.searchParams.get("redirect_to"),
+        challenge:
+          typeof body.code_challenge === "string" ? body.code_challenge : null,
+      });
       if (state.fault === "smtp") return fail(500, "unexpected_failure");
       if (state.fault === "limit")
         return fail(429, "over_email_send_rate_limit");
@@ -143,7 +165,8 @@ export async function startFakeAuth(issuerOrigin: string) {
       state.verifyCalls++;
       const hash = String(body.token_hash);
       const correct =
-        (hash === confirmationHash && body.type === "email") ||
+        ((hash === confirmationHash || hash === onboardingConfirmationHash) &&
+          body.type === "email") ||
         (hash === recoveryHash && body.type === "recovery");
       if (!correct || state.usedTokens.has(hash))
         return fail(403, "otp_expired");
@@ -158,20 +181,105 @@ export async function startFakeAuth(issuerOrigin: string) {
         return send(200, session("password"));
       }
       if (url.searchParams.get("grant_type") === "pkce") {
+        state.pkceCalls++;
         if (
           typeof body.code_verifier !== "string" ||
           body.code_verifier.length < 43
         )
           return fail(400, "bad_code_verifier");
-        if (body.auth_code === "legacy-recovery")
-          return send(200, session("recovery"));
-        if (body.auth_code === "legacy-signup")
-          return send(200, session("otp"));
+        const registered = state.pkceCodes.get(String(body.auth_code));
+        if (registered) {
+          const challenge = createHash("sha256")
+            .update(body.code_verifier)
+            .digest("base64url");
+          if (challenge !== registered.challenge)
+            return fail(400, "bad_code_verifier");
+          state.pkceCodes.delete(String(body.auth_code));
+          state.pkceSuccesses++;
+          return send(200, session(registered.method));
+        }
       }
       return fail(400, "invalid_grant");
     }
     if (url.pathname === "/rest/v1/rpc/is_super_admin") return send(200, false);
-    if (url.pathname.startsWith("/rest/v1/")) return send(200, []);
+    // Only the isolated HTTP journey uses these rows. SQL suites independently
+    // verify the real create_company implementation, RLS and server expiry.
+    if (url.pathname === "/rest/v1/rpc/create_company") {
+      if (!current) return fail(401, "unauthorized");
+      if (state.company) return fail(409, "owner_already_has_company");
+      state.companyCreations++;
+      state.company = {
+        id: "5225ae76-7610-408e-8e78-d2ab42c094b6",
+        name: body.company_name,
+        niche: body.company_niche,
+        plan_id: "essencial",
+        status: "trialing",
+        trial_card_required: false,
+        trial_ends_at: new Date(Date.now() + 7 * 86400000).toISOString(),
+        booking_enabled: false,
+        booking_slug: null,
+        is_demo: true,
+      };
+      return send(200, state.company.id);
+    }
+    if (url.pathname.startsWith("/rest/v1/")) {
+      if (!current) return fail(401, "unauthorized");
+      const table = url.pathname.slice("/rest/v1/".length);
+      const membership = state.company
+        ? { company_id: state.company.id, user_id: user.id, role: "OWNER" }
+        : null;
+      const single = request.headers.accept?.includes("vnd.pgrst.object");
+      const rows = (items: unknown[]) => {
+        response.setHeader(
+          "Content-Range",
+          `0-${Math.max(0, items.length - 1)}/${items.length}`,
+        );
+        return send(200, single ? (items[0] ?? null) : items);
+      };
+      if (table === "memberships") return rows(membership ? [membership] : []);
+      if (table === "companies")
+        return rows(state.company ? [state.company] : []);
+      if (table === "plans")
+        return rows([{ id: "essencial", name: "Essencial", staff_limit: 1 }]);
+      if (table === "services" || table === "professionals") {
+        const records = state[table];
+        if (request.method === "POST") {
+          if (
+            !state.company ||
+            state.company.status !== "trialing" ||
+            Date.parse(String(state.company.trial_ends_at)) <= Date.now()
+          )
+            return fail(403, "trial_expired");
+          records.push({ ...body, archived_at: null });
+          return send(201, null);
+        }
+        const id = url.searchParams.get("id")?.replace(/^eq\./, "");
+        return rows(records.filter((record) => !id || record.id === id));
+      }
+      if (table === "rpc/executive_dashboard") {
+        const totals = {
+          appointments: 0,
+          scheduled: 0,
+          completed: 0,
+          canceled: 0,
+          attended_customers: 0,
+        };
+        return send(200, {
+          scope: "company",
+          current: totals,
+          previous: totals,
+          customers: {
+            total: 0,
+            new: 0,
+            previous_new: 0,
+            without_created_at: 0,
+          },
+          daily: [],
+          financial_available: false,
+        });
+      }
+      return rows([]);
+    }
     return fail(404, "unexpected_test_request");
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -181,6 +289,19 @@ export async function startFakeAuth(issuerOrigin: string) {
     state,
     session,
     user,
+    // Models a code delivered by Auth after a real SDK PKCE request. No fixed
+    // aliases or verifier-length-only success path may bypass the challenge.
+    issuePkceCode(
+      method: "otp" | "recovery",
+      requestIndex = state.emailRequests.length - 1,
+    ) {
+      const challenge = state.emailRequests[requestIndex]?.challenge;
+      if (!challenge || !/^[A-Za-z0-9_-]{43}$/.test(challenge))
+        throw new Error("The fixture needs a preceding PKCE email request");
+      const code = `fixture-${randomUUID()}`;
+      state.pkceCodes.set(code, { challenge, method });
+      return code;
+    },
     close: () =>
       new Promise<void>((resolve, reject) => {
         server.closeAllConnections();

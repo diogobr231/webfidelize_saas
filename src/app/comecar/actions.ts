@@ -67,8 +67,21 @@ export async function startCompany(
       form,
     );
   if (admin.data) redirect("/admin");
-  if (ownership.data)
-    redirect(`/painel/${ownership.data.company_id}/configuracao`);
+  if (ownership.data) {
+    const { data: company, error } = await db
+      .from("companies")
+      .select("status")
+      .eq("id", ownership.data.company_id)
+      .single();
+    if (error)
+      return failure(
+        "Não foi possível consultar a ativação da empresa. Tente novamente.",
+        form,
+      );
+    redirect(
+      `/painel/${ownership.data.company_id}/${company.status === "pending_card" ? "assinatura" : "configuracao"}`,
+    );
+  }
   const parsed = z
     .object({
       name: z
@@ -98,8 +111,16 @@ export async function startCompany(
       .eq("user_id", user.id)
       .eq("role", "OWNER")
       .maybeSingle();
-    if (!current.error && current.data)
-      finish(current.data.company_id, "servicos", form);
+    if (!current.error && current.data) {
+      const company = await db
+        .from("companies")
+        .select("status")
+        .eq("id", current.data.company_id)
+        .single();
+      if (!company.error && company.data?.status === "pending_card")
+        redirect(`/painel/${current.data.company_id}/assinatura`);
+      if (!company.error) finish(current.data.company_id, "servicos", form);
+    }
     return failure(
       "Não foi possível criar a empresa. Confirme seu e-mail e tente novamente. Os campos continuam preenchidos.",
       form,

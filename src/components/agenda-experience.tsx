@@ -13,8 +13,14 @@ import {
 import { money } from "@/lib/catalog";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  bookingDetailLabels,
+  bookingDetailOptions,
+} from "@/lib/booking-intake";
+import { isGoogleMapsUrl } from "@/lib/company-personalization";
 
 export type CalendarAppointment = {
+  kind?: "appointment" | "class";
   id: string;
   starts_at: string;
   ends_at: string;
@@ -23,6 +29,8 @@ export type CalendarAppointment = {
   customer_name: string;
   service_name: string;
   professional_name: string;
+  attendance_confirmed_at?: string | null;
+  booking_details?: Record<string, string> | null;
 };
 type Option = { id: string; name: string; archived_at?: string | null };
 type Props = {
@@ -109,6 +117,13 @@ function AppointmentDialog({
         </button>
       </div>
       <h2 id="appointment-title">{item.customer_name}</h2>
+      {item.kind !== "class" && item.status === "scheduled" ? (
+        <p className={item.attendance_confirmed_at ? "notice" : "muted"}>
+          {item.attendance_confirmed_at
+            ? `Presença confirmada pelo cliente em ${new Date(item.attendance_confirmed_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}.`
+            : "Presença ainda não confirmada pelo cliente."}
+        </p>
+      ) : null}
       <p className="appointment-service">
         <Icon name="briefcase" size={16} />
         {item.service_name} · {item.professional_name}
@@ -122,7 +137,37 @@ function AppointmentDialog({
           {appointmentTime(item.starts_at)}–{appointmentTime(item.ends_at)}
         </span>
       </div>
-      {managed && item.status === "scheduled" ? (
+      {item.booking_details && Object.keys(item.booking_details).length ? (
+        <dl className="appointment-booking-details">
+          {Object.entries(item.booking_details).map(([key, raw]) => {
+            const value = bookingDetailOptions[key]?.[raw] ?? raw;
+            const mapsUrl = key === "delivery_location" && isGoogleMapsUrl(raw);
+            return bookingDetailLabels[key] ? (
+              <div key={key}>
+                <dt>{bookingDetailLabels[key]}</dt>
+                <dd>
+                  {mapsUrl ? (
+                    <a href={raw} target="_blank" rel="noopener noreferrer">
+                      Abrir localização no Maps
+                      <Icon name="arrow-up-right" size={14} />
+                    </a>
+                  ) : (
+                    value
+                  )}
+                </dd>
+              </div>
+            ) : null;
+          })}
+        </dl>
+      ) : null}
+      {item.kind === "class" ? (
+        <Link
+          className="button"
+          href={`/painel/${companyId}/turmas/${item.id}`}
+        >
+          Abrir turma e participantes <Icon name="users" size={16} />
+        </Link>
+      ) : managed && item.status === "scheduled" ? (
         <>
           <details>
             <summary>Remarcar atendimento</summary>
@@ -287,15 +332,15 @@ export function AgendaExperience(props: Props) {
           <span className="agenda-stat-icon">
             <Icon name="calendar" size={18} />
           </span>
-          <strong>{live.length}</strong>
-          <span>atendimentos no período</span>
+          <strong>{live.filter((a) => a.kind !== "class").length}</strong>
+          <span>atendimentos individuais</span>
         </div>
         <div className="agenda-period-stat">
           <span className="agenda-stat-icon completed">
             <Icon name="check" size={18} />
           </span>
-          <strong>{live.filter((a) => a.status === "completed").length}</strong>
-          <span>concluídos</span>
+          <strong>{live.filter((a) => a.kind === "class").length}</strong>
+          <span>turmas no período</span>
         </div>
         <div className="agenda-legend">
           <span className="agenda-dot" aria-hidden="true" />
@@ -420,7 +465,7 @@ export function AgendaExperience(props: Props) {
                     ({ event, lane, lanes }) => (
                       <button
                         key={event.id}
-                        className={`calendar-event event-${event.status}`}
+                        className={`calendar-event event-${event.status}${event.kind === "class" ? " event-class" : ""}`}
                         style={{
                           top:
                             (minutes(event.starts_at) - startHour * 60) * 1.5,
@@ -443,6 +488,10 @@ export function AgendaExperience(props: Props) {
                           {event.customer_name}
                         </b>
                         <span>{event.service_name}</span>
+                        {event.attendance_confirmed_at &&
+                        event.status === "scheduled" ? (
+                          <small>✓ Presença confirmada</small>
+                        ) : null}
                         {view === "week" && (
                           <small>{event.professional_name}</small>
                         )}
@@ -506,6 +555,10 @@ export function AgendaExperience(props: Props) {
                       >
                         {appointmentStatus[item.status]}
                       </span>
+                      {item.attendance_confirmed_at &&
+                      item.status === "scheduled" ? (
+                        <p className="muted">Presença confirmada</p>
+                      ) : null}
                     </td>
                     <td>
                       <button

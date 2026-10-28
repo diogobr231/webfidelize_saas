@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireCompany } from "@/lib/auth";
-import { canManage, hasAccess } from "@/lib/permissions";
+import { canManage } from "@/lib/permissions";
 import { money } from "@/lib/catalog";
 import { appointmentStatus } from "@/lib/scheduling";
 import { recordFilters, recordPagination } from "@/lib/record-list";
@@ -17,9 +17,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { archiveRecord, updateRecord } from "./actions";
 import { RecordArchiveForm, RecordEditForm } from "./forms";
+import { CustomerWhatsAppConsentForm } from "../../lembretes/forms";
+import { saveCustomerWhatsAppConsent } from "../../lembretes/actions";
 import "../../../operations.css";
 import "../records.css";
 import "./details.css";
+import "../../lembretes/reminders.css";
 
 export default async function RecordDetails({
   params,
@@ -59,7 +62,7 @@ export default async function RecordDetails({
   const label = businessLabels[section];
   const archived = Boolean(record.archived_at);
   const managed = canManage(role);
-  const writable = managed && hasAccess(company.status, company.trial_ends_at);
+  const writable = managed && company.access_valid;
   const base = `/painel/${companyId}/${section}`;
   const permalink = `${base}/${recordId}`;
   const requestedPage = recordFilters(query).page;
@@ -88,6 +91,27 @@ export default async function RecordDetails({
   const historyFailed = Boolean(countResult?.error || history.error);
   const total = countResult?.count ?? 0;
   const historyPage = (page: number) => `${permalink}?pagina=${page}#historico`;
+  const whatsAppConsent =
+    section === "customers" && managed
+      ? await db
+          .from("whatsapp_consents")
+          .select("phone,opted_in_at,revoked_at")
+          .eq("company_id", companyId)
+          .eq("customer_id", recordId)
+          .maybeSingle()
+      : null;
+  const normalizePhone = (phone: string) => {
+    const digits = phone.replace(/\D/g, "");
+    return digits.length === 10 || digits.length === 11
+      ? `55${digits}`
+      : digits;
+  };
+  const consentActive = Boolean(
+    whatsAppConsent?.data?.opted_in_at &&
+      !whatsAppConsent.data.revoked_at &&
+      normalizePhone(whatsAppConsent.data.phone) ===
+        normalizePhone(record.phone ?? ""),
+  );
   return (
     <>
       <Link
@@ -239,6 +263,45 @@ export default async function RecordDetails({
           ) : null}
         </aside>
       </div>
+      {section === "customers" && managed ? (
+        <section
+          className="panel reminder-page"
+          aria-labelledby="customer-reminder-title"
+        >
+          <h2 id="customer-reminder-title">Lembretes por WhatsApp</h2>
+          <p className="reminder-help">
+            A autorização vale para o telefone atual e somente para lembretes de
+            atendimento. Registre a escolha expressa do cliente; mudar o
+            telefone exige nova autorização.
+          </p>
+          {whatsAppConsent?.error ? (
+            <p className="notice error" role="alert">
+              Não foi possível consultar a autorização. Atualize a página antes
+              de alterar.
+            </p>
+          ) : (
+            <>
+              <p>
+                {consentActive
+                  ? "Autorização registrada para este número."
+                  : "Sem autorização ativa para este número."}
+              </p>
+              <CustomerWhatsAppConsentForm
+                key={recordId}
+                allowed={consentActive}
+                writable={writable && !archived}
+                revocable={!archived}
+                action={saveCustomerWhatsAppConsent.bind(
+                  null,
+                  companyId,
+                  recordId,
+                )}
+                permalink={permalink}
+              />
+            </>
+          )}
+        </section>
+      ) : null}
       {section === "customers" ? (
         <section
           className="panel business-history"

@@ -162,12 +162,63 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+.booking-niche-fields {
+  margin-top: 14px;
+}
+.booking-niche-fields small {
+  display: block;
+  color: var(--booking-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
 .booking-hero-art {
   min-height: 214px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.booking-cover {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--booking-border);
+  border-radius: 24px;
+  background: var(--booking-soft);
+  box-shadow: 0 18px 50px #082b4610;
+}
+.booking-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+.booking-cover figcaption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  background: #fff;
+}
+.booking-cover figcaption > span {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--booking-accent);
+}
+@media (max-width: 580px) {
+  .booking-cover {
+    border-radius: 18px;
+  }
+  .booking-cover img {
+    aspect-ratio: 16 / 9;
+  }
 }
 .booking-art-orbit {
   width: 236px;
@@ -446,6 +497,63 @@
 }
 .booking-fields > div {
   min-width: 0;
+}
+.booking-niche-fields > .cep-address-field {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.booking-page .cep-address-lookup,
+.booking-page .cep-address-value {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.booking-page .cep-address-field label {
+  display: block;
+  margin: 0;
+  font-size: 13px;
+}
+.booking-page .cep-address-lookup-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.booking-page .cep-address-lookup-controls input {
+  min-width: 0;
+}
+.booking-page .cep-address-lookup-button,
+.booking-page .cep-address-use-suggestion {
+  min-height: 46px;
+  padding: 9px 13px;
+  border: 1px solid #d6dde5;
+  border-radius: 8px;
+  background: #f4f9fb;
+  color: var(--booking-ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.booking-page .cep-address-use-suggestion {
+  width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.booking-page .cep-address-lookup-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.booking-page .cep-address-field small,
+.booking-page .cep-address-status {
+  margin: 0;
+  color: #52677a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.booking-page .cep-address-field small {
+  display: block;
 }
 .booking-page label {
   color: var(--booking-ink);
@@ -962,4 +1070,16 @@
     transition: none !important;
     animation: none !important;
   }
+}
+.booking-mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.booking-mode-switch .button {
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
 }

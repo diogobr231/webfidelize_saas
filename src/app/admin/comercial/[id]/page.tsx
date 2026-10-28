@@ -127,6 +127,21 @@ export default async function SalesLeadDetail({
           )}
         </section>
         <aside className="sales-detail-aside">
+          {!["won", "lost"].includes(lead.stage) && (
+            <section className="panel sales-origin">
+              <h2>Apoio da Central IA</h2>
+              <p>
+                Analise esta oportunidade e revise um rascunho antes de
+                utilizá-lo.
+              </p>
+              <Link
+                className="button secondary"
+                href={`/admin/ia?source_type=lead&source_id=${lead.id}#solicitar`}
+              >
+                Analisar oportunidade
+              </Link>
+            </section>
+          )}
           <section className="panel sales-origin">
             <h2>Origem e autorização</h2>
             <dl>

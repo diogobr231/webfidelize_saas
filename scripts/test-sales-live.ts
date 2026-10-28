@@ -213,7 +213,7 @@ async function main() {
         phone: "5518999990000",
         niche: "salao",
         team_size: "2-5",
-        budget_range: "1000-3000",
+        budget_range: "plan-profissional",
         timeline: "30-days",
         decision_role: "owner",
         challenge:
@@ -248,6 +248,7 @@ async function main() {
     assert.equal(lead.stage, "new");
     assert.equal(lead.source, "site");
     assert.equal(lead.utm_source, "qa");
+    assert.equal(lead.budget_range, "plan-profissional");
     assert.ok(lead.consent_at);
     pass(
       "public form validates consent and persists real qualification and attribution",

@@ -8,7 +8,7 @@ import {
   type HelpArticle,
   type SupportTicket,
 } from "@/lib/help";
-import { Brand } from "@/components/ui/brand";
+import { AdminNavigation } from "@/components/admin/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
@@ -86,17 +86,7 @@ export default async function AdminHelp({
     `/admin/ajuda?${new URLSearchParams({ pagina: String(number), status })}#atendimento`;
   return (
     <main className="admin-shell">
-      <nav className="admin-topbar" aria-label="Administração da ajuda">
-        <Brand href="/admin" />
-        <div className="admin-topbar-actions">
-          <span className="admin-access">
-            <Icon name="shield" size={14} /> SUPER_ADMIN
-          </span>
-          <Link className="button secondary" href="/admin">
-            Voltar à administração
-          </Link>
-        </div>
-      </nav>
+      <AdminNavigation current="support" />
       <div className="admin-content help-admin">
         <PageHeader
           eyebrow="Conteúdo e atendimento"
@@ -239,6 +229,14 @@ export default async function AdminHelp({
                     <small>{ticket.company_id}</small>
                   </div>
                   <TicketCard ticket={ticket}>
+                    {ticket.status !== "resolved" && (
+                      <Link
+                        className="button secondary"
+                        href={`/admin/ia?source_type=ticket&source_id=${ticket.id}#solicitar`}
+                      >
+                        Preparar análise interna com IA
+                      </Link>
+                    )}
                     <details
                       className="help-response-details"
                       open={query.solicitacao === ticket.id}

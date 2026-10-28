@@ -1,0 +1,43 @@
+name: Tarefa do produto
+description: Registrar correção, melhoria ou nova função antes da implementação.
+title: "[Tipo] Descrição objetiva"
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Tipo
+      options:
+        - Correção
+        - Melhoria
+        - Nova função
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Problema, objetivo e evidência
+      description: Inclua tela/arquivo, reprodução e esperado versus observado quando aplicável. Não inclua segredos ou dados de clientes.
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridade
+      options:
+        - Alta
+        - Média
+        - Baixa
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Escopo e critérios de conclusão
+      description: Descreva resultados verificáveis, testes e dependências.
+    validations:
+      required: true
+  - type: textarea
+    id: release
+    attributes:
+      label: Segurança e release
+      description: Informe migrações, configurações, efeitos em usuários ativos e autorizações externas necessárias.

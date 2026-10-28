@@ -1,0 +1,235 @@
+.team-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.team-filters label {
+  flex: 1 1 170px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
+.team-filters input {
+  margin-top: 7px;
+  width: 100%;
+  min-width: 0;
+}
+.team-filters button,
+.team-filters .button {
+  min-height: 44px;
+}
+.team-period-nav,
+.team-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+}
+.team-period-nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.team-period-nav span,
+.team-caption {
+  color: var(--muted);
+  font-size: 13px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.team-day-list {
+  display: grid;
+  gap: 12px;
+}
+.team-appointment {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  margin: 0;
+}
+.team-appointment-time {
+  display: grid;
+  gap: 3px;
+  min-width: 92px;
+}
+.team-appointment-time strong {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.team-appointment-time span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.team-appointment-info {
+  flex: 1;
+  min-width: 0;
+}
+.team-appointment-info h2 {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+  margin: 0 0 6px;
+}
+.team-appointment-info p {
+  font-size: 13px;
+  margin: 0 0 10px;
+  overflow-wrap: anywhere;
+}
+.team-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.team-statuses span,
+.team-plan-label {
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  font-size: 11px;
+}
+.team-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.team-metric {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 20px;
+  min-width: 0;
+}
+.team-metric h2 {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+.team-metric strong {
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.team-metric p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+.team-report-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.team-report-heading h2 {
+  margin: 0 0 7px;
+}
+.team-report-heading p {
+  font-size: 13px;
+  margin: 0;
+}
+.team-results {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.team-results th,
+.team-results td {
+  padding: 14px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 13px;
+}
+.team-results th {
+  color: var(--muted);
+  font-size: 11px;
+}
+.team-results td:first-child {
+  min-width: 130px;
+  max-width: 260px;
+  overflow-wrap: anywhere;
+}
+.team-results td small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.team-upgrade {
+  background: linear-gradient(130deg, #214c3d24, transparent);
+}
+.team-upgrade p {
+  max-width: 720px;
+}
+@media (max-width: 1000px) {
+  .team-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .team-appointment {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .team-appointment > form {
+    flex: 1 1 100%;
+  }
+  .team-appointment > form > button {
+    width: 100%;
+    min-height: 44px;
+  }
+  .team-filters button,
+  .team-filters .button {
+    flex: 1 1 auto;
+  }
+  .team-period-nav span {
+    flex-basis: 100%;
+    order: -1;
+  }
+  .team-results,
+  .team-results tbody,
+  .team-results tr,
+  .team-results td {
+    display: block;
+  }
+  .team-results thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .team-results tr {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 10px;
+  }
+  .team-results td {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 4px;
+    border: 0;
+  }
+  .team-results td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .team-results td:first-child {
+    max-width: none;
+    font-weight: 600;
+  }
+  .team-metric {
+    padding: 15px;
+  }
+  .team-metric strong {
+    font-size: 26px;
+  }
+}

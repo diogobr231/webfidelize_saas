@@ -5,6 +5,7 @@ import { Brand } from "@/components/ui/brand";
 import { Icon } from "@/components/ui/icon";
 import { PublicInquiryForm } from "@/components/sales/public-inquiry-form";
 import { getSalesOffers } from "@/lib/sales-server";
+import { commercialPlans } from "@/lib/commercial";
 import { site } from "@/lib/seo";
 import "./diagnostico.css";
 
@@ -31,7 +32,11 @@ export default async function Diagnosis({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [offers, params] = await Promise.all([getSalesOffers(), searchParams]);
+  const [offers, params, plans] = await Promise.all([
+    getSalesOffers(),
+    searchParams,
+    commercialPlans(),
+  ]);
   const selectedOffer =
     typeof params.produto === "string"
       ? offers?.find((offer) => offer.slug === params.produto)
@@ -176,7 +181,7 @@ export default async function Diagnosis({
         >
           <header className="sales-form-heading">
             <span className="sales-kicker">VAMOS ENTENDER SEU CENÁRIO</span>
-            <h2 id="sales-form-title">Solicite um diagnóstico.</h2>
+            <h2 id="sales-form-title">Descreva o que você busca.</h2>
             <p>
               Três etapas para apresentar seu negócio. Sem pagamento ou reunião
               automática.
@@ -184,6 +189,7 @@ export default async function Diagnosis({
           </header>
           {offers?.length ? (
             <PublicInquiryForm
+              plans={plans}
               offers={offers}
               selectedOfferId={selectedOffer?.id ?? ""}
               requestId={randomUUID()}
@@ -270,10 +276,11 @@ export default async function Diagnosis({
               <Icon name="plus" size={17} />
             </summary>
             <p>
-              Sim. O <Link href="/cadastro">teste gratuito de 7 dias</Link>{" "}
-              continua disponível no plano Essencial, com um profissional na
-              agenda. O período começa ao criar sua empresa, sem cartão ou
-              cobrança automática.
+              A <Link href="/demonstracao">demonstração interativa</Link>{" "}
+              permite explorar a agenda com dados de exemplo, sem login ou
+              cartão. Ela não cria reservas reais nem inicia uma assinatura. As
+              condições para usar o sistema na sua empresa estão na página de
+              planos.
             </p>
           </details>
         </div>

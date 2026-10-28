@@ -1,5 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient, configured } from "@/lib/supabase/server";
 import {
   authCallbackUrl,
@@ -13,7 +14,11 @@ import {
   newPassword,
   parseEmailConfirmation,
 } from "@/lib/auth-flow";
-import { getAuthOrigin } from "@/lib/auth-origin";
+import {
+  authCallbackOrigin,
+  canonicalAuthAction,
+  getAuthOrigin,
+} from "@/lib/auth-origin";
 import {
   clearRecoveryProof,
   isRecoverySession,
@@ -22,14 +27,15 @@ import {
   requireRecoverySession,
 } from "@/lib/auth-recovery";
 
-function emailOrigin(page: "/cadastro" | "/recuperar", next: string) {
+async function emailOrigin(page: "/cadastro" | "/recuperar", next: string) {
   if (!configured())
     redirect(authPageUrl(page, { next, erro: "configuracao" }));
   try {
-    return getAuthOrigin();
+    getAuthOrigin();
   } catch {
     redirect(authPageUrl(page, { next, erro: "configuracao" }));
   }
+  return canonicalAuthAction(page, next);
 }
 
 export async function login(form: FormData) {
@@ -53,7 +59,7 @@ export async function login(form: FormData) {
 }
 export async function signup(form: FormData) {
   const next = authDestination(form.get("next"));
-  const origin = emailOrigin("/cadastro", next);
+  const origin = await emailOrigin("/cadastro", next);
   const input = authCredentials.safeParse(Object.fromEntries(form));
   if (!input.success)
     redirect(authPageUrl("/cadastro", { next, erro: "validacao" }));
@@ -70,7 +76,7 @@ export async function signup(form: FormData) {
   redirect(authPageUrl("/entrar", { next, aviso: "confirme-email" }));
 }
 export async function recover(form: FormData) {
-  const origin = emailOrigin("/recuperar", "/painel");
+  const origin = await emailOrigin("/recuperar", "/painel");
   if (!recoveryProofConfigured()) redirect("/recuperar?erro=configuracao");
   const email = authEmail.safeParse(form.get("email"));
   if (!email.success) redirect("/recuperar?erro=email");
@@ -100,6 +106,7 @@ export async function resendConfirmation(
     return { error: authErrorMessage("configuracao") };
   }
   if (!configured()) return { error: authErrorMessage("configuracao") };
+  await canonicalAuthAction("/entrar", next);
   const db = await createClient();
   const { error } = await db.auth.resend({
     type: "signup",
@@ -123,9 +130,15 @@ export async function confirmEmail(form: FormData) {
         erro: "configuracao",
       }),
     );
+  try {
+    authCallbackOrigin(await headers());
+  } catch {
+    redirect("/entrar?erro=configuracao");
+  }
   if (type === "recovery") {
     if (!recoveryProofConfigured()) redirect("/recuperar?erro=configuracao");
-    emailOrigin("/recuperar", "/painel");
+    // Recovery confirmations may legitimately arrive on an allowed legacy host.
+    getAuthOrigin();
   }
   const db = await createClient();
   const { data, error } = await db.auth.verifyOtp({ token_hash, type });
