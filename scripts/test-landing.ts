@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { rasterDimensions } from "../src/lib/company-personalization";
 
 try {
   process.loadEnvFile(".env.local");
@@ -900,8 +901,12 @@ for (const slug of [
   assert.match(demoText, /Marca ilustrativa/i);
   assert.match(
     demoText,
-    /Imagem ilustrativa\. Sua empresa usa sua própria foto\./i,
+    /(?:Imagem|Foto) ilustrativa/i,
   );
+  if (slug === "escritorio") {
+    assert.match(demoText, /Escritório fictício/i);
+    assert.match(demoText, /Nastuh Abootalebi \/ Unsplash/);
+  } else assert.match(demoText, /Sua empresa usa sua própria foto\./i);
   const tabs = [
     ...demoMarkup.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/gi),
   ]
@@ -977,15 +982,22 @@ for (const path of demoCoverPaths) {
   const coverResponse = await get(path);
   assert.match(
     coverResponse.headers.get("content-type") || "",
-    /^image\/png\b/i,
+    /^image\/(?:png|webp)\b/i,
   );
-  const png = Buffer.from(await coverResponse.arrayBuffer());
+  const image = Buffer.from(await coverResponse.arrayBuffer());
   assert(
-    png.length >= 33,
-    "A foto ilustrativa precisa ser um arquivo PNG completo.",
+    image.length >= 33,
+    "A foto ilustrativa precisa ser um arquivo raster completo.",
   );
-  assert(png.readUInt32BE(16) > 0 && png.readUInt32BE(20) > 0);
-  assertPng(png, png.readUInt32BE(16), png.readUInt32BE(20));
+  const mime = coverResponse.headers.get("content-type")?.split(";")[0] ?? "";
+  const size = rasterDimensions(image, mime);
+  assert(size && size.width > 0 && size.height > 0, "A foto precisa de assinatura e dimensões raster válidas.");
+  if (mime === "image/png") assertPng(image, size.width, size.height);
+  else {
+    assert.equal(image.toString("ascii", 0, 4), "RIFF");
+    assert.equal(image.toString("ascii", 8, 12), "WEBP");
+    assert.equal(image.readUInt32LE(4) + 8, image.length);
+  }
 }
 pass(
   "Os oito segmentos apresentam página de agendamento com marca e imagem ilustrativas, controles acessíveis e sem envio real",
