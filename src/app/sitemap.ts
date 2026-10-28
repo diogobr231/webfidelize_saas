@@ -5,6 +5,11 @@ export default function sitemap() {
     ? [
         ...siteMap(),
         {
+          url: new URL("/servicos", site.url).href,
+          changeFrequency: "monthly" as const,
+          priority: 0.8,
+        },
+        {
           url: new URL("/planos", site.url).href,
           changeFrequency: "monthly" as const,
           priority: 0.8,

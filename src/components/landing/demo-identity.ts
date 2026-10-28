@@ -8,7 +8,11 @@ const identities: Record<
   salao: { name: "Seu salão", initials: "SS", icon: "scissors" },
   "pet-shop": { name: "Seu pet shop", initials: "SP", icon: "paw" },
   clinica: { name: "Sua clínica", initials: "SC", icon: "heart" },
-  escritorio: { name: "Seu escritório", initials: "SE", icon: "briefcase" },
+  escritorio: {
+    name: "Aurora · escritório fictício",
+    initials: "AU",
+    icon: "briefcase",
+  },
   restaurante: { name: "Seu restaurante", initials: "SR", icon: "utensils" },
   fornecedores: { name: "Sua empresa", initials: "SE", icon: "building" },
   logistica: { name: "Sua empresa", initials: "SE", icon: "truck" },

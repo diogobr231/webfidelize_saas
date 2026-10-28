@@ -100,7 +100,7 @@ export default async function Home() {
             <a href="#como-funciona">Como funciona</a>
             <a href="#recursos">Recursos</a>
             <a href="#planos">Planos</a>
-            <Link href="/diagnostico">Implantação</Link>
+            <Link href="/servicos">Serviços</Link>
             <a href="#duvidas">Dúvidas</a>
           </div>
           <details className="wf-mobile-nav">
@@ -114,6 +114,7 @@ export default async function Home() {
               <a href="#como-funciona">Primeiros passos</a>
               <a href="#planos">Planos e condições</a>
               <Link href="/diagnostico">Implantação acompanhada</Link>
+              <Link href="/servicos">Conteúdo, tráfego e fotografia</Link>
               <a href="#duvidas">Perguntas frequentes</a>
             </div>
           </details>
@@ -181,6 +182,24 @@ export default async function Home() {
           </a>
         </div>
         <ProductTour />
+      </section>
+      <section
+        className="wf-container wf-mission"
+        aria-labelledby="mission-title"
+      >
+        <div>
+          <span className="wf-eyebrow">NOSSA MISSÃO</span>
+          <h2 id="mission-title">
+            A missão da Web Fidelize é digitalizar negócios.
+          </h2>
+          <p>
+            Uma operação organizada e uma presença digital com a sua identidade.
+            Da agenda ao conteúdo, com tecnologia e atendimento humano.
+          </p>
+        </div>
+        <Link href="/servicos" className="wf-button wf-button-outline">
+          Conheça nossos serviços <Icon name="arrow-right" size={18} />
+        </Link>
       </section>
       <section
         className="wf-container wf-value-strip"
@@ -844,8 +863,10 @@ export default async function Home() {
           <a href="#recursos">Recursos</a>
           <a href="#planos">Planos</a>
           <Link href="/diagnostico">Implantação acompanhada</Link>
+          <Link href="/servicos">Serviços de marketing e fotografia</Link>
           <a href="#duvidas">Dúvidas</a>
           <Link href="/entrar">Entrar na minha conta</Link>
+          <a href="mailto:contato@webfidelize.com">contato@webfidelize.com</a>
           <a href={whatsapp} target="_blank" rel="noopener noreferrer">
             WhatsApp
           </a>

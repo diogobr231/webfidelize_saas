@@ -195,7 +195,11 @@ export function InteractiveDemo({
                   </div>
                 ) : (
                   <Image
-                    src="/demo/espaco-ilustrativo.png"
+                    src={
+                      segmentSlug === "escritorio"
+                        ? "/demo/photos/office-interior.webp"
+                        : "/demo/espaco-ilustrativo.png"
+                    }
                     alt="Recepção ilustrativa para a demonstração da página de agendamento"
                     width={1536}
                     height={1024}
@@ -204,7 +208,9 @@ export function InteractiveDemo({
                   />
                 )}
                 <figcaption>
-                  Imagem ilustrativa. Sua empresa usa sua própria foto.
+                  {segmentSlug === "escritorio"
+                    ? "Foto ilustrativa · Nastuh Abootalebi / Unsplash. Escritório fictício."
+                    : "Imagem ilustrativa. Sua empresa usa sua própria foto."}
                 </figcaption>
               </figure>
               <header className="demo-booking-identity">
