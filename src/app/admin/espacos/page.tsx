@@ -48,12 +48,10 @@ export default async function Spaces({
   const filters = adminSpacesFilters(await searchParams);
   const now = new Date();
   function companiesQuery(head = false) {
-    let query = db
-      .from("companies")
-      .select(companyColumns, {
-        head,
-        ...(head ? { count: "exact" as const } : {}),
-      });
+    let query = db.from("companies").select(companyColumns, {
+      head,
+      ...(head ? { count: "exact" as const } : {}),
+    });
     if (filters.search)
       query = query.ilike("name", adminSpaceNamePattern(filters.search));
     if (filters.plan !== "all") query = query.eq("plan_id", filters.plan);
@@ -280,6 +278,13 @@ export default async function Spaces({
                       </td>
                       <td data-label="Ações">
                         <div className="spaces-company-actions">
+                          <Link
+                            className="button secondary"
+                            href={`/admin/redes?empresa=${company.id}`}
+                          >
+                            <Icon name="briefcase" size={15} />
+                            Serviços e redes
+                          </Link>
                           <Link
                             className="button secondary"
                             href={`/admin/empresas/${company.id}`}

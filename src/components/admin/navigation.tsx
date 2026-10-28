@@ -10,6 +10,11 @@ const sections = {
   tasks: { label: "Tarefas", href: "/admin/automacoes", icon: "check" },
   support: { label: "Atendimento", href: "/admin/ajuda", icon: "help" },
   marketing: { label: "Marketing", href: "/admin/marketing", icon: "sparkles" },
+  social: {
+    label: "Serviços dos clientes",
+    href: "/admin/redes",
+    icon: "briefcase",
+  },
   ai: { label: "Central IA", href: "/admin/ia", icon: "sparkles" },
   whatsapp: { label: "WhatsApp", href: "/admin/whatsapp", icon: "phone" },
   integrations: {
@@ -26,7 +31,7 @@ export type AdminSection = keyof typeof sections;
 const groups: { label: string; items: AdminSection[] }[] = [
   {
     label: "Operação",
-    items: ["overview", "spaces", "sales", "tasks", "support"],
+    items: ["overview", "spaces", "social", "sales", "tasks", "support"],
   },
   { label: "Crescimento", items: ["marketing", "ai"] },
   { label: "Configuração", items: ["whatsapp", "integrations"] },

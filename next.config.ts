@@ -21,6 +21,7 @@ const config: NextConfig = {
         "/convite/:path*",
         "/nova-senha",
         "/confirmar/:path*",
+        "/api/social/:path*",
       ].map((source) => ({
         source,
         headers: [
