@@ -349,5 +349,14 @@
     "state": "open",
     "number": 41,
     "url": "https://github.com/diogobr231/webfidelize_saas/issues/41"
+  },
+  {
+    "key": "dashboard-illustration",
+    "title": "[Melhoria] Humanizar guia do painel com ilustração acessível",
+    "priority": "Média",
+    "body": "## Objetivo e evidência\n\nO proprietário relatou excesso de texto e pediu imagens para tornar o SaaS mais agradável. O painel já oferece um guia de configuração e estados vazios; esta melhoria propõe uma imagem ilustrativa discreta no guia, sem alterar o significado dos dados.\n\n**Prioridade:** Média. **Área:** painel e guia de configuração.\n\n## Critérios verificáveis\n\n- Inserir ilustração original em local apropriado, com carregamento e dimensões estáveis.\n- Preservar contraste, navegação, ações, responsividade e acessibilidade; não apresentar a imagem gerada como cliente real.\n- Verificar build, comportamento em computador e celular e registrar evidências visuais no PR.\n- Preservar autorização, dados e recursos existentes. Vincular PR a esta issue e registrar limitações.\n\n\n<!-- webfidelize-backlog:dashboard-illustration -->",
+    "state": "open",
+    "number": 44,
+    "url": "https://github.com/diogobr231/webfidelize_saas/issues/44"
   }
 ]

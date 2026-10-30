@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { setupProgress } from "@/lib/onboarding";
 import { Icon } from "@/components/ui/icon";
 
@@ -64,6 +65,9 @@ export function SetupGuide({
   const initialSetup = setupProgress(true, services, professionals);
   return (
     <section className="panel setup-guide" aria-labelledby="setup-title">
+      <div className="setup-illustration" aria-hidden="true">
+        <Image src="/illustrations/primeiros-passos.png" alt="" width={1672} height={941} sizes="(max-width: 640px) 100vw, 600px" />
+      </div>
       <div className="workspace-section-heading">
         <div>
           <span className="tag">Preparar agendamento online</span>
